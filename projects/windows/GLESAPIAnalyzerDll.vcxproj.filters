@@ -1,0 +1,388 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="api">
+      <UniqueIdentifier>{b535911e-95b5-47f3-89ab-066569a72628}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="modules">
+      <UniqueIdentifier>{d51038fd-dd4e-4011-8932-d850377aaebe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="modules\png">
+      <UniqueIdentifier>{029fa9ab-1bd9-4d4f-880f-01574c895481}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ApiAnalyzer">
+      <UniqueIdentifier>{2bdbad15-ed55-4f83-bfc1-d9280b4007f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ApiDump">
+      <UniqueIdentifier>{b2dd11ce-6ef9-40e0-91ae-1b892d9d29db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Common">
+      <UniqueIdentifier>{da2c1b0f-e7d5-40c6-8fc1-042c24630bc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="modules\zlib">
+      <UniqueIdentifier>{eec61a8c-010a-45ab-b07e-2f06b6cae105}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OS">
+      <UniqueIdentifier>{5c1a6775-bb47-4f8b-9950-c7d029257d51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sdk">
+      <UniqueIdentifier>{ffe5fe0d-0555-4033-ac3e-caf38d67a741}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sdk\GLES3">
+      <UniqueIdentifier>{304bf112-1f44-4ee7-99b8-d7aa0d8aa709}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sdk\GLES2">
+      <UniqueIdentifier>{482ded84-f95a-40ac-9286-92a7e565113f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sdk\EGL">
+      <UniqueIdentifier>{29371943-240b-4739-a3b1-d4b74489e1a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\DumpDraw">
+      <UniqueIdentifier>{9623e177-edd6-4f2d-8e42-27a9ae7ebf68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine">
+      <UniqueIdentifier>{1bb68679-c773-4812-9843-54c5f45a9a5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="api\GLES3.0_Tracer">
+      <UniqueIdentifier>{9dafdc94-01fe-4178-bd52-82f9d2817399}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="api\TCG">
+      <UniqueIdentifier>{93f532ea-cf1f-4622-8bc5-63bb232b0713}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\api\ApiAnalyzer.cpp">
+      <Filter>api</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\png.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngerror.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pnggccrd.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngget.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngmem.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngpread.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngread.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngrio.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngrtran.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngrutil.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngset.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngtest.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngtrans.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngvcrd.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngwio.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngwrite.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngwtran.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\png\pngwutil.c">
+      <Filter>modules\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiAnalyzer\ConvertApiDump.cpp">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiAnalyzer\egl.cpp">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiAnalyzer\gles3.cpp">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiAnalyzer\GLES3Context.cpp">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiAnalyzer\GLES3Tex.cpp">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiAnalyzer\GLES3VertexBuffer.cpp">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiAnalyzer\GLESShare.cpp">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiAnalyzer\GLSLShader.cpp">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiAnalyzer\math.cpp">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiAnalyzer\MemoryPool.cpp">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiAnalyzer\ParseGLES3.cpp">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiDump\ApiDumpInfo.cpp">
+      <Filter>src\ApiDump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Common\utils.cpp">
+      <Filter>src\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\adler32.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\compress.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\crc32.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\deflate.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\gzclose.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\gzlib.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\gzread.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\gzwrite.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\infback.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\inffast.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\inflate.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\inftrees.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\trees.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\uncompr.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\zlib\zutil.c">
+      <Filter>modules\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Common\bitmap.cpp">
+      <Filter>src\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ApiDump\ApiDumpUtils.cpp">
+      <Filter>src\ApiDump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Common\PngInterface.cpp">
+      <Filter>src\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Common\GLESGlobal.cpp">
+      <Filter>src\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OS\windows\APIWindowsOS.cpp">
+      <Filter>OS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\DumpDraw\ApiDumpDraw.cpp">
+      <Filter>src\DumpDraw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Engine\ApiEngine.cpp">
+      <Filter>src\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Common\TranslateGL.cpp">
+      <Filter>src\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\api\GLES3.0_Tracer\APIGLES3Tracer.cpp">
+      <Filter>api\GLES3.0_Tracer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\api\TCG\ApiTcg.cpp">
+      <Filter>api\TCG</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\api\ApiAnalyzer.h">
+      <Filter>api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiDump\ApiDumpInfo.h">
+      <Filter>src\ApiDump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Common\types.h">
+      <Filter>src\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Common\utils.h">
+      <Filter>src\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\modules\zlib\crc32.h">
+      <Filter>modules\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\modules\zlib\deflate.h">
+      <Filter>modules\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\modules\zlib\gzguts.h">
+      <Filter>modules\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\modules\zlib\inffast.h">
+      <Filter>modules\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\modules\zlib\inffixed.h">
+      <Filter>modules\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\modules\zlib\inflate.h">
+      <Filter>modules\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\modules\zlib\inftrees.h">
+      <Filter>modules\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\modules\zlib\trees.h">
+      <Filter>modules\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\modules\zlib\zconf.h">
+      <Filter>modules\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\modules\zlib\zlib.h">
+      <Filter>modules\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\modules\zlib\zutil.h">
+      <Filter>modules\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Common\bitmap.h">
+      <Filter>src\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiDump\ApiDebug.h">
+      <Filter>src\ApiDump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiDump\ApiDumpUtils.h">
+      <Filter>src\ApiDump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Common\GLESGlobal.h">
+      <Filter>src\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Common\PngInterface.h">
+      <Filter>src\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\OS\APIOS.h">
+      <Filter>OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\GLES3\gl2ext.h">
+      <Filter>sdk\GLES3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\GLES3\gl3.h">
+      <Filter>sdk\GLES3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\GLES3\gl3ext.h">
+      <Filter>sdk\GLES3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\GLES3\gl3platform.h">
+      <Filter>sdk\GLES3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\GLES3\gl3rename.h">
+      <Filter>sdk\GLES3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\GLES3\gl3unname.h">
+      <Filter>sdk\GLES3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\GLES3\gl31.h">
+      <Filter>sdk\GLES3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\GLES2\gl2.h">
+      <Filter>sdk\GLES2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\GLES2\gl2ext.h">
+      <Filter>sdk\GLES2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\GLES2\gl2platform.h">
+      <Filter>sdk\GLES2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\GLES2\gl2rename.h">
+      <Filter>sdk\GLES2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\GLES2\gl2unname.h">
+      <Filter>sdk\GLES2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\EGL\egl.h">
+      <Filter>sdk\EGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\EGL\eglext.h">
+      <Filter>sdk\EGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sdk\EGL\eglplatform.h">
+      <Filter>sdk\EGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\DumpDraw\ApiDumpDraw.h">
+      <Filter>src\DumpDraw</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Engine\ApiEngine.h">
+      <Filter>src\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiAnalyzer\ParseGLES3.h">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiAnalyzer\ConvertApiDump.h">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiAnalyzer\egl.h">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiAnalyzer\gles3.h">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiAnalyzer\GLES3Context.h">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiAnalyzer\GLES3Tex.h">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiAnalyzer\GLES3VertexBuffer.h">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiAnalyzer\GLESShare.h">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiAnalyzer\GLSLShader.h">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiAnalyzer\MathAPI.h">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ApiAnalyzer\MemoryPool.h">
+      <Filter>src\ApiAnalyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Common\TranslateGL.h">
+      <Filter>src\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\api\GLES3.0_Tracer\ApiGLES3Tracer.h">
+      <Filter>api\GLES3.0_Tracer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\api\TCG\ApiTcg.h">
+      <Filter>api\TCG</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

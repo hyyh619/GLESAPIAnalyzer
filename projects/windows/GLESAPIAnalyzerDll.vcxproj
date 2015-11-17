@@ -1,0 +1,499 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="API_DUMP|Win32">
+      <Configuration>API_DUMP</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DEBUG_OES3|Win32">
+      <Configuration>DEBUG_OES3</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Performance_Debug|Win32">
+      <Configuration>Performance_Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Render_Debug_OES3|Win32">
+      <Configuration>Render_Debug_OES3</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Render_Debug|Win32">
+      <Configuration>Render_Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="TCG_CLIENT_WITH_TRACER_OES3|Win32">
+      <Configuration>TCG_CLIENT_WITH_TRACER_OES3</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="WITH_TCG_TRACER_OES2|Win32">
+      <Configuration>WITH_TCG_TRACER_OES2</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="WITH_TCG_TRACER_OES3|Win32">
+      <Configuration>WITH_TCG_TRACER_OES3</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="WITH_TRACER_OES3|Win32">
+      <Configuration>WITH_TRACER_OES3</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="WITH_TRACER|Win32">
+      <Configuration>WITH_TRACER</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C5165D64-2C8B-4FA4-BA42-9AE5A0D95B59}</ProjectGuid>
+    <RootNamespace>ConvertApiDump</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TCG_TRACER_OES2|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TCG_TRACER_OES3|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Render_Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Render_Debug_OES3|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TRACER|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TRACER_OES3|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='TCG_CLIENT_WITH_TRACER_OES3|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DEBUG_OES3|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Performance_Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='API_DUMP|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TCG_TRACER_OES2|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TCG_TRACER_OES3|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Render_Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Render_Debug_OES3|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TRACER|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TRACER_OES3|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='TCG_CLIENT_WITH_TRACER_OES3|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DEBUG_OES3|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Performance_Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='API_DUMP|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TCG_TRACER_OES2|Win32'">
+    <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TCG_TRACER_OES3|Win32'">
+    <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Render_Debug|Win32'">
+    <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Render_Debug_OES3|Win32'">
+    <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TRACER|Win32'">
+    <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TRACER_OES3|Win32'">
+    <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='TCG_CLIENT_WITH_TRACER_OES3|Win32'">
+    <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DEBUG_OES3|Win32'">
+    <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Performance_Debug|Win32'">
+    <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='API_DUMP|Win32'">
+    <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../OS;../../src/DumpDraw;../../src/engine;../../src/common;../../src/ApiDump;../../sdk;../../api/GLES3.0_Tracer;../../api;../../src/ApiAnalyzer;../../modules/png;../../modules/zlib;../../../P4/tools/GLES3.0_Tracer/players/src/Render;../../../P4/tools/GLES3.0_Tracer/common;../../../P4/tools/GLES3.0_Tracer/players/src/Parser;../../../P4/tools/GLES3.0_Tracer/players/src/Main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;VTRACER_USE;API_ANALYZER;OPENGL_ES_2;VTRACER;WINDOWS;API_DUMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TCG_TRACER_OES2|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../OS;../../src/DumpDraw;../../src/engine;../../src/common;../../src/ApiDump;../../sdk;../../src/ApiAnalyzer;../../api/GLES3.0_Tracer;../../api;../../modules/png;../../modules/zlib;../../../P4/tools/GLES3.0_Tracer/players/src/Render;../../../P4/tools/GLES3.0_Tracer/common;../../../P4/tools/GLES3.0_Tracer/players/src/Parser;../../../P4/tools/GLES3.0_Tracer/players/src/Main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;VTRACER_USE;API_ANALYZER;OPENGL_ES_2;VTRACER;WINDOWS;API_DUMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TCG_TRACER_OES3|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../OS;../../src/DumpDraw;../../src/engine;../../src/common;../../src/ApiDump;../../sdk;../../src/ApiAnalyzer;../../api/GLES3.0_Tracer;../../api;../../modules/png;../../modules/zlib;../../../P4/tools/GLES3.0_Tracer/players/src/Render;../../../P4/tools/GLES3.0_Tracer/common;../../../P4/tools/GLES3.0_Tracer/players/src/Parser;../../../P4/tools/GLES3.0_Tracer/players/src/Main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;VTRACER_USE;API_ANALYZER;OPENGL_ES_2;VTRACER;OES3_API;WINDOWS;API_DUMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Render_Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../OS;../../src/DumpDraw;../../src/engine;../../src/common;../../src/ApiDump;../../sdk;../../src/ApiAnalyzer;../../api/TCG;../../api;../../modules/png;../../modules/zlib;../../../tencent/TCG_CL1315_20151016/tcg_client/src/Render;../../../tencent/TCG_CL1315_20151016/common;../../../tencent/TCG_CL1315_20151016/tcg_client/src/parser;../../../tencent/TCG_CL1315_20151016/tcg_client/src/common;../../../tencent/TCG_CL1315_20151016/tcg_client/src/OS;../../../tencent/TCG_CL1315_20151016/tcg_client/src/Dump;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;TCG_USE;WINDOWS;API_DUMP;USE_FILE;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Render_Debug_OES3|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../OS;../../src/DumpDraw;../../src/engine;../../src/common;../../src/ApiDump;../../sdk;../../src/ApiAnalyzer;../../api/TCG;../../api;../../modules/png;../../modules/zlib;../../../tencent/TCG_CL1315_20151016/tcg_client/src/Render;../../../tencent/TCG_CL1315_20151016/common;../../../tencent/TCG_CL1315_20151016/tcg_client/src/parser;../../../tencent/TCG_CL1315_20151016/tcg_client/src/common;../../../tencent/TCG_CL1315_20151016/tcg_client/src/OS;../../../tencent/TCG_CL1315_20151016/tcg_client/src/Dump;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;TCG_USE;WINDOWS;API_DUMP;USE_FILE;WIN32;OES3_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TRACER|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../OS;../../src/DumpDraw;../../src/engine;../../src/common;../../src/ApiDump;../../sdk;../../src/ApiAnalyzer;../../modules/png;../../modules/zlib;../../api;../../api/GLES3.0_Tracer;../../../P4\tools\GLES3.0_Tracer\players\src\Render;../../../P4\tools\GLES3.0_Tracer\common;../../../P4\tools\GLES3.0_Tracer\players\src\Parser;../../../P4\tools\GLES3.0_Tracer\players\src\Main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;VTRACER_USE;API_ANALYZER;OPENGL_ES_2;VTRACER;WINDOWS;API_DUMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='WITH_TRACER_OES3|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../OS;../../src/DumpDraw;../../src/engine;../../src/common;../../src/ApiDump;../../sdk;../../src/ApiAnalyzer;../../modules/png;../../modules/zlib;../../api;../../api/GLES3.0_Tracer;../../../P4\tools\GLES3.0_Tracer\players\src\Render;../../../P4\tools\GLES3.0_Tracer\common;../../../P4\tools\GLES3.0_Tracer\players\src\Parser;../../../P4\tools\GLES3.0_Tracer\players\src\Main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;VTRACER_USE;API_ANALYZER;OPENGL_ES_2;VTRACER;WINDOWS;API_DUMP;OES3_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='TCG_CLIENT_WITH_TRACER_OES3|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../OS;../../src/DumpDraw;../../src/engine;../../src/common;../../src/ApiDump;../../sdk;../../src/ApiAnalyzer;../../modules/png;../../modules/zlib;../../api;../../api/TCG;../../../tencent\TCG_CL1315_20151016\tcg_client\src\Render;../../../tencent\TCG_CL1315_20151016\tcg_client\src\common;../../../tencent\TCG_CL1315_20151016\common;../../../tencent\TCG_CL1315_20151016\tcg_client\src\OS;../../../tencent\TCG_CL1315_20151016\tcg_client\src\Dump;../../../tencent\TCG_CL1315_20151016\tcg_client\src\Parser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;TCG_USE;API_ANALYZER;OPENGL_ES_2;VTRACER;WINDOWS;API_DUMP;OES3_API;USE_FILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DEBUG_OES3|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../OS;../../src/DumpDraw;../../src/engine;../../src/common;../../src/ApiDump;../../sdk;../../api/GLES3.0_Tracer;../../api;../../src/ApiAnalyzer;../../modules/png;../../modules/zlib;../../../P4/tools/GLES3.0_Tracer/players/src/Render;../../../P4/tools/GLES3.0_Tracer/common;../../../P4/tools/GLES3.0_Tracer/players/src/Parser;../../../P4/tools/GLES3.0_Tracer/players/src/Main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;VTRACER_USE;API_ANALYZER;OPENGL_ES_2;VTRACER;WINDOWS;API_DUMP;OES3_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Performance_Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../OS;../../src/DumpDraw;../../src/engine;../../src/common;../../src/ApiDump;../../sdk;../../src/ApiAnalyzer;../../modules/png;../../modules/zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;VTRACER_USE;API_ANALYZER;OPENGL_ES_2;VTRACER;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='API_DUMP|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../OS;../../src/DumpDraw;../../src/engine;../../src/common;../../src/ApiDump;../../sdk;../../src/ApiAnalyzer;../../modules/png;../../modules/zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;VTRACER_USE;API_ANALYZER;OPENGL_ES_2;API_DUMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
+      <CallingConvention>Cdecl</CallingConvention>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>../../OS;../../src/DumpDraw;../../src/engine;../../src/common;../../src/ApiDump;../../sdk;../../src/ApiAnalyzer;../../modules/png;../../modules/zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;VTRACER_USE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\api\ApiAnalyzer.cpp" />
+    <ClCompile Include="..\..\api\GLES3.0_Tracer\APIGLES3Tracer.cpp" />
+    <ClCompile Include="..\..\api\TCG\ApiTcg.cpp" />
+    <ClCompile Include="..\..\modules\png\png.c" />
+    <ClCompile Include="..\..\modules\png\pngerror.c" />
+    <ClCompile Include="..\..\modules\png\pnggccrd.c" />
+    <ClCompile Include="..\..\modules\png\pngget.c" />
+    <ClCompile Include="..\..\modules\png\pngmem.c" />
+    <ClCompile Include="..\..\modules\png\pngpread.c" />
+    <ClCompile Include="..\..\modules\png\pngread.c" />
+    <ClCompile Include="..\..\modules\png\pngrio.c" />
+    <ClCompile Include="..\..\modules\png\pngrtran.c" />
+    <ClCompile Include="..\..\modules\png\pngrutil.c" />
+    <ClCompile Include="..\..\modules\png\pngset.c" />
+    <ClCompile Include="..\..\modules\png\pngtest.c" />
+    <ClCompile Include="..\..\modules\png\pngtrans.c" />
+    <ClCompile Include="..\..\modules\png\pngvcrd.c" />
+    <ClCompile Include="..\..\modules\png\pngwio.c" />
+    <ClCompile Include="..\..\modules\png\pngwrite.c" />
+    <ClCompile Include="..\..\modules\png\pngwtran.c" />
+    <ClCompile Include="..\..\modules\png\pngwutil.c" />
+    <ClCompile Include="..\..\modules\zlib\adler32.c" />
+    <ClCompile Include="..\..\modules\zlib\compress.c" />
+    <ClCompile Include="..\..\modules\zlib\crc32.c" />
+    <ClCompile Include="..\..\modules\zlib\deflate.c" />
+    <ClCompile Include="..\..\modules\zlib\gzclose.c" />
+    <ClCompile Include="..\..\modules\zlib\gzlib.c" />
+    <ClCompile Include="..\..\modules\zlib\gzread.c" />
+    <ClCompile Include="..\..\modules\zlib\gzwrite.c" />
+    <ClCompile Include="..\..\modules\zlib\infback.c" />
+    <ClCompile Include="..\..\modules\zlib\inffast.c" />
+    <ClCompile Include="..\..\modules\zlib\inflate.c" />
+    <ClCompile Include="..\..\modules\zlib\inftrees.c" />
+    <ClCompile Include="..\..\modules\zlib\trees.c" />
+    <ClCompile Include="..\..\modules\zlib\uncompr.c" />
+    <ClCompile Include="..\..\modules\zlib\zutil.c" />
+    <ClCompile Include="..\..\OS\windows\APIWindowsOS.cpp" />
+    <ClCompile Include="..\..\src\ApiAnalyzer\ConvertApiDump.cpp" />
+    <ClCompile Include="..\..\src\ApiAnalyzer\egl.cpp" />
+    <ClCompile Include="..\..\src\ApiAnalyzer\gles3.cpp" />
+    <ClCompile Include="..\..\src\ApiAnalyzer\GLES3Context.cpp" />
+    <ClCompile Include="..\..\src\ApiAnalyzer\GLES3Tex.cpp" />
+    <ClCompile Include="..\..\src\ApiAnalyzer\GLES3VertexBuffer.cpp" />
+    <ClCompile Include="..\..\src\ApiAnalyzer\GLESShare.cpp" />
+    <ClCompile Include="..\..\src\ApiAnalyzer\GLSLShader.cpp" />
+    <ClCompile Include="..\..\src\ApiAnalyzer\math.cpp" />
+    <ClCompile Include="..\..\src\ApiAnalyzer\MemoryPool.cpp" />
+    <ClCompile Include="..\..\src\ApiAnalyzer\ParseGLES3.cpp" />
+    <ClCompile Include="..\..\src\ApiDump\ApiDumpInfo.cpp" />
+    <ClCompile Include="..\..\src\ApiDump\ApiDumpUtils.cpp" />
+    <ClCompile Include="..\..\src\Common\bitmap.cpp" />
+    <ClCompile Include="..\..\src\Common\GLESGlobal.cpp" />
+    <ClCompile Include="..\..\src\Common\PngInterface.cpp" />
+    <ClCompile Include="..\..\src\Common\TranslateGL.cpp" />
+    <ClCompile Include="..\..\src\Common\utils.cpp" />
+    <ClCompile Include="..\..\src\DumpDraw\ApiDumpDraw.cpp" />
+    <ClCompile Include="..\..\src\Engine\ApiEngine.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\api\ApiAnalyzer.h" />
+    <ClInclude Include="..\..\api\GLES3.0_Tracer\ApiGLES3Tracer.h" />
+    <ClInclude Include="..\..\api\TCG\ApiTcg.h" />
+    <ClInclude Include="..\..\modules\zlib\crc32.h" />
+    <ClInclude Include="..\..\modules\zlib\deflate.h" />
+    <ClInclude Include="..\..\modules\zlib\gzguts.h" />
+    <ClInclude Include="..\..\modules\zlib\inffast.h" />
+    <ClInclude Include="..\..\modules\zlib\inffixed.h" />
+    <ClInclude Include="..\..\modules\zlib\inflate.h" />
+    <ClInclude Include="..\..\modules\zlib\inftrees.h" />
+    <ClInclude Include="..\..\modules\zlib\trees.h" />
+    <ClInclude Include="..\..\modules\zlib\zconf.h" />
+    <ClInclude Include="..\..\modules\zlib\zlib.h" />
+    <ClInclude Include="..\..\modules\zlib\zutil.h" />
+    <ClInclude Include="..\..\OS\APIOS.h" />
+    <ClInclude Include="..\..\sdk\EGL\egl.h" />
+    <ClInclude Include="..\..\sdk\EGL\eglext.h" />
+    <ClInclude Include="..\..\sdk\EGL\eglplatform.h" />
+    <ClInclude Include="..\..\sdk\GLES2\gl2.h" />
+    <ClInclude Include="..\..\sdk\GLES2\gl2ext.h" />
+    <ClInclude Include="..\..\sdk\GLES2\gl2platform.h" />
+    <ClInclude Include="..\..\sdk\GLES2\gl2rename.h" />
+    <ClInclude Include="..\..\sdk\GLES2\gl2unname.h" />
+    <ClInclude Include="..\..\sdk\GLES3\gl2ext.h" />
+    <ClInclude Include="..\..\sdk\GLES3\gl3.h" />
+    <ClInclude Include="..\..\sdk\GLES3\gl31.h" />
+    <ClInclude Include="..\..\sdk\GLES3\gl3ext.h" />
+    <ClInclude Include="..\..\sdk\GLES3\gl3platform.h" />
+    <ClInclude Include="..\..\sdk\GLES3\gl3rename.h" />
+    <ClInclude Include="..\..\sdk\GLES3\gl3unname.h" />
+    <ClInclude Include="..\..\src\ApiAnalyzer\ConvertApiDump.h" />
+    <ClInclude Include="..\..\src\ApiAnalyzer\egl.h" />
+    <ClInclude Include="..\..\src\ApiAnalyzer\gles3.h" />
+    <ClInclude Include="..\..\src\ApiAnalyzer\GLES3Context.h" />
+    <ClInclude Include="..\..\src\ApiAnalyzer\GLES3Tex.h" />
+    <ClInclude Include="..\..\src\ApiAnalyzer\GLES3VertexBuffer.h" />
+    <ClInclude Include="..\..\src\ApiAnalyzer\GLESShare.h" />
+    <ClInclude Include="..\..\src\ApiAnalyzer\GLSLShader.h" />
+    <ClInclude Include="..\..\src\ApiAnalyzer\MathAPI.h" />
+    <ClInclude Include="..\..\src\ApiAnalyzer\MemoryPool.h" />
+    <ClInclude Include="..\..\src\ApiAnalyzer\ParseGLES3.h" />
+    <ClInclude Include="..\..\src\ApiDump\ApiDebug.h" />
+    <ClInclude Include="..\..\src\ApiDump\ApiDumpInfo.h" />
+    <ClInclude Include="..\..\src\ApiDump\ApiDumpUtils.h" />
+    <ClInclude Include="..\..\src\Common\bitmap.h" />
+    <ClInclude Include="..\..\src\Common\GLESGlobal.h" />
+    <ClInclude Include="..\..\src\Common\PngInterface.h" />
+    <ClInclude Include="..\..\src\Common\TranslateGL.h" />
+    <ClInclude Include="..\..\src\Common\types.h" />
+    <ClInclude Include="..\..\src\Common\utils.h" />
+    <ClInclude Include="..\..\src\DumpDraw\ApiDumpDraw.h" />
+    <ClInclude Include="..\..\src\Engine\ApiEngine.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
