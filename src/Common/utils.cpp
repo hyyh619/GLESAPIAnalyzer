@@ -3,10 +3,8 @@
 #include "bitmap.h"
 #include "MemoryPool.h"
 #include "ApiAnalyzer.h"
+#include "Analyzer.h"
 
-enLogLevel printLevel = LOG_ERROR;
-
-const char  *strHalDumpFileName = "hal_Displacement_noData_21.log.hy";
 char        strOnlyFileName[FILE_NAME_BUF_SIZE];
 char        strOnlyFrameFileName[FILE_NAME_BUF_SIZE];
 char        strFileName[FILE_NAME_BUF_SIZE];
@@ -26,16 +24,9 @@ char        tmp4[TMP_BUF_SIZE];
 char        tmp5[TMP5_BUF_SIZE];
 char        tmp6[TMP5_BUF_SIZE];
 
-FILE        *g_pApiDumpFile = NULL;
-FILE        *g_pOutputFile  = NULL;
-FILE        *g_pDrawFile    = NULL;
-FILE        *g_pFrameFile   = NULL;
-FILE        *g_pShaderFile  = NULL;
-FILE        *g_pTextureFile = NULL;
 GLuint      nLineNum        = 0;
 GLuint      nStartFrame     = 0;
 GLuint      nEndFrame       = 0;
-GLuint      g_nFrames       = 1;
 
 GLboolean   bPrintEGL           = GL_FALSE;
 GLboolean   bPrintES20          = GL_FALSE;
@@ -45,7 +36,6 @@ GLboolean   bPrintVertexAttrib  = GL_FALSE;
 GLboolean   g_bSaveTexture      = GL_FALSE;
 GLboolean   bDumpFrameFile      = GL_FALSE;
 GLboolean   bPrintMatrix        = GL_FALSE;
-GLboolean   g_bSaveShader       = GL_FALSE;
 GLboolean   bForceFinish        = GL_FALSE;
 GLboolean   bPrintUniform       = GL_FALSE;
 GLboolean   bThread             = GL_FALSE;
@@ -56,7 +46,6 @@ GLboolean   bDatabase           = GL_FALSE;
 GLboolean   bUsePng             = GL_FALSE;
 GLboolean   bCollectCloudSize   = GL_FALSE;
 GLboolean   bFlushFile          = GL_TRUE;
-GLboolean   bOutputToShaderFile = GL_TRUE;
 
 GLint       eglWidth            = 1920;
 GLint       eglHeight           = 1080;
@@ -138,26 +127,10 @@ void* ReadCompressedTex(GLuint type, GLuint handle, GLuint count)
 {
     void *data = NULL;
 
-#ifdef API_DUMP
     if (handle)
     {
         data = GetCurrentTexDataPtr(handle);
     }
-#else
-    switch (type)
-    {
-    case READ_GL_UINT:
-        data = readUInt(count);
-        break;
-
-    case READ_GL_UCHAR:
-        data = readUCharFast(count);
-        break;
-
-    default:
-        break;
-    }
-#endif
 
     return data;
 }
@@ -166,26 +139,10 @@ void* ReadTexData(GLuint type, GLuint handle, GLuint count)
 {
     void *data = NULL;
 
-#ifdef API_DUMP
     if (handle)
     {
         data = GetCurrentTexDataPtr(handle);
     }
-#else
-    switch (type)
-    {
-    case READ_GL_UINT:
-        data = readUInt(count);
-        break;
-
-    case READ_GL_UCHAR:
-        data = readUCharFast(count);
-        break;
-
-    default:
-        break;
-    }
-#endif
 
     return data;
 }
@@ -198,20 +155,6 @@ GLvoid* ReadData(GLuint type, GLuint handle, GLuint count)
     if (handle)
     {
         data = GetCurrentDataPtr(handle);
-    }
-#else
-    switch (type)
-    {
-    case READ_GL_UINT:
-        data = readUInt(count);
-        break;
-
-    case READ_GL_UCHAR:
-        data = readUCharFast(count);
-        break;
-
-    default:
-        break;
     }
 #endif
 
@@ -229,9 +172,7 @@ GLuint ReadUInt(GLuint handle)
 
 void FreeData(void *ptr)
 {
-#ifndef API_DUMP
-    FREE(ptr);
-#endif
+
 }
 
 void FlushToOutputFile(char *output, FILE *file)
@@ -442,7 +383,7 @@ GLboolean ParseArguments1(int argc, const char **argv)
 
         if (!strncmp(*argv, "-save_shader", 12))
         {
-            g_bSaveShader = GL_TRUE;
+            g_Analyzer.m_bSaveShader = GL_TRUE;
         }
 
         if (!strncmp(*argv, "-width", 5))
@@ -558,531 +499,6 @@ GLboolean OutputToFile(GLboolean    bEventSeq,
     return GL_TRUE;
 }
 
-GLvoid OutputToShaderFile(GLchar *output)
-{
-    if (bOutputToShaderFile)
-    {
-        OutputToFile(GL_FALSE, 0, NULL, output, g_pShaderFile);
-    }
-}
-
-GLuint * readUIntCount(GLint* count)
-{
-    const GLchar    *line;
-    GLuint          *buffer;
-    GLuint          current;
-    GLuint          data[4];
-    GLint           index;
-    GLint           n;
-    GLvoid          *temp;
-
-    if (*count == 0)
-    {
-        buffer = NULL;
-    }
-    else
-    {
-        ALLOC(temp, *count * 4);
-        buffer = (GLuint*) temp;
-    }
-
-    for (index = 0;;)
-    {
-        line = readLineFast();
-        if (line == NULL)
-        {
-            return NULL;
-        }
-
-        n = sscanf(line, "$$ 0x%08X: 0x%08X 0x%08X 0x%08X 0x%08X",
-                   &current, &data[0], &data[1], &data[2], &data[3]) - 1;
-
-        if (n > 0)
-        {
-            if (*count == 0)
-            {
-                buffer = (GLuint *) realloc(buffer, 4 * (index + n));
-                if (buffer == NULL)
-                {
-                    return NULL;
-                }
-                memcpy(buffer + index, data, n * 4);
-                index += n;
-            }
-            else
-            {
-                if (index + n > *count)
-                {
-                    return NULL;
-                }
-                memcpy(buffer + index, data, 4 * n);
-                index += n;
-            }
-        }
-
-        else if (strncmp(line, "$$ <nil>", 8) == 0)
-        {
-            if (index == 0)
-            {
-                if (buffer != NULL)
-                {
-                    free(buffer);
-                    buffer = NULL;
-                }
-            }
-            else if (buffer != NULL)
-            {
-                return NULL;
-            }
-        }
-
-        else if (strncmp(line, "$$ **********", 13) == 0)
-        {
-            if ((*count != 0) && (index != *count) && (buffer != NULL))
-            {
-                return NULL;
-            }
-
-            *count = index;
-            return buffer;
-        }
-
-        else if (strncmp(line, "$}", 2) == 0)
-        {
-            if ((*count != 0) && (index != *count) && (buffer != NULL))
-            {
-                FREE(buffer);
-                return NULL;
-            }
-
-            *count = index;
-            return buffer;
-        }
-    }
-}
-
-GLuint * readUIntCountFast(int * count)
-{
-    const GLchar    *line;
-    GLuint          *buffer;
-    GLuint          data[4];
-    GLint           index, n;
-    GLvoid          *temp;
-    GLchar          *p;
-    GLint           dIndex;
-    GLint           d;
-
-    if (*count == 0)
-    {
-        buffer = NULL;
-    }
-    else
-    {
-        ALLOC(temp, *count * 4);
-        buffer = (GLuint*) temp;
-    }
-
-    for (index = 0;;)
-    {
-        line = readLineFast();
-        if (line == NULL)
-        {
-            return NULL;
-        }
-
-        //n = sscanf(line, "$$ 0x%08X: 0x%08X 0x%08X 0x%08X 0x%08X",
-        //           &current, &data[0], &data[1], &data[2], &data[3]) - 1;
-        n = 0;
-        if (!strncmp(line, "$$ 0x", 5))
-        {
-            p       = (char*)&line[15];
-            dIndex  = 0;
-            while (*p != '\0')
-            {
-                if (p[0] == '0' && p[1] == 'x')
-                {
-                    d = 0;
-                    for (int j=0; j<8; j++)
-                    {
-                        d <<= 4;
-                        d += Char2Int(p[j+2]);
-                    }
-                    data[dIndex++] = d;
-                    n ++;
-                    p += 10;
-                }
-                else
-                {
-                    p ++;
-                }
-            }
-        }
-
-        if (n > 0)
-        {
-            if (*count == 0)
-            {
-                buffer = (GLuint *) realloc(buffer, 4 * (index + n));
-                if (buffer == NULL)
-                {
-                    return NULL;
-                }
-                memcpy(buffer + index, data, n * 4);
-                index += n;
-            }
-            else
-            {
-                if (index + n > *count)
-                {
-                    return NULL;
-                }
-                memcpy(buffer + index, data, 4 * n);
-                index += n;
-            }
-        }
-
-        else if (strncmp(line, "$$ <nil>", 8) == 0)
-        {
-            if (index == 0)
-            {
-                if (buffer != NULL)
-                {
-                    free(buffer);
-                    buffer = NULL;
-                }
-            }
-            else if (buffer != NULL)
-            {
-                return NULL;
-            }
-        }
-
-        else if (strncmp(line, "$$ **********", 13) == 0)
-        {
-            if ((*count != 0) && (index != *count) && (buffer != NULL))
-            {
-                return NULL;
-            }
-
-            *count = index;
-            return buffer;
-        }
-
-        else if (strncmp(line, "$}", 2) == 0)
-        {
-            if ((*count != 0) && (index != *count) && (buffer != NULL))
-            {
-                FREE(buffer);
-                return NULL;
-            }
-
-            *count = index;
-            return buffer;
-        }
-    }
-}
-
-GLuint * readUInt(int count)
-{
-    return readUIntCountFast(&count);
-}
-
-char* readLine(void)
-{
-    static char lineBuffer[256];
-    char *p;
-
-    while (fgets(lineBuffer, sizeof(lineBuffer), g_pApiDumpFile) != NULL)
-    {
-        nLineNum++;
-
-        if ((p = strstr(lineBuffer, "${")) != NULL)
-        {
-             return p;
-        }
-
-        if ((p = strstr(lineBuffer, "$}")) != NULL)
-        {
-           return p;
-        }
-
-        if ((p = strstr(lineBuffer, "$$")) != NULL)
-        {
-           return p;
-        }
-    }
-
-    return NULL;
-}
-
-char* readLineFast(void)
-{
-    static char lineBuffer[256];
-    char *p;
-
-    if (!g_pApiDumpFile)
-    {
-        return NULL;
-    }
-
-    while (fgets(lineBuffer, sizeof(lineBuffer), g_pApiDumpFile) != NULL)
-    {
-        nLineNum++;
-
-        p = lineBuffer;
-        while (*p != '\0')
-        {
-            if (p[0] == '$')
-            {
-                if (p[1] == '{' || p[1] == '}' || p[1] == '$')
-                {
-                    return p;
-                }
-            }
-
-            p ++;
-        }
-    }
-
-    return NULL;
-}
-
-GLchar* readUCharFast(GLint count)
-{
-    const GLchar    *line;
-    GLchar          *buffer;
-    GLuint          data[8];
-    GLint           index;
-    GLint           n;
-    GLint           i;
-    GLchar          *p;
-    GLubyte         d;
-    GLint           dIndex = 0;
-
-    if (count == 0)
-    {
-        buffer = NULL;
-    }
-    else
-    {
-        buffer = (char *) malloc(count);
-        if (buffer == NULL)
-        {
-            return NULL;
-        }
-    }
-
-    for (index = 0;;)
-    {
-        line = readLineFast();
-        if (line == NULL)
-        {
-            return NULL;
-        }
-
-        //n = sscanf(line, "$$ 0x%08X: 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X "
-        //           "0x%02X 0x%02X",
-        //           &current, &data[0], &data[1], &data[2], &data[3], &data[4],
-        //           &data[5], &data[6], &data[7]) - 1;
-
-        n = 0;
-        if (strstr(line, "$$ 0x"))
-        {
-            p = (char*)&line[15];
-            dIndex = 0;
-            while (*p != '\0')
-            {
-                if (p[0] == '0' && p[1] == 'x')
-                {
-                    d = Char2Int(p[2]) * 16 + Char2Int(p[3]);
-                    p += 4;
-                    data[dIndex++] = d;
-                    n ++;
-                }
-                else
-                {
-                    p ++;
-                }
-            }
-        }
-
-        if (n > 0)
-        {
-            if (count == 0)
-            {
-                buffer = (char *) realloc(buffer, index + n);
-                if (buffer == NULL)
-                {
-                    return NULL;
-                }
-            }
-            else if (index + n > count)
-            {
-                return NULL;
-            }
-
-            for (i = 0; i < n; ++i)
-            {
-                buffer[index++] = (unsigned char) data[i];
-            }
-        }
-        else if (strncmp(line, "$$ <nil>", 8) == 0)
-        {
-            if (index == 0)
-            {
-                if (buffer != NULL)
-                {
-                    free(buffer);
-                    buffer = NULL;
-                }
-            }
-            else if (buffer != NULL)
-            {
-                return NULL;
-            }
-        }
-
-        else if (strncmp(line, "$$ **********", 13) == 0)
-        {
-            if ((count != 0) && (index != count) && (buffer != NULL))
-            {
-                return NULL;
-            }
-
-            if (index != 0)
-            {
-                GLchar  *tmp = (GLchar*)malloc(index+1);
-
-                memset(tmp, 0, index+1);
-                memcpy(tmp, buffer, index);
-                free(buffer);
-
-                buffer = tmp;
-            }
-
-            return buffer;
-        }
-        else
-        {
-            return NULL;
-        }
-    }
-}
-
-GLchar* readUChar(GLint count)
-{
-    const GLchar    *line;
-    GLchar          *buffer;
-    GLuint          current;
-    GLuint          data[8];
-    GLint           index;
-    GLint           n;
-    GLint           i;
-
-    if (count == 0)
-    {
-        buffer = NULL;
-    }
-    else
-    {
-        buffer = (char *) malloc(count);
-        if (buffer == NULL)
-        {
-            return NULL;
-        }
-    }
-
-    for (index = 0;;)
-    {
-        line = readLineFast();
-        if (line == NULL)
-        {
-            return NULL;
-        }
-
-        n = sscanf(line, "$$ 0x%08X: 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X "
-                   "0x%02X 0x%02X",
-                   &current, &data[0], &data[1], &data[2], &data[3], &data[4],
-                   &data[5], &data[6], &data[7]) - 1;
-
-        if (n > 0)
-        {
-            if (count == 0)
-            {
-                buffer = (char *) realloc(buffer, index + n);
-                if (buffer == NULL)
-                {
-                    return NULL;
-                }
-            }
-            else if (index + n > count)
-            {
-                return NULL;
-            }
-
-            for (i = 0; i < n; ++i)
-            {
-                buffer[index++] = (unsigned char) data[i];
-            }
-        }
-        else if (strncmp(line, "$$ <nil>", 8) == 0)
-        {
-            if (index == 0)
-            {
-                if (buffer != NULL)
-                {
-                    free(buffer);
-                    buffer = NULL;
-                }
-            }
-            else if (buffer != NULL)
-            {
-                return NULL;
-            }
-        }
-
-        else if (strncmp(line, "$$ **********", 13) == 0)
-        {
-            if ((count != 0) && (index != count) && (buffer != NULL))
-            {
-                return NULL;
-            }
-
-            if (index != 0)
-            {
-                GLchar  *tmp = (GLchar*)malloc(index+1);
-
-                memset(tmp, 0, index+1);
-                memcpy(tmp, buffer, index);
-                free(buffer);
-
-                buffer = tmp;
-            }
-
-            return buffer;
-        }
-        else
-        {
-            return NULL;
-        }
-    }
-}
-
-GLvoid Print(enLogLevel level, const char *msg, ...)
-{
-    va_list arguments;
-    GLchar  buf[1024];
-
-    if (level < printLevel)
-        return;
-
-    va_start(arguments, msg);
-    vsnprintf(buf, 1024, msg, arguments);
-    va_end(arguments);
-
-    printf("%s", buf);
-}
-
 GLvoid OutputStrcat(GLchar* outBuf, GLint outputSize, const GLchar* string, ...)
 {
     va_list arguments;
@@ -1102,105 +518,6 @@ void OutputStrcatFast(int pos, char* outBuf, int outputSize, const char* string,
     vsnprintf(tmp6, TMP5_BUF_SIZE, string, arguments);
     strcpy(&outBuf[pos], tmp6);
     va_end(arguments);
-}
-
-void SetDumpFile(int location)
-{
-    fseek(g_pApiDumpFile, 0, location);
-}
-
-GLboolean OpenDumpFile()
-{
-    char    strOutputFile[1024];
-    char    strDrawFile[1024];
-    char    strFrameFile[1024];
-    char    strShaderFile[1024];
-    char    strTextureFile[1024];
-
-    memset(strOutputFile, 0, 1024);
-    memset(strDrawFile, 0, 1024);
-    memset(strFrameFile, 0, 1024);
-
-    sprintf(strOutputFile, "%s.hy", strFileName);
-    sprintf(strDrawFile, "%s_Draw.hy", strFileName);
-    sprintf(strFrameFile, "%s_Frame.hy", strFileName);
-    sprintf(strShaderFile, "%s_shader.hy", strFileName);
-    sprintf(strTextureFile, "%s_texture.hy", strFileName);
-
-    g_pOutputFile = fopen(strOutputFile, "w");
-    if (g_pOutputFile == NULL)
-    {
-        printf("Cannot create output file: %s\n", strOutputFile);
-        goto _Error;
-    }
-
-    g_pDrawFile = fopen(strDrawFile, "w");
-    if (g_pDrawFile == NULL)
-    {
-        printf("Cannot create draw file: %s\n", strDrawFile);
-        goto _Error;
-    }
-
-    g_pFrameFile = fopen(strFrameFile, "w");
-    if (g_pFrameFile == NULL)
-    {
-        printf("Cannot create frame file: %s\n", strFrameFile);
-        goto _Error;
-    }
-
-    g_pShaderFile = fopen(strShaderFile, "w");
-    if (g_pShaderFile == NULL)
-    {
-        printf("Cannot create shader file: %s\n", strShaderFile);
-        goto _Error;
-    }
-
-    g_pTextureFile = fopen(strTextureFile, "w");
-    if (g_pTextureFile == NULL)
-    {
-        printf("Cannot create texture file: %s\n", strTextureFile);
-        goto _Error;
-    }
-
-    APIInitNameMap();
-
-    return GL_TRUE;
-
-_Error:
-    return GL_FALSE;
-}
-
-void CloseDumpFile()
-{
-    if (g_pApiDumpFile)
-    {
-        fclose(g_pApiDumpFile);
-    }
-
-    if (g_pOutputFile)
-    {
-        fclose(g_pOutputFile);
-    }
-
-    if (g_pDrawFile)
-    {
-        fclose(g_pDrawFile);
-    }
-
-    if (g_pFrameFile)
-    {
-        fclose(g_pFrameFile);
-    }
-
-    if (g_pShaderFile)
-    {
-        fclose(g_pShaderFile);
-    }
-
-    if (g_pTextureFile)
-    {
-        fclose(g_pTextureFile);
-    }
 }
 
 /*
@@ -2247,7 +1564,7 @@ GLvoid OutputDebugInfoToFile(const GLchar *str, ...)
     va_start(arguments, str);
     vsnprintf(buf, TMP5_BUF_SIZE, str, arguments);
     va_end(arguments);
-    OutputToFile(GL_FALSE, 0, "", buf, g_pOutputFile);
+    OutputToFile(GL_FALSE, 0, "", buf, g_Analyzer.m_pOutputFile);
 }
 
 const GLchar* apiNameTable[GLES_FUNCTION_TOTAL_NUMBER];

@@ -692,6 +692,16 @@ GLvoid GetInternalFormatBppFromTextureFormat(GLenum          Format,
         }
         break;
 
+    case GL_RGB8:
+        bpp = 24;
+        imageFormat = gcvSURF_B8G8R8;
+        break;
+
+    case GL_RGBA8:
+        bpp = 32;
+        imageFormat = gcvSURF_A8B8G8R8;
+        break;
+
     default:
         break;
     }
@@ -1447,6 +1457,7 @@ CTexObj* CGLES3Context::GetTexObjByName(GLuint name)
 GLvoid CGLES3Context::ApiActiveTexture(GLenum texture)
 {
     activeTexUnit = texture;
+    CTX_ANALYZER_FUNC1(ActiveTexture, GLOutput, GL_OUT_BUF_SIZE, texture);
 }
 
 GLvoid CGLES3Context::ApiBindTexture(GLenum target, GLuint texture)
@@ -1486,6 +1497,8 @@ GLvoid CGLES3Context::ApiBindTexture(GLenum target, GLuint texture)
     default:
         break;
     }
+
+    CTX_ANALYZER_FUNC2(BindTexture, GLOutput, GL_OUT_BUF_SIZE, target, texture);
 }
 
 CTexObj* CGLES3Context::FindTexObj(GLuint texture)
@@ -1509,6 +1522,8 @@ GLvoid CGLES3Context::ApiDeleteTextures(GLsizei n, const GLuint *textures)
         GLuint tex = textures[i];
         DeleteTextureObject(tex);
     }
+
+    CTX_ANALYZER_FUNC2(DeleteTextures, GLOutput, GL_OUT_BUF_SIZE, n, textures);
 }
 
 GLvoid CGLES3Context::ApiGenTextures(GLsizei n, GLuint *textures)
@@ -1519,7 +1534,7 @@ GLvoid CGLES3Context::ApiGenTextures(GLsizei n, GLuint *textures)
         CreateTextureObject(tex);
     }
 
-    m_pAnalyzer->AnalyzeGenTextures(GLOutput, GL_OUT_BUF_SIZE, n, textures);
+    CTX_ANALYZER_FUNC2(GenTextures, GLOutput, GL_OUT_BUF_SIZE, n, textures);
 }
 
 GLvoid CGLES3Context::ApiGenerateMipmap(GLenum target)
@@ -1527,6 +1542,8 @@ GLvoid CGLES3Context::ApiGenerateMipmap(GLenum target)
     CTexObj *pTex = GetActiveTexObj(target);
 
     pTex->genMipmap = GL_TRUE;
+
+    CTX_ANALYZER_FUNC1(GenerateMipmap, GLOutput, GL_OUT_BUF_SIZE, target);
 }
 
 GLvoid CTexObj::InsertTexImage(GLenum target, stTexImage *pTexImg)
@@ -1745,10 +1762,13 @@ GLvoid CGLES3Context::ApiTexImage2D(GLenum target, GLint level, GLint internalfo
 
     if (pixels == NULL)
     {
-        return;
+        goto _End;
     }
 
     memcpy(pTexImg->pixels, pixels, pTexImg->imageSize);
+
+_End:
+    CTX_ANALYZER_FUNC9(TexImage2D, GLOutput, GL_OUT_BUF_SIZE, target, level, internalformat, width, height, border, format, type, pixels);
     return;
 }
 
@@ -1798,6 +1818,8 @@ GLvoid CGLES3Context::ApiTexSubImage2D(GLenum target, GLint level, GLint xoffset
             }
         }
     }
+
+    CTX_ANALYZER_FUNC9(TexSubImage2D, GLOutput, GL_OUT_BUF_SIZE, target, level, xoffset, yoffset, width, height, format, type, pixels);
 }
 
 GLvoid CGLES3Context::ApiTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels)
@@ -1838,10 +1860,13 @@ GLvoid CGLES3Context::ApiTexImage3D(GLenum target, GLint level, GLint internalfo
 
     if (pixels == NULL)
     {
-        return;
+        goto _End;
     }
 
     memcpy(pTexImg->pixels, pixels, pTexImg->imageSize);
+
+_End:
+    CTX_ANALYZER_FUNC10(TexImage3D, GLOutput, GL_OUT_BUF_SIZE, target, level, internalformat, width, height, depth, border, format, type, pixels);
     return;
 }
 
@@ -1893,6 +1918,8 @@ GLvoid CGLES3Context::ApiTexSubImage3D(GLenum target, GLint level, GLint xoffset
             }
         }
     }
+
+    CTX_ANALYZER_FUNC11(TexSubImage3D, GLOutput, GL_OUT_BUF_SIZE, target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
 }
 
 GLvoid CGLES3Context::ApiTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)
@@ -1927,6 +1954,8 @@ GLvoid CGLES3Context::ApiTexStorage2D(GLenum target, GLsizei levels, GLenum inte
             }
         }
     }
+
+    CTX_ANALYZER_FUNC5(TexStorage2D, GLOutput, GL_OUT_BUF_SIZE, target, levels, internalformat, width, height);
 }
 
 GLvoid CGLES3Context::ApiTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth)
@@ -1946,6 +1975,8 @@ GLvoid CGLES3Context::ApiTexStorage3D(GLenum target, GLsizei levels, GLenum inte
             levelHeight = MAX(1, levelHeight/2);
         }
     }
+
+    CTX_ANALYZER_FUNC6(TexStorage3D, GLOutput, GL_OUT_BUF_SIZE, target, levels, internalformat, width, height, depth);
 }
 
 GLvoid CGLES3Context::ApiCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const void *data)
@@ -1989,7 +2020,7 @@ GLvoid CGLES3Context::ApiCompressedTexImage2D(GLenum target, GLint level, GLenum
         memcpy(pTexImg->pixels, data, imageSize);
     }
 
-    m_pAnalyzer->AnalyzeCompressedTexImage2D(GLOutput, GL_OUT_BUF_SIZE, target, level, internalformat, width, height, border, imageSize, data);
+    CTX_ANALYZER_FUNC8(CompressedTexImage2D, GLOutput, GL_OUT_BUF_SIZE, target, level, internalformat, width, height, border, imageSize, data);
 }
 
 GLvoid CGLES3Context::ApiCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void *data)
@@ -2017,6 +2048,8 @@ GLvoid CGLES3Context::ApiCompressedTexSubImage2D(GLenum target, GLint level, GLi
     {
         memcpy(pTexImg->pixels, data, imageSize);
     }
+
+    CTX_ANALYZER_FUNC9(CompressedTexSubImage2D, GLOutput, GL_OUT_BUF_SIZE, target, level, xoffset, yoffset, width, height, format, imageSize, data);
 }
 
 GLvoid CGLES3Context::ApiTexParameterf(GLenum target, GLenum pname, GLfloat param)
@@ -2028,6 +2061,8 @@ GLvoid CGLES3Context::ApiTexParameterf(GLenum target, GLenum pname, GLfloat para
         return;
 
     pTex->TexParameteri(target, pname, parami);
+
+    CTX_ANALYZER_FUNC3(TexParameterf, GLOutput, GL_OUT_BUF_SIZE, target, pname, param);
 }
 
 GLvoid CGLES3Context::ApiTexParameterfv(GLenum target, GLenum pname, const GLfloat *params)
@@ -2039,6 +2074,8 @@ GLvoid CGLES3Context::ApiTexParameterfv(GLenum target, GLenum pname, const GLflo
         return;
 
     pTex->TexParameteri(target, pname, parami);
+
+    CTX_ANALYZER_FUNC3(TexParameterfv, GLOutput, GL_OUT_BUF_SIZE, target, pname, params);
 }
 
 GLvoid CGLES3Context::ApiTexParameteri(GLenum target, GLenum pname, GLint param)
@@ -2049,6 +2086,8 @@ GLvoid CGLES3Context::ApiTexParameteri(GLenum target, GLenum pname, GLint param)
         return;
 
     pTex->TexParameteri(target, pname, param);
+
+    CTX_ANALYZER_FUNC3(TexParameteri, GLOutput, GL_OUT_BUF_SIZE, target, pname, param);
 }
 
 GLvoid CGLES3Context::ApiTexParameteriv(GLenum target, GLenum pname, const GLint *params)
@@ -2060,20 +2099,41 @@ GLvoid CGLES3Context::ApiTexParameteriv(GLenum target, GLenum pname, const GLint
         return;
 
     pTex->TexParameteri(target, pname, parami);
+
+    CTX_ANALYZER_FUNC3(TexParameteriv, GLOutput, GL_OUT_BUF_SIZE, target, pname, params);
 }
 
 GLvoid CGLES3Context::ApiCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
 {
+    CTX_ANALYZER_FUNC8(CopyTexImage2D, GLOutput, GL_OUT_BUF_SIZE, target, level, internalformat, x, y, width, height, border);
 }
 
 GLvoid CGLES3Context::ApiCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height)
 {
+    CTX_ANALYZER_FUNC8(CopyTexSubImage2D, GLOutput, GL_OUT_BUF_SIZE, target, level, xoffset, yoffset, x, y, width, height);
 }
 
 GLvoid CGLES3Context::ApiGetTexParameterfv(GLenum target, GLenum pname, GLfloat *params)
 {
+    CTX_ANALYZER_FUNC3(GetTexParameterfv, GLOutput, GL_OUT_BUF_SIZE, target, pname, params);
 }
 
 GLvoid CGLES3Context::ApiGetTexParameteriv(GLenum target, GLenum pname, GLint *params)
 {
+    CTX_ANALYZER_FUNC3(GetTexParameteriv, GLOutput, GL_OUT_BUF_SIZE, target, pname, params);
+}
+
+GLvoid CGLES3Context::ApiCopyTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height)
+{
+    CTX_ANALYZER_FUNC9(CopyTexSubImage3D, GLOutput, GL_OUT_BUF_SIZE, target, level, xoffset, yoffset, zoffset, x, y, width, height);
+}
+
+GLvoid CGLES3Context::ApiCompressedTexImage3D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const void *data)
+{
+    CTX_ANALYZER_FUNC9(CompressedTexImage3D, GLOutput, GL_OUT_BUF_SIZE, target, level, internalformat, width, height, depth, border, imageSize, data);
+}
+
+GLvoid CGLES3Context::ApiCompressedTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const void *data)
+{
+    CTX_ANALYZER_FUNC11(CompressedTexSubImage3D, GLOutput, GL_OUT_BUF_SIZE, target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data);
 }

@@ -24,9 +24,6 @@
 #define TEXTURE_TYPE_EXTERNAL   2
 #define TEXTURE_TYPE_3D         3
 
-#define ES11_VERSION            1
-#define ES20_VERSION            2
-
 #ifndef GLboolean
 typedef unsigned char    GLboolean;
 #endif
@@ -54,24 +51,11 @@ typedef enum _PARAM_FORMAT
 
 
 GLvoid GetPrimitiveCount(GLenum Mode, GLsizei Count, GLuint *PrimitiveCount);
-GLvoid OutputBlend(int *pos, int esVersion, char *output, int outputSize);
-GLvoid OutputCullFace(int *pos, int esVersion, char *output, int outputSize);
-GLvoid OutputDepth(int *pos, int esVersion, char *output, int outputSize);
-GLvoid OutputDither(int *pos, int esVersion, char *output, int outputSize);
-GLvoid OutputScissor(int *pos, int esVersion, char *output, int outputSize);
-GLvoid OutputStencil(int *pos, int esVersion, char *output, int outputSize);
-GLvoid OutputPolygonOffset(int *pos, int esVersion, char *output, int outputSize);
-GLvoid OutputSampleCoverage(int *pos, int esVersion, char *output, int outputSize);
-GLvoid OutputViewPort(int *pos, int esVersion, char *output, int outputSize);
-GLvoid OutputData(int *pos, GLenum type, char *output, int outputSize, char *input);
-GLvoid OutputStrcatFast(int pos, char* outBuf, int outputSize, const char* string, ...);
-GLvoid PrintMatrixf(GLfloat *matrix, char *output);
-GLvoid OutputStates(int *pos, int esVersion, char *output, int outputSize);
 GLvoid GetInternalFormatBppFromTextureFormat(GLenum Format, GLenum Type, gceSURF_FORMAT *ImageFormat, GLuint *Bpp, GLuint *fakeBpp);
 
-void DumpMatrix(int *pos, GLenum type, int row, int column, GLvoid *data, char *output, int outputSize);
-void DumpVector(int *pos, GLenum type, int num, GLvoid *data, char *output, int outputSize);
-
+GLvoid DumpMatrix(int *pos, GLenum type, int row, int column, GLvoid *data, char *output, int outputSize);
+GLvoid DumpVector(int *pos, GLenum type, int num, GLvoid *data, char *output, int outputSize);
+GLvoid OutputData(int *pos, GLenum type, char *output, int outputSize, char *input);
 GLvoid SetCapability(GLenum cap, GLboolean flag);
 
 void GenDelObjects(GLvoid *pContext,
@@ -83,10 +67,10 @@ void GenDelObjects(GLvoid *pContext,
                    const GLchar *objName);
 void PrintParams0(GLchar *output, GLuint outputSize, const GLchar *funcName);
 void PrintParams1(GLchar *output, GLuint outputSize, const GLchar *funcName,
-                  GLuint param, const GLchar *paramName, PARAM_FORMAT format, GLboolean bShader = GL_FALSE);
+                  GLuint param, const GLchar *paramName, PARAM_FORMAT format);
 void PrintParams2(GLchar *output, GLuint outputSize, const GLchar *funcName,
                   GLuint param1, const GLchar *paramName1, PARAM_FORMAT format1,
-                  GLuint param2, const GLchar *paramName2, PARAM_FORMAT format2, GLboolean bShader = GL_FALSE);
+                  GLuint param2, const GLchar *paramName2, PARAM_FORMAT format2);
 void PrintParams3(GLchar *output, GLuint outputSize, const GLchar *funcName,
                   GLuint param1, const GLchar *paramName1, PARAM_FORMAT format1,
                   GLuint param2, const GLchar *paramName2, PARAM_FORMAT format2,

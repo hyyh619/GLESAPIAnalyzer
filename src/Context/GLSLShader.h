@@ -5,6 +5,7 @@
 #include <map>
 #include <GLES3/gl31.h>
 #include "GLESGlobal.h"
+#include "ApiOESEngine.h"
 
 #define SHADER_SAMPLER_NUM      8
 
@@ -150,7 +151,7 @@ public:
         m_bCompiled = GL_FALSE;
         m_type      = type;
         m_oldName   = oldName;
-        m_name      = glCreateShader(type);
+        m_name      = g_opengl->glCreateShader(type);
 
         memset(m_strFileName, 0, 256);
     }
@@ -164,7 +165,7 @@ public:
     {
         if (m_name)
         {
-            glDeleteShader(m_name);
+            g_opengl->glDeleteShader(m_name);
             m_name = 0;
         }
 
@@ -195,7 +196,7 @@ public:
 
         m_bLinked   = GL_FALSE;
         m_oldName   = oldName;
-        m_name      = glCreateProgram();
+        m_name      = g_opengl->glCreateProgram();
 
         m_attributes.clear();
         m_uniforms.clear();
@@ -226,7 +227,7 @@ public:
         // We cannot release GL object here, because there is no gl context.
         if (m_name)
         {
-            glDeleteProgram(m_name);
+            g_opengl->glDeleteProgram(m_name);
         }
     }
 
@@ -259,12 +260,9 @@ public:
 typedef std::map<GLuint, CShaderObj*>   ShaderMap;
 typedef std::map<GLuint, CProgramObj*>  ProgramMap;
 
-GLvoid              DumpUniforms(GLint *pos, char *output, GLint outputSize);
-GLvoid              PrintShader(GLint *pos, GLuint progID, GLuint vertex, GLuint fragment, char *output, GLint outputSize);
-eShaderType         ConvertGLSLDataTypeToInternType(GLenum type);
-GLuint              GetSizeFromShaderDataType(eShaderType type);
-GLboolean           DumpUniform(GLint *pos, GLint location, GLuint programId, CUniformObj *uniform, char *output, GLint outputSize);
-GLvoid              SaveShaderToFile(GLuint shaderIndex, GLenum shaderType, GLuint shaderLine, GLchar **shaderSource);
-GLuint              GetShaderDataSizeByType(GLenum shaderType);
+GLvoid      PrintShader(GLint *pos, GLuint progID, GLuint vertex, GLuint fragment, char *output, GLint outputSize);
+eShaderType ConvertGLSLDataTypeToInternType(GLenum type);
+GLuint      GetSizeFromShaderDataType(eShaderType type);
+GLuint      GetShaderDataSizeByType(GLenum shaderType);
 
 #endif /* __GLSL_SHADER_H */

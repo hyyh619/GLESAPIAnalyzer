@@ -131,7 +131,6 @@ GLvoid ParseGetUniformfv(GLchar *input, GLchar *output, GLint outputSize);
 GLvoid ParseGetUniformiv(GLchar *input, GLchar *output, GLint outputSize);
 GLvoid ParseIsShader(GLchar *input, GLchar *output, GLint outputSize);
 GLvoid ParseIsProgram(GLchar *input, GLchar *output, GLint outputSize);
-GLvoid ParseShaderSource(GLchar *input, GLchar *output, GLint outputSize);
 GLvoid ParseUniform1f(GLchar *input, GLchar *output, GLint outputSize);
 GLvoid ParseUniform1fv(GLchar *input, GLchar *output, GLint outputSize);
 GLvoid ParseUniform1i(GLchar *input, GLchar *output, GLint outputSize);
@@ -152,6 +151,7 @@ GLvoid ParseUniformMatrix2fv(GLchar *input, GLchar *output, GLint outputSize);
 GLvoid ParseUniformMatrix3fv(GLchar *input, GLchar *output, GLint outputSize);
 GLvoid ParseUniformMatrix4fv(GLchar *input, GLchar *output, GLint outputSize);
 GLvoid ParseValidateProgram(GLchar *input, GLchar *output, GLint outputSize);
+GLvoid ParseShaderSource(GLchar *input, GLchar *output, GLint outputSize);
 
 // draw states
 GLvoid ParseCullFace(GLchar *input, GLchar *output, GLint outputSize);

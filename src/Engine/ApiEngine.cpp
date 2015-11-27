@@ -3,6 +3,7 @@
 
 #include "APIOS.h"
 #include "ApiEngine.h"
+#include "ApiOESEngine.h"
 
 CApiEngine::CApiEngine()
 {
@@ -27,7 +28,7 @@ GLint CApiEngine::DrawStatesViewportH()
 
 GLboolean CApiEngine::IsEnabled(GLenum cap)
 {
-    return glIsEnabled(cap);
+    return g_opengl->glIsEnabled(cap);
 }
 
 GLboolean CApiEngine::DrawStatesIsBindFBO()
@@ -54,21 +55,21 @@ GLenum CApiEngine::DrawStatesActiveTexUnit()
 
 GLuint CApiEngine::CreateProgram(GLuint vertex, GLuint fragment)
 {
-    GLuint  program     = glCreateProgram();
+    GLuint  program     = g_opengl->glCreateProgram();
     GLint   shaderStat  = 0;
 
-    glAttachShader(program, vertex);
-    glAttachShader(program, fragment);
-    glLinkProgram(program);
-    glGetProgramiv(program, GL_LINK_STATUS, &shaderStat);
+    g_opengl->glAttachShader(program, vertex);
+    g_opengl->glAttachShader(program, fragment);
+    g_opengl->glLinkProgram(program);
+    g_opengl->glGetProgramiv(program, GL_LINK_STATUS, &shaderStat);
     if (shaderStat != 1)
     {
         GLchar  *info;
         GLint   writeLen;
 
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &shaderStat);
+        g_opengl->glGetProgramiv(program, GL_INFO_LOG_LENGTH, &shaderStat);
         info = (GLchar*)malloc(shaderStat);
-        glGetProgramInfoLog(program, shaderStat, &writeLen, info);
+        g_opengl->glGetProgramInfoLog(program, shaderStat, &writeLen, info);
         printf("program: %s\n", info);
     }
 
@@ -77,17 +78,17 @@ GLuint CApiEngine::CreateProgram(GLuint vertex, GLuint fragment)
 
 GLvoid CApiEngine::DeleteProgram(GLuint program)
 {
-    glDeleteProgram(program);
+    g_opengl->glDeleteProgram(program);
 }
 
 GLint CApiEngine::GetAttribLocation(GLuint program, const GLchar *name)
 {
-    return glGetAttribLocation(program, name);
+    return g_opengl->glGetAttribLocation(program, name);
 }
 
 GLint CApiEngine::GetUniformLocation(GLuint program, const GLchar *name)
 {
-    return glGetUniformLocation(program, name);
+    return g_opengl->glGetUniformLocation(program, name);
 }
 
 GLuint CApiEngine::CreateShader(GLenum shaderType, const GLchar *str)
@@ -95,18 +96,18 @@ GLuint CApiEngine::CreateShader(GLenum shaderType, const GLchar *str)
     GLuint  shader = 0;
     GLint   shaderStat;
 
-    shader = glCreateShader(shaderType);
-    glShaderSource(shader, 1, &str, NULL);
-    glCompileShader(shader);
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &shaderStat);
+    shader = g_opengl->glCreateShader(shaderType);
+    g_opengl->glShaderSource(shader, 1, &str, NULL);
+    g_opengl->glCompileShader(shader);
+    g_opengl->glGetShaderiv(shader, GL_COMPILE_STATUS, &shaderStat);
     if (shaderStat != 1)
     {
         GLchar  *info;
         GLint   writeLen;
 
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &shaderStat);
+        g_opengl->glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &shaderStat);
         info = (GLchar*)malloc(shaderStat);
-        glGetShaderInfoLog(shader, shaderStat, &writeLen, info);
+        g_opengl->glGetShaderInfoLog(shader, shaderStat, &writeLen, info);
         printf("shader: %s\n", info);
     }
 
@@ -115,12 +116,12 @@ GLuint CApiEngine::CreateShader(GLenum shaderType, const GLchar *str)
 
 GLvoid CApiEngine::DeleteShader(GLuint shader)
 {
-    glDeleteShader(shader);
+    g_opengl->glDeleteShader(shader);
 }
 
 GLvoid CApiEngine::CheckGLError()
 {
-    GLenum err = glGetError();
+    GLenum err = g_opengl->glGetError();
 
     if (err != GL_NO_ERROR)
     {
@@ -130,59 +131,60 @@ GLvoid CApiEngine::CheckGLError()
 
 GLvoid CApiEngine::SaveDrawStates()
 {
-    glGetIntegerv(GL_CURRENT_PROGRAM, &m_drawStates.program);
-    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &m_drawStates.vbo);
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &m_drawStates.fbo);
-    glGetIntegerv(GL_VIEWPORT, m_drawStates.viewport);
-    glGetIntegerv(GL_ACTIVE_TEXTURE, &m_drawStates.texUnit);
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &m_drawStates.tex);
+    g_opengl->glGetIntegerv(GL_CURRENT_PROGRAM, &m_drawStates.program);
+    g_opengl->glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &m_drawStates.vbo);
+    g_opengl->glGetIntegerv(GL_FRAMEBUFFER_BINDING, &m_drawStates.fbo);
+    g_opengl->glGetIntegerv(GL_VIEWPORT, m_drawStates.viewport);
+    g_opengl->glGetIntegerv(GL_ACTIVE_TEXTURE, &m_drawStates.texUnit);
+    g_opengl->glGetIntegerv(GL_TEXTURE_BINDING_2D, &m_drawStates.tex);
 
     // Vertex Attribute
     for (GLuint i=0; i<8; i++)
     {
-        glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_SIZE, &m_drawStates.vap[i].size);
-        glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_STRIDE, &m_drawStates.vap[i].stride);
-        glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_TYPE, &m_drawStates.vap[i].type);
-        glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, &m_drawStates.vap[i].normalize);
-        glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &m_drawStates.vap[i].vbo);
-        glGetVertexAttribPointerv(i, GL_VERTEX_ATTRIB_ARRAY_POINTER, &m_drawStates.vap[i].pointer);
+        g_opengl->glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_SIZE, &m_drawStates.vap[i].size);
+        g_opengl->glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_STRIDE, &m_drawStates.vap[i].stride);
+        g_opengl->glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_TYPE, &m_drawStates.vap[i].type);
+        g_opengl->glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, &m_drawStates.vap[i].normalize);
+        g_opengl->glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &m_drawStates.vap[i].vbo);
+        g_opengl->glGetVertexAttribPointerv(i, GL_VERTEX_ATTRIB_ARRAY_POINTER, &m_drawStates.vap[i].pointer);
     }
 
-    m_drawStates.depthTest = glIsEnabled(GL_DEPTH_TEST);
-    m_drawStates.stencilTest = glIsEnabled(GL_STENCIL_TEST);
-    m_drawStates.blend = glIsEnabled(GL_BLEND);
+    m_drawStates.depthTest      = g_opengl->glIsEnabled(GL_DEPTH_TEST);
+    m_drawStates.stencilTest    = g_opengl->glIsEnabled(GL_STENCIL_TEST);
+    m_drawStates.blend          = g_opengl->glIsEnabled(GL_BLEND);
 }
 
 GLvoid CApiEngine::LoadDrawStates()
 {
-    glUseProgram(m_drawStates.program);
+    g_opengl->glUseProgram(m_drawStates.program);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, m_drawStates.fbo);
-    glActiveTexture(m_drawStates.texUnit);
-    glBindTexture(GL_TEXTURE_2D, m_drawStates.tex);
+    g_opengl->glBindFramebuffer(GL_FRAMEBUFFER, m_drawStates.fbo);
+    g_opengl->glActiveTexture(m_drawStates.texUnit);
+    g_opengl->glBindTexture(GL_TEXTURE_2D, m_drawStates.tex);
 
     // Vertex Attribute
     for (GLuint i=0; i<8; i++)
     {
-        glBindBuffer(GL_ARRAY_BUFFER, m_drawStates.vap[i].vbo);
-        glVertexAttribPointer(i,
-                              m_drawStates.vap[i].size,
-                              m_drawStates.vap[i].type,
-                              m_drawStates.vap[i].normalize,
-                              m_drawStates.vap[i].stride,
-                              m_drawStates.vap[i].pointer);
+        g_opengl->glBindBuffer(GL_ARRAY_BUFFER, m_drawStates.vap[i].vbo);
+        g_opengl->glVertexAttribPointer(
+            i,
+            m_drawStates.vap[i].size,
+            m_drawStates.vap[i].type,
+            m_drawStates.vap[i].normalize,
+            m_drawStates.vap[i].stride,
+            m_drawStates.vap[i].pointer);
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_drawStates.vbo);
+    g_opengl->glBindBuffer(GL_ARRAY_BUFFER, m_drawStates.vbo);
 
     if (m_drawStates.depthTest)
-        glEnable(GL_DEPTH_TEST);
+        g_opengl->glEnable(GL_DEPTH_TEST);
 
     if (m_drawStates.stencilTest)
-        glEnable(GL_STENCIL_TEST);
+        g_opengl->glEnable(GL_STENCIL_TEST);
 
     if (m_drawStates.blend)
-        glEnable(GL_BLEND);
+        g_opengl->glEnable(GL_BLEND);
 }
 
 GLvoid CApiEngine::CreateDumpDepthProgram()
@@ -226,7 +228,7 @@ GLvoid CApiEngine::DeleteDumpDepthProgram()
 
 GLvoid CApiEngine::UseDumpDepthProgram()
 {
-    glUseProgram(m_dumpDepthProg);
+    g_opengl->glUseProgram(m_dumpDepthProg);
 }
 
 GLuint CApiEngine::GetDumpDepthProgram()
@@ -236,7 +238,7 @@ GLuint CApiEngine::GetDumpDepthProgram()
 
 GLvoid CApiEngine::CheckFramebufferStatus(GLenum target)
 {
-    GLenum err = glCheckFramebufferStatus(target);
+    GLenum err = g_opengl->glCheckFramebufferStatus(target);
     if (err != GL_FRAMEBUFFER_COMPLETE)
     {
         printf("frame: 0x%04X\n", err);
@@ -246,77 +248,77 @@ GLvoid CApiEngine::CheckFramebufferStatus(GLenum target)
 GLuint CApiEngine::GenFramebuffer(GLenum target)
 {
     GLuint fbo;
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(target, fbo);
+    g_opengl->glGenFramebuffers(1, &fbo);
+    g_opengl->glBindFramebuffer(target, fbo);
     return fbo;
 }
 
 GLvoid CApiEngine::FramebufferTexture2D(GLenum target, GLuint fbo, GLenum attachment, GLenum textarget, GLuint texture, GLint level)
 {
-    glBindFramebuffer(target, fbo);
-    glFramebufferTexture2D(target, attachment, textarget, texture, level);
+    g_opengl->glBindFramebuffer(target, fbo);
+    g_opengl->glFramebufferTexture2D(target, attachment, textarget, texture, level);
     CheckFramebufferStatus(target);
 }
 
 GLvoid CApiEngine::BlitFramebuffer(GLint width, GLint height, GLbitfield mask, GLenum filter)
 {
 #ifdef OES3_API
-    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, mask, filter);
+    g_opengl->glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, mask, filter);
 #elif defined(__APPLE__)
-    //glBlitFramebufferANGLE(0, 0, width, height, 0, 0, width, height, mask, filter);
+    //g_opengl->glBlitFramebufferANGLE(0, 0, width, height, 0, 0, width, height, mask, filter);
 #elif defined(WITH_TCG_TRACER_OES2)
 #else
-    glBlitFramebufferANGLE(0, 0, width, height, 0, 0, width, height, mask, filter);
+    g_opengl->glBlitFramebufferANGLE(0, 0, width, height, 0, 0, width, height, mask, filter);
 #endif
 }
 
 GLvoid CApiEngine::BindFramebuffer(GLenum target, GLuint fbo)
 {
-    glBindFramebuffer(target, fbo);
+    g_opengl->glBindFramebuffer(target, fbo);
 }
 
 GLvoid CApiEngine::ActiveTexture(GLenum unit)
 {
-    glActiveTexture(unit);
+    g_opengl->glActiveTexture(unit);
 }
 
 GLuint CApiEngine::GenTexture(GLenum target)
 {
     GLuint tex;
-    glGenTextures(1, &tex);
-    glBindTexture(target, tex);
+    g_opengl->glGenTextures(1, &tex);
+    g_opengl->glBindTexture(target, tex);
     CheckGLError();
     return tex;
 }
 
 GLvoid CApiEngine::BindTexture(GLenum target, GLuint tex)
 {
-    glBindTexture(target, tex);
+    g_opengl->glBindTexture(target, tex);
 }
 
 GLvoid CApiEngine::TexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels)
 {
-    glTexImage2D(target, level, internalformat, width, height, 0, format, type, pixels);
+    g_opengl->glTexImage2D(target, level, internalformat, width, height, 0, format, type, pixels);
     CheckGLError();
 }
 
 GLvoid CApiEngine::TexParameters(GLenum target, GLenum minFilter, GLenum magFilter, GLenum wrapR, GLenum wrapS, GLenum wrapT, GLenum cmpMode)
 {
-    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, magFilter);
-    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minFilter);
+    g_opengl->glTexParameteri(target, GL_TEXTURE_MAG_FILTER, magFilter);
+    g_opengl->glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minFilter);
 
 #ifdef OES3_API
-    glTexParameteri(target, GL_TEXTURE_WRAP_R, wrapR);
+    g_opengl->glTexParameteri(target, GL_TEXTURE_WRAP_R, wrapR);
 #else
-    glTexParameteri(target, GL_TEXTURE_WRAP_R_OES, wrapR);
+    g_opengl->glTexParameteri(target, GL_TEXTURE_WRAP_R_OES, wrapR);
 #endif
-    glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapS);
-    glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapT);
+    g_opengl->glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapS);
+    g_opengl->glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapT);
 
 #ifdef OES3_API
-    glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, cmpMode);
+    g_opengl->glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, cmpMode);
 #else
-    glTexParameteri(target, GL_TEXTURE_COMPARE_MODE_EXT, cmpMode);
+    g_opengl->glTexParameteri(target, GL_TEXTURE_COMPARE_MODE_EXT, cmpMode);
 #endif
 
     CheckGLError();

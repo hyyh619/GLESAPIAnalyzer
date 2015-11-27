@@ -32,15 +32,6 @@ GLvoid      SetTexParameter(CTexObj *Texture,
                             GLenum Target,
                             GLenum Parameter,
                             GLint  Value);
-GLvoid      OutputDrawElements_es20(GLenum mode, GLint indexCount, GLenum indexType, GLuint indexAddr, char *output, GLint outputSize);
-GLvoid      OutputDrawArrays_es20(GLenum mode, GLuint first, GLint count, char *output, GLint outputSize);
-GLvoid      OutputDrawArraysToFrameFile_es20(GLenum mode, GLuint first, GLint count, GLuint historyID);
-GLvoid      OutputClearToFrameFile(GLint mask);
-GLvoid      OutputMaskToFrameFile(char *str);
-GLvoid      OutputFBO(GLuint currentFBO, GLchar *output, GLint outputSize);
-GLvoid      OutputCurrentFBO(GLint *pos, GLchar *output, GLint outputSize);
-GLvoid      OutputDrawElementsToFrameFile_es20(GLenum mode, GLint count, GLenum indexType, GLuint historyID);
-GLvoid      DumpVertexAttr(GLint *pos, GLint vertexMin, GLint vertexMax, GLint first, char *output, GLint outputSize);
 GLboolean   IsNeedDraw(GLuint indexCount, GLenum mode, GLuint count);
 
 #endif /* _GLES2_H */

@@ -309,7 +309,7 @@ GLvoid CGLES3Context::ApiGenBuffers(GLsizei n, GLuint *buffers)
         CBufObj *pBuf   = CreateBufObj(name);
     }
 
-    m_pAnalyzer->AnalyzeGenBuffers(GLOutput, GL_OUT_BUF_SIZE, n, buffers);
+    CTX_ANALYZER_FUNC2(GenBuffers, GLOutput, GL_OUT_BUF_SIZE, n, buffers);
 }
 
 GLvoid CGLES3Context::ApiDeleteBuffers(GLsizei n, const GLuint *buffers)
@@ -321,6 +321,8 @@ GLvoid CGLES3Context::ApiDeleteBuffers(GLsizei n, const GLuint *buffers)
     {
         DeleteBufObj(buffers[i]);
     }
+
+    CTX_ANALYZER_FUNC2(DeleteBuffers, GLOutput, GL_OUT_BUF_SIZE, n, buffers);
 }
 
 GLvoid CGLES3Context::ApiBindBuffer(GLenum target, GLuint buffer)
@@ -333,6 +335,8 @@ GLvoid CGLES3Context::ApiBindBuffer(GLenum target, GLuint buffer)
     }
 
     SetBufObj(target, buffer);
+
+    CTX_ANALYZER_FUNC2(BindBuffer, GLOutput, GL_OUT_BUF_SIZE, target, buffer);
 }
 
 GLvoid CGLES3Context::ApiBindBufferBase(GLenum target, GLuint index, GLuint buffer)
@@ -340,7 +344,7 @@ GLvoid CGLES3Context::ApiBindBufferBase(GLenum target, GLuint index, GLuint buff
     CBufObj *pBuffer = FindBufObj(buffer);
 
     if (buffer == 0)
-        return;
+        goto _End;
 
     if (pBuffer == NULL)
     {
@@ -352,6 +356,9 @@ GLvoid CGLES3Context::ApiBindBufferBase(GLenum target, GLuint index, GLuint buff
     pBuffer->m_nMapIndex    = index;
     pBuffer->m_nMapSize     = pBuffer->m_nSize;
     pBuffer->m_nMapOffset   = 0;
+
+_End:
+    CTX_ANALYZER_FUNC3(BindBufferBase, GLOutput, GL_OUT_BUF_SIZE, target, index, buffer);
 }
 
 GLvoid CGLES3Context::ApiBindBufferRange(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size)
@@ -368,9 +375,11 @@ GLvoid CGLES3Context::ApiBindBufferRange(GLenum target, GLuint index, GLuint buf
     pBuffer->m_nMapIndex    = index;
     pBuffer->m_nMapSize     = size;
     pBuffer->m_nMapOffset   = offset;
+
+    CTX_ANALYZER_FUNC5(BindBufferRange, GLOutput, GL_OUT_BUF_SIZE, target, index, buffer, offset, size);
 }
 
-GLvoid CGLES3Context::ApiBufferData (GLenum target, GLsizeiptr size, const void *data, GLenum usage)
+GLvoid CGLES3Context::ApiBufferData(GLenum target, GLsizeiptr size, const void *data, GLenum usage)
 {
     CBufObj *pBuffer    = FindBufObjByTarget(target);
     GLchar  *pSrc       = (GLchar*)data;
@@ -395,9 +404,11 @@ GLvoid CGLES3Context::ApiBufferData (GLenum target, GLsizeiptr size, const void 
     {
         SaveVBO(target, size, (GLchar*)pBuffer->m_pData);
     }
+
+    CTX_ANALYZER_FUNC4(BufferData, GLOutput, GL_OUT_BUF_SIZE, target, size, data, usage);
 }
 
-GLvoid CGLES3Context::ApiBufferSubData (GLenum target, GLintptr offset, GLsizeiptr size, const void *data)
+GLvoid CGLES3Context::ApiBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const void *data)
 {
     CBufObj *pBuffer    = FindBufObjByTarget(target);
     GLchar  *pSrc       = (GLchar*)data;
@@ -427,6 +438,8 @@ GLvoid CGLES3Context::ApiBufferSubData (GLenum target, GLintptr offset, GLsizeip
 
         SaveVBO(target, size, (GLchar*)pBuffer->m_pData);
     }
+
+    CTX_ANALYZER_FUNC4(BufferSubData, GLOutput, GL_OUT_BUF_SIZE, target, offset, size, data);
 }
 
 GLvoid CGLES3Context::ApiGenVertexArrays(GLsizei n, GLuint *arrays)
@@ -438,6 +451,8 @@ GLvoid CGLES3Context::ApiGenVertexArrays(GLsizei n, GLuint *arrays)
     {
         CreateVertexArrayObj(arrays[i]);
     }
+
+    CTX_ANALYZER_FUNC2(GenVertexArrays, GLOutput, GL_OUT_BUF_SIZE, n, arrays);
 }
 
 GLvoid CGLES3Context::ApiDeleteVertexArrays(GLsizei n, const GLuint *arrays)
@@ -449,6 +464,8 @@ GLvoid CGLES3Context::ApiDeleteVertexArrays(GLsizei n, const GLuint *arrays)
     {
         DeleteVertexArrayObj(arrays[i]);
     }
+
+    CTX_ANALYZER_FUNC2(DeleteVertexArrays, GLOutput, GL_OUT_BUF_SIZE, n, arrays);
 }
 
 GLvoid CGLES3Context::ApiBindVertexArray(GLuint array)
@@ -461,6 +478,13 @@ GLvoid CGLES3Context::ApiBindVertexArray(GLuint array)
     }
 
     vertexArray = array;
+
+    CTX_ANALYZER_FUNC1(BindVertexArray, GLOutput, GL_OUT_BUF_SIZE, array);
+}
+
+GLvoid CGLES3Context::ApiIsVertexArray(GLuint array, GLboolean ret)
+{
+    CTX_ANALYZER_FUNC2(IsVertexArray, GLOutput, GL_OUT_BUF_SIZE, array, ret);
 }
 
 GLvoid CGLES3Context::ApiDeleteTransformFeedbacks(GLsizei n, const GLuint *ids)
@@ -472,6 +496,8 @@ GLvoid CGLES3Context::ApiDeleteTransformFeedbacks(GLsizei n, const GLuint *ids)
     {
         DeleteTransFeedbackObj(ids[i]);
     }
+
+    CTX_ANALYZER_FUNC2(DeleteTransformFeedbacks, GLOutput, GL_OUT_BUF_SIZE, n, ids);
 }
 
 GLvoid CGLES3Context::ApiGenTransformFeedbacks(GLsizei n, GLuint *ids)
@@ -484,7 +510,7 @@ GLvoid CGLES3Context::ApiGenTransformFeedbacks(GLsizei n, GLuint *ids)
         CreateTransFeedbackObj(ids[i]);
     }
 
-    m_pAnalyzer->AnalyzeGenTransformFeedbacks(GLOutput, GL_OUT_BUF_SIZE, n, ids);
+    CTX_ANALYZER_FUNC2(GenTransformFeedbacks, GLOutput, GL_OUT_BUF_SIZE, n, ids);
 }
 
 GLvoid CGLES3Context::ApiBindTransformFeedback(GLenum target, GLuint id)
@@ -497,6 +523,8 @@ GLvoid CGLES3Context::ApiBindTransformFeedback(GLenum target, GLuint id)
     }
 
     transFeedback = id;
+
+    CTX_ANALYZER_FUNC2(BindTransformFeedback, GLOutput, GL_OUT_BUF_SIZE, target, id);
 }
 
 GLvoid CGLES3Context::ApiBeginTransformFeedback(GLenum primitiveMode)
@@ -508,6 +536,8 @@ GLvoid CGLES3Context::ApiBeginTransformFeedback(GLenum primitiveMode)
         p->primMode = primitiveMode;
         p->bActive  = GL_TRUE;
     }
+
+    CTX_ANALYZER_FUNC1(BeginTransformFeedback, GLOutput, GL_OUT_BUF_SIZE, primitiveMode);
 }
 
 GLvoid CGLES3Context::ApiEndTransformFeedback(void)
@@ -518,6 +548,18 @@ GLvoid CGLES3Context::ApiEndTransformFeedback(void)
     {
         p->bActive  = GL_FALSE;
     }
+
+    CTX_ANALYZER_FUNC0(EndTransformFeedback, GLOutput, GL_OUT_BUF_SIZE);
+}
+
+GLvoid CGLES3Context::ApiTransformFeedbackVaryings(GLuint program, GLsizei count, const GLchar *const*varyings, GLenum bufferMode)
+{
+    CTX_ANALYZER_FUNC4(TransformFeedbackVaryings, GLOutput, GL_OUT_BUF_SIZE, program, count, varyings, bufferMode);
+}
+
+GLvoid CGLES3Context::ApiGetTransformFeedbackVarying(GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLsizei *size, GLenum *type, GLchar *name)
+{
+    CTX_ANALYZER_FUNC7(GetTransformFeedbackVarying, GLOutput, GL_OUT_BUF_SIZE, program, index, bufSize, length, size, type, name);
 }
 
 GLvoid CGLES3Context::ApiDisableVertexAttribArray(GLuint index)
@@ -526,6 +568,8 @@ GLvoid CGLES3Context::ApiDisableVertexAttribArray(GLuint index)
     {
         vertexAttribBits &= (~(1 << index));
     }
+
+    CTX_ANALYZER_FUNC1(DisableVertexAttribArray, GLOutput, GL_OUT_BUF_SIZE, index);
 }
 
 GLvoid CGLES3Context::ApiEnableVertexAttribArray(GLuint index)
@@ -534,6 +578,8 @@ GLvoid CGLES3Context::ApiEnableVertexAttribArray(GLuint index)
     {
         vertexAttribBits |= (1 << index);
     }
+
+    CTX_ANALYZER_FUNC1(EnableVertexAttribArray, GLOutput, GL_OUT_BUF_SIZE, index);
 }
 
 GLvoid  CGLES3Context::SetVertexAttrib1234fv(GLuint index, GLuint count, const GLfloat *pData)
@@ -580,41 +626,49 @@ GLvoid CGLES3Context::SetVertexAttrib1234f(GLuint index, GLuint count, GLfloat f
 GLvoid CGLES3Context::ApiVertexAttrib1f(GLuint index, GLfloat x)
 {
     SetVertexAttrib1234f(index, 1, x, 0.0f, 0.0f, 0.0f);
+    CTX_ANALYZER_FUNC2(VertexAttrib1f, GLOutput, GL_OUT_BUF_SIZE, index, x);
 }
 
 GLvoid CGLES3Context::ApiVertexAttrib1fv(GLuint index, const GLfloat *v)
 {
     SetVertexAttrib1234fv(index, 1, v);
+    CTX_ANALYZER_FUNC2(VertexAttrib1fv, GLOutput, GL_OUT_BUF_SIZE, index, v);
 }
 
 GLvoid CGLES3Context::ApiVertexAttrib2f(GLuint index, GLfloat x, GLfloat y)
 {
     SetVertexAttrib1234f(index, 2, x, y, 0.0f, 0.0f);
+    CTX_ANALYZER_FUNC3(VertexAttrib2f, GLOutput, GL_OUT_BUF_SIZE, index, x, y);
 }
 
 GLvoid CGLES3Context::ApiVertexAttrib2fv(GLuint index, const GLfloat *v)
 {
     SetVertexAttrib1234fv(index, 2, v);
+    CTX_ANALYZER_FUNC2(VertexAttrib2fv, GLOutput, GL_OUT_BUF_SIZE, index, v);
 }
 
 GLvoid CGLES3Context::ApiVertexAttrib3f(GLuint index, GLfloat x, GLfloat y, GLfloat z)
 {
     SetVertexAttrib1234f(index, 3, x, y, z, 0.0f);
+    CTX_ANALYZER_FUNC4(VertexAttrib3f, GLOutput, GL_OUT_BUF_SIZE, index, x, y, z);
 }
 
 GLvoid CGLES3Context::ApiVertexAttrib3fv(GLuint index, const GLfloat *v)
 {
     SetVertexAttrib1234fv(index, 3, v);
+    CTX_ANALYZER_FUNC2(VertexAttrib3fv, GLOutput, GL_OUT_BUF_SIZE, index, v);
 }
 
 GLvoid CGLES3Context::ApiVertexAttrib4f(GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 {
     SetVertexAttrib1234f(index, 4, x, y, z, w);
+    CTX_ANALYZER_FUNC5(VertexAttrib4f, GLOutput, GL_OUT_BUF_SIZE, index, x, y, z, w);
 }
 
 GLvoid CGLES3Context::ApiVertexAttrib4fv(GLuint index, const GLfloat *v)
 {
     SetVertexAttrib1234fv(index, 4, v);
+    CTX_ANALYZER_FUNC2(VertexAttrib4fv, GLOutput, GL_OUT_BUF_SIZE, index, v);
 }
 
 GLvoid CGLES3Context::ApiVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer)
@@ -641,6 +695,8 @@ GLvoid CGLES3Context::ApiVertexAttribPointer(GLuint index, GLint size, GLenum ty
         pVertex->vbo        = arrayBuffer;
         pVertex->bUseVBO    = arrayBuffer?GL_TRUE:GL_FALSE;
     }
+
+    CTX_ANALYZER_FUNC6(VertexAttribPointer, GLOutput, GL_OUT_BUF_SIZE, index, size, type, normalized, stride, pointer);
 }
 
 GLvoid CGLES3Context::ApiVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer)
@@ -666,6 +722,8 @@ GLvoid CGLES3Context::ApiVertexAttribIPointer(GLuint index, GLint size, GLenum t
         pVertex->vbo        = arrayBuffer;
         pVertex->bUseVBO    = arrayBuffer?GL_TRUE:GL_FALSE;
     }
+
+    CTX_ANALYZER_FUNC5(VertexAttribIPointer, GLOutput, GL_OUT_BUF_SIZE, index, size, type, stride, pointer);
 }
 
 GLuint CGLES3Context::GetVertexAttribBits()
@@ -703,16 +761,50 @@ stVertAttrPtr* CGLES3Context::GetVertexAttribPointer(GLint index)
 
 GLvoid CGLES3Context::ApiGetBufferParameteriv(GLenum target, GLenum pname, GLint *params)
 {
+    CTX_ANALYZER_FUNC3(GetBufferParameteriv, GLOutput, GL_OUT_BUF_SIZE, target, pname, params);
 }
 
 GLvoid CGLES3Context::ApiGetVertexAttribfv(GLuint index, GLenum pname, GLfloat *params)
 {
+    CTX_ANALYZER_FUNC3(GetVertexAttribfv, GLOutput, GL_OUT_BUF_SIZE, index, pname, params);
 }
 
 GLvoid CGLES3Context::ApiGetVertexAttribiv(GLuint index, GLenum pname, GLint *params)
 {
+    CTX_ANALYZER_FUNC3(GetVertexAttribiv, GLOutput, GL_OUT_BUF_SIZE, index, pname, params);
 }
 
 GLvoid CGLES3Context::ApiGetVertexAttribPointerv(GLuint index, GLenum pname, void **pointer)
 {
+    CTX_ANALYZER_FUNC3(GetVertexAttribPointerv, GLOutput, GL_OUT_BUF_SIZE, index, pname, pointer);
+}
+
+GLvoid CGLES3Context::ApiMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, GLvoid *map)
+{
+    CTX_ANALYZER_FUNC5(MapBufferRange, GLOutput, GL_OUT_BUF_SIZE, target, offset, length, access, map);
+}
+
+GLvoid CGLES3Context::ApiFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length)
+{
+    CTX_ANALYZER_FUNC3(FlushMappedBufferRange, GLOutput, GL_OUT_BUF_SIZE, target, offset, length);
+}
+
+GLvoid CGLES3Context::ApiUnmapBuffer(GLenum target, GLboolean ret)
+{
+    CTX_ANALYZER_FUNC2(UnmapBuffer, GLOutput, GL_OUT_BUF_SIZE, target, ret);
+}
+
+GLvoid CGLES3Context::ApiPauseTransformFeedback(void)
+{
+    CTX_ANALYZER_FUNC0(PauseTransformFeedback, GLOutput, GL_OUT_BUF_SIZE);
+}
+
+GLvoid CGLES3Context::ApiResumeTransformFeedback(void)
+{
+    CTX_ANALYZER_FUNC0(ResumeTransformFeedback, GLOutput, GL_OUT_BUF_SIZE);
+}
+
+GLvoid CGLES3Context::ApiIsTransformFeedback(GLuint id, GLboolean ret)
+{
+    CTX_ANALYZER_FUNC2(IsTransformFeedback, GLOutput, GL_OUT_BUF_SIZE, id, ret);
 }

@@ -7,6 +7,8 @@
 #include "gles3.h"
 #include "GLESShare.h"
 #include "ApiGLES3Context.h"
+#include "ApiEGLContext.h"
+#include "Analyzer.h"
 
 
 extern char             tmp[TMP_BUF_SIZE];
@@ -54,7 +56,7 @@ GLvoid SaveCompressedTextureToFile(GLenum target,
     GLenum          decFormat       = 0;
     GLint           newFormat       = 0;
 
-    pTexObj     = CURRENT_CONTEXT1().GetTexObjByUnit(CURRENT_CONTEXT1().activeTexUnit, target);
+    pTexObj     = CURRENT_CONTEXT1()->GetTexObjByUnit(CURRENT_CONTEXT1()->activeTexUnit, target);
     texIndex    = pTexObj->texIndex;
     pTexImg     = pTexObj->GetTexImageByLevel(target, level);
     planeSize   = pTexImg->imageSize/pTexImg->depth;
@@ -210,7 +212,7 @@ GLvoid SaveTextureToFile(GLenum target,
     GLubyte         *pSrc           = NULL;
     GLint           newFormat       = 0;
 
-    pTexObj     = CURRENT_CONTEXT1().GetTexObjByUnit(CURRENT_CONTEXT1().activeTexUnit, target);
+    pTexObj     = CURRENT_CONTEXT1()->GetTexObjByUnit(CURRENT_CONTEXT1()->activeTexUnit, target);
     texIndex    = pTexObj->texIndex;
     pTexImg     = pTexObj->GetTexImageByLevel(target, level);
     planeSize   = pTexImg->imageSize/pTexImg->depth;
@@ -462,7 +464,7 @@ void OutputData(int *pos, GLenum type, char *output, int outputSize, char *input
     OutputStringFast(dumpData1, pos, output, outputSize, "%s", buf);
 }
 
-void OutputViewPort(int *pos, int esVersion, char *output, int outputSize)
+void CAnalyzer::OutputViewPort(int *pos, char *output, int outputSize)
 {
     GLint     viewportX;
     GLint     viewportY;
@@ -470,27 +472,27 @@ void OutputViewPort(int *pos, int esVersion, char *output, int outputSize)
     GLuint    viewportHeight;
 
     {
-        viewportX       = CURRENT_CONTEXT1().viewportX;
-        viewportY       = CURRENT_CONTEXT1().viewportY;
-        viewportWidth   = CURRENT_CONTEXT1().viewportWidth;
-        viewportHeight  = CURRENT_CONTEXT1().viewportHeight;
+        viewportX       = CURRENT_CONTEXT1()->viewportX;
+        viewportY       = CURRENT_CONTEXT1()->viewportY;
+        viewportWidth   = CURRENT_CONTEXT1()->viewportWidth;
+        viewportHeight  = CURRENT_CONTEXT1()->viewportHeight;
     }
 
     OutputStringFast(drawStates11, pos, output, outputSize, "****Viewport: (%04d, %04d, %04d, %04d)\n",
         viewportX, viewportY, viewportWidth, viewportHeight);
 }
 
-void OutputSampleCoverage(int *pos, int esVersion, char *output, int outputSize)
+void CAnalyzer::OutputSampleCoverage(int *pos, char *output, int outputSize)
 {
     GLboolean           sampleAlphaToCoverage;
     GLboolean           sampleCoverage;
     GLfloat             sampleCoverageValue;
     GLboolean           sampleCoverageInvert;
 
-    sampleAlphaToCoverage   = CURRENT_CONTEXT1().sampleAlphaToCoverage;
-    sampleCoverage          = CURRENT_CONTEXT1().sampleCoverage;
-    sampleCoverageValue     = CURRENT_CONTEXT1().sampleCoverageValue;
-    sampleCoverageInvert    = CURRENT_CONTEXT1().sampleCoverageInvert;
+    sampleAlphaToCoverage   = CURRENT_CONTEXT1()->sampleAlphaToCoverage;
+    sampleCoverage          = CURRENT_CONTEXT1()->sampleCoverage;
+    sampleCoverageValue     = CURRENT_CONTEXT1()->sampleCoverageValue;
+    sampleCoverageInvert    = CURRENT_CONTEXT1()->sampleCoverageInvert;
 
     if (sampleAlphaToCoverage)
     {
@@ -512,16 +514,16 @@ void OutputSampleCoverage(int *pos, int esVersion, char *output, int outputSize)
     }
 }
 
-void OutputPolygonOffset(int *pos, int esVersion, char *output, int outputSize)
+void CAnalyzer::OutputPolygonOffset(int *pos, char *output, int outputSize)
 {
     GLboolean           offsetEnable;
     GLfloat             offsetFactor;
     GLfloat             offsetUnits;
 
     {
-        offsetEnable    = CURRENT_CONTEXT1().offsetEnable;
-        offsetFactor    = CURRENT_CONTEXT1().offsetFactor;
-        offsetUnits     = CURRENT_CONTEXT1().offsetUnits;
+        offsetEnable    = CURRENT_CONTEXT1()->offsetEnable;
+        offsetFactor    = CURRENT_CONTEXT1()->offsetFactor;
+        offsetUnits     = CURRENT_CONTEXT1()->offsetUnits;
     }
 
     if (offsetEnable)
@@ -539,7 +541,7 @@ void OutputPolygonOffset(int *pos, int esVersion, char *output, int outputSize)
     }
 }
 
-void OutputScissor(int *pos, int esVersion, char *output, int outputSize)
+void CAnalyzer::OutputScissor(int *pos, char *output, int outputSize)
 {
     GLboolean           scissorEnable;
     GLint               scissorX;
@@ -548,11 +550,11 @@ void OutputScissor(int *pos, int esVersion, char *output, int outputSize)
     GLuint              scissorHeight;
 
     {
-        scissorEnable   = CURRENT_CONTEXT1().scissorEnable;
-        scissorX        = CURRENT_CONTEXT1().scissorX;
-        scissorY        = CURRENT_CONTEXT1().scissorY;
-        scissorWidth    = CURRENT_CONTEXT1().scissorWidth;
-        scissorHeight   = CURRENT_CONTEXT1().scissorHeight;
+        scissorEnable   = CURRENT_CONTEXT1()->scissorEnable;
+        scissorX        = CURRENT_CONTEXT1()->scissorX;
+        scissorY        = CURRENT_CONTEXT1()->scissorY;
+        scissorWidth    = CURRENT_CONTEXT1()->scissorWidth;
+        scissorHeight   = CURRENT_CONTEXT1()->scissorHeight;
     }
 
     if (scissorEnable)
@@ -571,38 +573,38 @@ void OutputScissor(int *pos, int esVersion, char *output, int outputSize)
     }
 }
 
-void OutputStencil(int *pos, int esVersion, char *output, int outputSize)
+void CAnalyzer::OutputStencil(int *pos, char *output, int outputSize)
 {
-    GLboolean           stencilEnable;
-    GLuint              stencilRefFront;
-    GLuint              stencilRefBack;
-    GLenum              stencilFuncFront;
-    GLenum              stencilFuncBack;
-    GLuint              stencilMaskFront;
-    GLuint              stencilMaskBack;
-    GLenum              stencilOpFailFront;
-    GLenum              stencilOpFailBack;
-    GLenum              stencilOpDepthFailFront;
-    GLenum              stencilOpDepthFailBack;
-    GLenum              stencilOpDepthPassFront;
-    GLenum              stencilOpDepthPassBack;
-    GLuint              stencilWriteMask;
+    GLboolean   stencilEnable;
+    GLuint      stencilRefFront;
+    GLuint      stencilRefBack;
+    GLenum      stencilFuncFront;
+    GLenum      stencilFuncBack;
+    GLuint      stencilMaskFront;
+    GLuint      stencilMaskBack;
+    GLenum      stencilOpFailFront;
+    GLenum      stencilOpFailBack;
+    GLenum      stencilOpDepthFailFront;
+    GLenum      stencilOpDepthFailBack;
+    GLenum      stencilOpDepthPassFront;
+    GLenum      stencilOpDepthPassBack;
+    GLuint      stencilWriteMask;
 
     {
-        stencilEnable               = CURRENT_CONTEXT1().stencilEnable;
-        stencilRefFront             = CURRENT_CONTEXT1().stencilRefFront;
-        stencilRefBack              = CURRENT_CONTEXT1().stencilRefBack;
-        stencilFuncFront            = CURRENT_CONTEXT1().stencilFuncFront;
-        stencilFuncBack             = CURRENT_CONTEXT1().stencilFuncBack;
-        stencilMaskFront            = CURRENT_CONTEXT1().stencilMaskFront;
-        stencilMaskBack             = CURRENT_CONTEXT1().stencilMaskBack;
-        stencilOpFailFront          = CURRENT_CONTEXT1().stencilOpFailFront;
-        stencilOpFailBack           = CURRENT_CONTEXT1().stencilOpFailBack;
-        stencilOpDepthFailFront     = CURRENT_CONTEXT1().stencilOpDepthFailFront;
-        stencilOpDepthFailBack      = CURRENT_CONTEXT1().stencilOpDepthFailBack;
-        stencilOpDepthPassFront     = CURRENT_CONTEXT1().stencilOpDepthPassFront;
-        stencilOpDepthPassBack      = CURRENT_CONTEXT1().stencilOpDepthPassBack;
-        stencilWriteMask            = CURRENT_CONTEXT1().stencilWriteMask;
+        stencilEnable               = CURRENT_CONTEXT1()->stencilEnable;
+        stencilRefFront             = CURRENT_CONTEXT1()->stencilRefFront;
+        stencilRefBack              = CURRENT_CONTEXT1()->stencilRefBack;
+        stencilFuncFront            = CURRENT_CONTEXT1()->stencilFuncFront;
+        stencilFuncBack             = CURRENT_CONTEXT1()->stencilFuncBack;
+        stencilMaskFront            = CURRENT_CONTEXT1()->stencilMaskFront;
+        stencilMaskBack             = CURRENT_CONTEXT1()->stencilMaskBack;
+        stencilOpFailFront          = CURRENT_CONTEXT1()->stencilOpFailFront;
+        stencilOpFailBack           = CURRENT_CONTEXT1()->stencilOpFailBack;
+        stencilOpDepthFailFront     = CURRENT_CONTEXT1()->stencilOpDepthFailFront;
+        stencilOpDepthFailBack      = CURRENT_CONTEXT1()->stencilOpDepthFailBack;
+        stencilOpDepthPassFront     = CURRENT_CONTEXT1()->stencilOpDepthPassFront;
+        stencilOpDepthPassBack      = CURRENT_CONTEXT1()->stencilOpDepthPassBack;
+        stencilWriteMask            = CURRENT_CONTEXT1()->stencilWriteMask;
     }
 
     if (stencilEnable)
@@ -634,7 +636,7 @@ void OutputStencil(int *pos, int esVersion, char *output, int outputSize)
     }
 }
 
-void OutputBlend(int *pos, int esVersion, char *output, int outputSize)
+void CAnalyzer::OutputBlend(int *pos, char *output, int outputSize)
 {
     GLboolean   blendEnable;
     GLenum      blendFuncSourceRGB, blendFuncSourceAlpha;
@@ -644,17 +646,17 @@ void OutputBlend(int *pos, int esVersion, char *output, int outputSize)
     GLclampf    blendColorAlpha;
 
     {
-        blendEnable             = CURRENT_CONTEXT1().blendEnable;
-        blendFuncSourceRGB      = CURRENT_CONTEXT1().blendFuncSourceRGB;
-        blendFuncSourceAlpha    = CURRENT_CONTEXT1().blendFuncSourceAlpha;
-        blendFuncTargetRGB      = CURRENT_CONTEXT1().blendFuncTargetRGB;
-        blendFuncTargetAlpha    = CURRENT_CONTEXT1().blendFuncTargetAlpha;
-        blendModeRGB            = CURRENT_CONTEXT1().blendModeRGB;
-        blendModeAlpha          = CURRENT_CONTEXT1().blendModeAlpha;
-        blendColorRed           = CURRENT_CONTEXT1().blendColorRed;
-        blendColorGreen         = CURRENT_CONTEXT1().blendColorGreen;
-        blendColorBlue          = CURRENT_CONTEXT1().blendColorBlue;
-        blendColorAlpha         = CURRENT_CONTEXT1().blendColorAlpha;
+        blendEnable             = CURRENT_CONTEXT1()->blendEnable;
+        blendFuncSourceRGB      = CURRENT_CONTEXT1()->blendFuncSourceRGB;
+        blendFuncSourceAlpha    = CURRENT_CONTEXT1()->blendFuncSourceAlpha;
+        blendFuncTargetRGB      = CURRENT_CONTEXT1()->blendFuncTargetRGB;
+        blendFuncTargetAlpha    = CURRENT_CONTEXT1()->blendFuncTargetAlpha;
+        blendModeRGB            = CURRENT_CONTEXT1()->blendModeRGB;
+        blendModeAlpha          = CURRENT_CONTEXT1()->blendModeAlpha;
+        blendColorRed           = CURRENT_CONTEXT1()->blendColorRed;
+        blendColorGreen         = CURRENT_CONTEXT1()->blendColorGreen;
+        blendColorBlue          = CURRENT_CONTEXT1()->blendColorBlue;
+        blendColorAlpha         = CURRENT_CONTEXT1()->blendColorAlpha;
     }
 
     if (blendEnable)
@@ -690,7 +692,7 @@ void OutputBlend(int *pos, int esVersion, char *output, int outputSize)
     }
 }
 
-void OutputCullFace(int *pos, int esVersion, char *output, int outputSize)
+void CAnalyzer::OutputCullFace(int *pos, char *output, int outputSize)
 {
     const char  *ptr = NULL;
     GLboolean   cullEnable;
@@ -698,9 +700,9 @@ void OutputCullFace(int *pos, int esVersion, char *output, int outputSize)
     GLenum      cullFront;
 
     {
-        cullEnable  = CURRENT_CONTEXT1().cullEnable;
-        cullMode    = CURRENT_CONTEXT1().cullMode;
-        cullFront   = CURRENT_CONTEXT1().cullFront;
+        cullEnable  = CURRENT_CONTEXT1()->cullEnable;
+        cullMode    = CURRENT_CONTEXT1()->cullMode;
+        cullFront   = CURRENT_CONTEXT1()->cullFront;
     }
 
     if (cullEnable)
@@ -753,7 +755,7 @@ void OutputCullFace(int *pos, int esVersion, char *output, int outputSize)
     }
 }
 
-void OutputDepth(int *pos, int esVersion, char *output, int outputSize)
+void CAnalyzer::OutputDepth(int *pos, char *output, int outputSize)
 {
     GLboolean   depthTest;
     GLenum      depthFunc;
@@ -762,11 +764,11 @@ void OutputDepth(int *pos, int esVersion, char *output, int outputSize)
     GLclampf    depthFar;
 
     {
-        depthTest   = CURRENT_CONTEXT1().depthTest;
-        depthFunc   = CURRENT_CONTEXT1().depthFunc;
-        depthMask   = CURRENT_CONTEXT1().depthMask;
-        depthNear   = CURRENT_CONTEXT1().depthNear;
-        depthFar    = CURRENT_CONTEXT1().depthFar;
+        depthTest   = CURRENT_CONTEXT1()->depthTest;
+        depthFunc   = CURRENT_CONTEXT1()->depthFunc;
+        depthMask   = CURRENT_CONTEXT1()->depthMask;
+        depthNear   = CURRENT_CONTEXT1()->depthNear;
+        depthFar    = CURRENT_CONTEXT1()->depthFar;
     }
 
     if (depthTest)
@@ -786,12 +788,12 @@ void OutputDepth(int *pos, int esVersion, char *output, int outputSize)
     }
 }
 
-void OutputDither(int *pos, int esVersion, char *output, int outputSize)
+void CAnalyzer::OutputDither(int *pos, char *output, int outputSize)
 {
     GLboolean   dither;
 
     {
-        dither = CURRENT_CONTEXT1().ditherEnable;
+        dither = CURRENT_CONTEXT1()->ditherEnable;
     }
 
     if (dither)
@@ -843,19 +845,19 @@ void GetPrimitiveCount(GLenum Mode, GLsizei Count, GLuint *PrimitiveCount)
     return;
 }
 
-void OutputStates(int *pos, int esVersion, char *output, int outputSize)
+void CAnalyzer::OutputStates(int *pos, char *output, int outputSize)
 {
     OutputCurrentFBO(pos, output, outputSize);
     OutputStringFast(drawStates1, pos, output, outputSize, "\n*********************states*********************\n");
-    OutputBlend(pos, esVersion, output, outputSize);
-    OutputCullFace(pos, esVersion, output, outputSize);
-    OutputDepth(pos, esVersion, output, outputSize);
-    OutputDither(pos, esVersion, output, outputSize);
-    OutputScissor(pos, esVersion, output, outputSize);
-    OutputStencil(pos, esVersion, output, outputSize);
-    OutputPolygonOffset(pos, esVersion, output, outputSize);
-    OutputSampleCoverage(pos, esVersion, output, outputSize);
-    OutputViewPort(pos, esVersion, output, outputSize);
+    OutputBlend(pos, output, outputSize);
+    OutputCullFace(pos, output, outputSize);
+    OutputDepth(pos, output, outputSize);
+    OutputDither(pos, output, outputSize);
+    OutputScissor(pos, output, outputSize);
+    OutputStencil(pos, output, outputSize);
+    OutputPolygonOffset(pos, output, outputSize);
+    OutputSampleCoverage(pos, output, outputSize);
+    OutputViewPort(pos, output, outputSize);
     OutputStringFast(drawStates2, pos, output, outputSize, "*********************end************************\n");
 }
 
@@ -985,25 +987,18 @@ void PrintParams0(GLchar *output, GLuint outputSize, const GLchar *funcName)
 }
 
 void PrintParams1(GLchar *output, GLuint outputSize, const GLchar *funcName,
-                  GLuint param, const GLchar *paramName, PARAM_FORMAT format,
-                  GLboolean bShader)
+                  GLuint param, const GLchar *paramName, PARAM_FORMAT format)
 {
     int pos = 0;
 
     sprintf(output, "%s(", funcName); pos += (strlen(funcName)+1);
     PrintParamByFormat(&pos, output, outputSize, param, paramName, format);
     OutputStrcatFast(pos-2, output, outputSize, ")\n");
-
-    if (bShader)
-    {
-        OutputToShaderFile(output);
-    }
 }
 
 void PrintParams2(GLchar *output, GLuint outputSize, const GLchar *funcName,
                   GLuint param1, const GLchar *paramName1, PARAM_FORMAT format1,
-                  GLuint param2, const GLchar *paramName2, PARAM_FORMAT format2,
-                  GLboolean bShader)
+                  GLuint param2, const GLchar *paramName2, PARAM_FORMAT format2)
 {
     int pos = 0;
 
@@ -1011,11 +1006,6 @@ void PrintParams2(GLchar *output, GLuint outputSize, const GLchar *funcName,
     PrintParamByFormat(&pos, output, outputSize, param1, paramName1, format1);
     PrintParamByFormat(&pos, output, outputSize, param2, paramName2, format2);
     OutputStrcatFast(pos-2, output, outputSize, ")\n");
-
-    if (bShader)
-    {
-        OutputToShaderFile(output);
-    }
 }
 
 void PrintParams3(GLchar *output, GLuint outputSize, const GLchar *funcName,

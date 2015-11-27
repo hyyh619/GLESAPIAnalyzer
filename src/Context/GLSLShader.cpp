@@ -2,6 +2,7 @@
 #include "GLESShare.h"
 #include "GLSLShader.h"
 #include "ApiGLES3Context.h"
+#include "ApiEGLContext.h"
 #include "gles3.h"
 
 int CharNumInString(GLchar *str, GLuint srcLen, GLchar c)
@@ -351,9 +352,9 @@ GLvoid CGLES3Context::ClearProgram(CProgramObj *pProgram)
 
     if (pProgram->m_name)
     {
-        glDeleteProgram(pProgram->m_name);
-        glDeleteShader(pProgram->m_pVertex->m_name);
-        glDeleteShader(pProgram->m_pFragment->m_name);
+        g_opengl->glDeleteProgram(pProgram->m_name);
+        g_opengl->glDeleteShader(pProgram->m_pVertex->m_name);
+        g_opengl->glDeleteShader(pProgram->m_pFragment->m_name);
 
         pProgram->m_name                = 0;
         pProgram->m_pVertex->m_name     = 0;
@@ -591,8 +592,8 @@ GLvoid CProgramObj::AnalyzeUniform()
     GLint       activeUniforms  = 0;
     GLint       maxUniformLen   = 0;
 
-    glGetProgramiv(progName, GL_ACTIVE_UNIFORMS, &activeUniforms);
-    glGetProgramiv(progName, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformLen);
+    g_opengl->glGetProgramiv(progName, GL_ACTIVE_UNIFORMS, &activeUniforms);
+    g_opengl->glGetProgramiv(progName, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformLen);
 
     for (GLint i=0; i<activeUniforms; i++)
     {
@@ -603,8 +604,8 @@ GLvoid CProgramObj::AnalyzeUniform()
 
         pUniformName = (GLchar*)malloc(maxUniformLen);
         memset(pUniformName, 0, maxUniformLen);
-        glGetActiveUniform(progName, i, maxUniformLen, &len, &size, &type, pUniformName);
-        loc = glGetUniformLocation(progName, pUniformName);
+        g_opengl->glGetActiveUniform(progName, i, maxUniformLen, &len, &size, &type, pUniformName);
+        loc = g_opengl->glGetUniformLocation(progName, pUniformName);
 
         pUniform = new CUniformObj;
         pUniform->type      = type;
@@ -630,8 +631,8 @@ GLvoid CProgramObj::AnalyzeAttribute()
         return;
     }
 
-    glGetProgramiv(progName, GL_ACTIVE_ATTRIBUTES, &activeAttributes);
-    glGetProgramiv(progName, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeLen);
+    g_opengl->glGetProgramiv(progName, GL_ACTIVE_ATTRIBUTES, &activeAttributes);
+    g_opengl->glGetProgramiv(progName, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeLen);
 
     for (GLint i=0; i<activeAttributes; i++)
     {
@@ -645,13 +646,13 @@ GLvoid CProgramObj::AnalyzeAttribute()
 
         name = (GLchar*)malloc(maxAttributeLen);
         memset(name, 0, maxAttributeLen);
-        glGetActiveAttrib(progName, i, maxAttributeLen, &len, &size, &type, name);
-        loc = glGetAttribLocation(progName, name);
+        g_opengl->glGetActiveAttrib(progName, i, maxAttributeLen, &len, &size, &type, name);
+        loc = g_opengl->glGetAttribLocation(progName, name);
 
-        glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_TYPE, &vertexType);
-        glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_STRIDE, &stride);
-        glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, &norm);
-        glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_SIZE, &size);
+        g_opengl->glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_TYPE, &vertexType);
+        g_opengl->glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_STRIDE, &stride);
+        g_opengl->glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, &norm);
+        g_opengl->glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_SIZE, &size);
 
         pAttr = FindAttributeByName(name);
         if (pAttr == NULL)
@@ -696,24 +697,24 @@ GLboolean CGLES3Context::LinkProgram(CProgramObj *pProgram)
     for (GLuint i=0; i<size; i++)
     {
         CAttribObj *pAttr = pProgram->m_attributes[i];
-        glBindAttribLocation(pProgram->m_name, pAttr->nLoc, pAttr->name);
+        g_opengl->glBindAttribLocation(pProgram->m_name, pAttr->nLoc, pAttr->name);
     }
 
-    glAttachShader(pProgram->m_name, pProgram->m_pVertex->m_name);
-    glAttachShader(pProgram->m_name, pProgram->m_pFragment->m_name);
-    glLinkProgram(pProgram->m_name);
-    glGetProgramiv(pProgram->m_name, GL_LINK_STATUS, &status);
+    g_opengl->glAttachShader(pProgram->m_name, pProgram->m_pVertex->m_name);
+    g_opengl->glAttachShader(pProgram->m_name, pProgram->m_pFragment->m_name);
+    g_opengl->glLinkProgram(pProgram->m_name);
+    g_opengl->glGetProgramiv(pProgram->m_name, GL_LINK_STATUS, &status);
     if (status == 0)
     {
         memset(infoLog, 0, 256);
-        glGetProgramInfoLog(pProgram->m_name, 256, &len, infoLog);
+        g_opengl->glGetProgramInfoLog(pProgram->m_name, 256, &len, infoLog);
         printf("Link failure on program(%d)", pProgram->m_name);
         printf("Info: %s", infoLog);
         pProgram->m_bLinked = GL_FALSE;
 
-        glDeleteProgram(pProgram->m_name);
-        glDeleteShader(pProgram->m_pVertex->m_name);
-        glDeleteShader(pProgram->m_pFragment->m_name);
+        g_opengl->glDeleteProgram(pProgram->m_name);
+        g_opengl->glDeleteShader(pProgram->m_pVertex->m_name);
+        g_opengl->glDeleteShader(pProgram->m_pFragment->m_name);
         return GL_FALSE;
     }
 
@@ -865,8 +866,8 @@ CAttribObj* CProgramObj::FindAttribObjByIndex(GLuint index)
 
 GLvoid PrintShader(int *pos, GLuint progID, GLuint vertex, GLuint fragment, GLchar *output, int outputSize)
 {
-    CShaderObj  *vertShader = CURRENT_CONTEXT1().FindShader(vertex);
-    CShaderObj  *fragShader = CURRENT_CONTEXT1().FindShader(fragment);
+    CShaderObj  *vertShader = CURRENT_CONTEXT1()->FindShader(vertex);
+    CShaderObj  *fragShader = CURRENT_CONTEXT1()->FindShader(fragment);
     GLuint      vertexCnt   = vertShader?1:0;
     GLuint      fragmentCnt = fragShader?1:0;
 
@@ -916,6 +917,8 @@ GLvoid CGLES3Context::ApiBindAttribLocation(GLuint program, GLint loc, const GLc
         pAttr->nLoc     = loc;
         pAttr->nOldLoc  = loc;
     }
+
+    CTX_ANALYZER_FUNC3(BindAttribLocation, GLOutput, GL_OUT_BUF_SIZE, program, loc, name);
 }
 
 CProgramObj* CGLES3Context::FindProgram(GLuint program)
@@ -960,21 +963,25 @@ GLvoid CGLES3Context::ApiAttachShader(GLuint program, GLuint shader)
     {
         pProgram->m_pVertex = pShader;
     }
+
+    CTX_ANALYZER_FUNC2(AttachShader, GLOutput, GL_OUT_BUF_SIZE, program, shader);
 }
 
 GLint CGLES3Context::ApiGetUniformLocation(GLuint program, const GLchar *name, GLint oldLoc)
 {
-    CProgramObj *prog       = CURRENT_CONTEXT1().FindProgram(program);
+    CProgramObj *prog       = CURRENT_CONTEXT1()->FindProgram(program);
     CUniformObj *uniform    = prog->GetUniformByName(name);
 
     if (uniform == NULL)
     {
-        return -1;
+        goto _End;
     }
 
     uniform->nOldLoc = oldLoc;
-    uniform->nLoc    = glGetUniformLocation(prog->m_name, name);
+    uniform->nLoc    = g_opengl->glGetUniformLocation(prog->m_name, name);
 
+_End:
+    CTX_ANALYZER_FUNC3(GetUniformLocation, GLOutput, GL_OUT_BUF_SIZE, program, name, oldLoc);
     return oldLoc;
 }
 
@@ -982,12 +989,14 @@ GLvoid CGLES3Context::ApiLinkProgram(GLuint program)
 {
     CProgramObj *p = FindProgram(program);
     LinkProgram(p);
+    CTX_ANALYZER_FUNC1(LinkProgram, GLOutput, GL_OUT_BUF_SIZE, program);
 }
 
 GLvoid CGLES3Context::ApiCompileShader(GLuint shader)
 {
     CShaderObj *p = FindShader(shader);
     CompileShader(p);
+    CTX_ANALYZER_FUNC1(CompileShader, GLOutput, GL_OUT_BUF_SIZE, shader);
 }
 
 GLuint CGLES3Context::CompileShader(CShaderObj *pShader)
@@ -999,13 +1008,13 @@ GLuint CGLES3Context::CompileShader(CShaderObj *pShader)
 
     // GL_VERTEX_SHADER: 0x8B31
     // GL_FRAGMENT_SHADER: 0x8B30
-    glShaderSource(name, 1, (const GLchar**)&pShader->m_source, NULL);
-    glCompileShader(name);
-    glGetShaderiv(name, GL_COMPILE_STATUS, &status);
+    g_opengl->glShaderSource(name, 1, (const GLchar**)&pShader->m_source, NULL);
+    g_opengl->glCompileShader(name);
+    g_opengl->glGetShaderiv(name, GL_COMPILE_STATUS, &status);
     if (status == 0)
     {
         memset(infoLog, 0, 256);
-        glGetShaderInfoLog(name, 256, &len, infoLog);
+        g_opengl->glGetShaderInfoLog(name, 256, &len, infoLog);
         printf("Compile failure on shader(%d)\n", name);
         printf("Info: %s\n", infoLog);
         pShader->m_bCompiled = GL_FALSE;
@@ -1019,12 +1028,14 @@ GLuint CGLES3Context::CompileShader(CShaderObj *pShader)
 GLuint CGLES3Context::ApiCreateShader(GLenum type, GLuint shader)
 {
     CreateShaderObject(type, shader);
+    CTX_ANALYZER_FUNC2(CreateShader, GLOutput, GL_OUT_BUF_SIZE, type, shader);
     return shader;
 }
 
 GLuint CGLES3Context::ApiCreateProgram(GLuint program)
 {
     CreateProgramObject(program);
+    CTX_ANALYZER_FUNC1(CreateProgram, GLOutput, GL_OUT_BUF_SIZE, program);
     return program;
 }
 
@@ -1044,16 +1055,20 @@ GLvoid CGLES3Context::ApiDetachShader(GLuint program, GLuint shader)
     {
         pProg->m_pFragment = NULL;
     }
+
+    CTX_ANALYZER_FUNC2(DetachShader, GLOutput, GL_OUT_BUF_SIZE, program, shader);
 }
 
 GLvoid CGLES3Context::ApiDeleteShader(GLuint shader)
 {
     DeleteShaderObject(shader);
+    CTX_ANALYZER_FUNC1(DeleteShader, GLOutput, GL_OUT_BUF_SIZE, shader);
 }
 
 GLvoid CGLES3Context::ApiDeleteProgram(GLuint program)
 {
     DeleteProgramObject(program);
+    CTX_ANALYZER_FUNC1(DeleteProgram, GLOutput, GL_OUT_BUF_SIZE, program);
 }
 
 GLvoid CGLES3Context::ApiGetAttribLocation(GLuint program, const GLchar *name, GLint oldLoc)
@@ -1063,9 +1078,11 @@ GLvoid CGLES3Context::ApiGetAttribLocation(GLuint program, const GLchar *name, G
 
     if (pAttr)
     {
-        pAttr->nLoc = glGetAttribLocation(pProg->m_name, name);
+        pAttr->nLoc = g_opengl->glGetAttribLocation(pProg->m_name, name);
         pAttr->nOldLoc = oldLoc;
     }
+
+    CTX_ANALYZER_FUNC3(GetAttribLocation, GLOutput, GL_OUT_BUF_SIZE, program, name, oldLoc);
 }
 
 GLvoid CGLES3Context::ApiProgramBinary(GLuint program, GLenum binaryFormat, const void *binary, GLsizei length)
@@ -1076,13 +1093,15 @@ GLvoid CGLES3Context::ApiProgramBinary(GLuint program, GLenum binaryFormat, cons
     {
         LinkProgram(p);
     }
+
+    CTX_ANALYZER_FUNC4(ProgramBinary, GLOutput, GL_OUT_BUF_SIZE, program, binaryFormat, binary, length);
 }
 
 GLvoid CGLES3Context::ApiShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
 {
     GLsizei     i       = 0;
     GLsizei     n       = 0;
-    CShaderObj  *p      = CURRENT_CONTEXT1().shaderMap[shader];
+    CShaderObj  *p      = CURRENT_CONTEXT1()->shaderMap[shader];
     GLchar      *tmp    = NULL;
     GLuint      total   = 1;
 
@@ -1136,6 +1155,8 @@ GLvoid CGLES3Context::ApiShaderSource(GLuint shader, GLsizei count, const GLchar
     tmp = p->m_source;
     IndentShaderCode(tmp, n, &p->m_source);
     free(tmp);
+
+    CTX_ANALYZER_FUNC4(ShaderSource, Uniform, UNIFORM_BUF_SIZE, shader, count, string, length);
 }
 
 CUniformObj* CProgramObj::GetUniformByName(const GLchar *name)
@@ -1254,24 +1275,28 @@ GLvoid CGLES3Context::ApiUniform1f(GLint location, GLfloat v0)
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniform1234if(location, DATA_TYPE_FLOAT_X1, &v0);
+    CTX_ANALYZER_FUNC2(Uniform1f, GLOutput, GL_OUT_BUF_SIZE, location, v0);
 }
 
 GLvoid CGLES3Context::ApiUniform1fv(GLint location, GLsizei count, const GLfloat *value)
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniform1234ifv(location, DATA_TYPE_FLOAT_X1, count, value);
+    CTX_ANALYZER_FUNC3(Uniform1fv, Uniform, UNIFORM_BUF_SIZE, location, count, value);
 }
 
 GLvoid CGLES3Context::ApiUniform1i(GLint location, GLint v0)
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniform1234if(location, DATA_TYPE_INTEGER_X1, &v0);
+    CTX_ANALYZER_FUNC2(Uniform1i, GLOutput, GL_OUT_BUF_SIZE, location, v0);
 }
 
 GLvoid CGLES3Context::ApiUniform1iv(GLint location, GLsizei count, const GLint *value)
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniform1234ifv(location, DATA_TYPE_INTEGER_X1, count, value);
+    CTX_ANALYZER_FUNC3(Uniform1iv, Uniform, UNIFORM_BUF_SIZE, location, count, value);
 }
 
 GLvoid CGLES3Context::ApiUniform2f(GLint location, GLfloat v0, GLfloat v1)
@@ -1279,12 +1304,14 @@ GLvoid CGLES3Context::ApiUniform2f(GLint location, GLfloat v0, GLfloat v1)
     CProgramObj *p      = FindProgram(curProgram);
     GLfloat     v[2]    = {v0, v1};
     p->SetUniform1234if(location, DATA_TYPE_FLOAT_X2, v);
+    CTX_ANALYZER_FUNC3(Uniform2f, GLOutput, GL_OUT_BUF_SIZE, location, v0, v1);
 }
 
 GLvoid CGLES3Context::ApiUniform2fv(GLint location, GLsizei count, const GLfloat *value)
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniform1234ifv(location, DATA_TYPE_FLOAT_X2, count, value);
+    CTX_ANALYZER_FUNC3(Uniform2fv, Uniform, UNIFORM_BUF_SIZE, location, count, value);
 }
 
 GLvoid CGLES3Context::ApiUniform2i(GLint location, GLint v0, GLint v1)
@@ -1293,12 +1320,14 @@ GLvoid CGLES3Context::ApiUniform2i(GLint location, GLint v0, GLint v1)
     GLint       v[2]    = {v0, v1};
 
     p->SetUniform1234if(location, DATA_TYPE_INTEGER_X2, v);
+    CTX_ANALYZER_FUNC3(Uniform2i, GLOutput, GL_OUT_BUF_SIZE, location, v0, v1);
 }
 
 GLvoid CGLES3Context::ApiUniform2iv(GLint location, GLsizei count, const GLint *value)
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniform1234ifv(location, DATA_TYPE_INTEGER_X2, count, value);
+    CTX_ANALYZER_FUNC3(Uniform2iv, Uniform, UNIFORM_BUF_SIZE, location, count, value);
 }
 
 GLvoid CGLES3Context::ApiUniform3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2)
@@ -1306,12 +1335,14 @@ GLvoid CGLES3Context::ApiUniform3f(GLint location, GLfloat v0, GLfloat v1, GLflo
     CProgramObj *p      = FindProgram(curProgram);
     GLfloat     v[3]    = {v0, v1, v2};
     p->SetUniform1234if(location, DATA_TYPE_FLOAT_X3, v);
+    CTX_ANALYZER_FUNC4(Uniform3f, GLOutput, GL_OUT_BUF_SIZE, location, v0, v1, v2);
 }
 
 GLvoid CGLES3Context::ApiUniform3fv(GLint location, GLsizei count, const GLfloat *value)
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniform1234ifv(location, DATA_TYPE_FLOAT_X3, count, value);
+    CTX_ANALYZER_FUNC3(Uniform3fv, Uniform, UNIFORM_BUF_SIZE, location, count, value);
 }
 
 GLvoid CGLES3Context::ApiUniform3i(GLint location, GLint v0, GLint v1, GLint v2)
@@ -1320,12 +1351,14 @@ GLvoid CGLES3Context::ApiUniform3i(GLint location, GLint v0, GLint v1, GLint v2)
     GLint       v[3]    = {v0, v1, v2};
 
     p->SetUniform1234if(location, DATA_TYPE_INTEGER_X3, v);
+    CTX_ANALYZER_FUNC4(Uniform3i, GLOutput, GL_OUT_BUF_SIZE, location, v0, v1, v2);
 }
 
 GLvoid CGLES3Context::ApiUniform3iv(GLint location, GLsizei count, const GLint *value)
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniform1234ifv(location, DATA_TYPE_INTEGER_X3, count, value);
+    CTX_ANALYZER_FUNC3(Uniform3iv, Uniform, UNIFORM_BUF_SIZE, location, count, value);
 }
 
 GLvoid CGLES3Context::ApiUniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
@@ -1333,12 +1366,14 @@ GLvoid CGLES3Context::ApiUniform4f(GLint location, GLfloat v0, GLfloat v1, GLflo
     CProgramObj *p      = FindProgram(curProgram);
     GLfloat     v[4]    = {v0, v1, v2, v3};
     p->SetUniform1234if(location, DATA_TYPE_FLOAT_X4, v);
+    CTX_ANALYZER_FUNC5(Uniform4f, GLOutput, GL_OUT_BUF_SIZE, location, v0, v1, v2, v3);
 }
 
 GLvoid CGLES3Context::ApiUniform4fv(GLint location, GLsizei count, const GLfloat *value)
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniform1234ifv(location, DATA_TYPE_FLOAT_X4, count, value);
+    CTX_ANALYZER_FUNC3(Uniform4fv, Uniform, UNIFORM_BUF_SIZE, location, count, value);
 }
 
 GLvoid CGLES3Context::ApiUniform4i(GLint location, GLint v0, GLint v1, GLint v2, GLint v3)
@@ -1347,12 +1382,14 @@ GLvoid CGLES3Context::ApiUniform4i(GLint location, GLint v0, GLint v1, GLint v2,
     GLint       v[4]    = {v0, v1, v2, v3};
 
     p->SetUniform1234if(location, DATA_TYPE_INTEGER_X4, v);
+    CTX_ANALYZER_FUNC5(Uniform4i, GLOutput, GL_OUT_BUF_SIZE, location, v0, v1, v2, v3);
 }
 
 GLvoid CGLES3Context::ApiUniform4iv(GLint location, GLsizei count, const GLint *value)
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniform1234ifv(location, DATA_TYPE_INTEGER_X4, count, value);
+    CTX_ANALYZER_FUNC3(Uniform4iv, Uniform, UNIFORM_BUF_SIZE, location, count, value);
 }
 
 GLvoid CProgramObj::SetUniformMatrix234fv(GLuint location, eShaderType type, GLuint count, GLuint transpose, const GLfloat *pData)
@@ -1377,73 +1414,95 @@ GLvoid CGLES3Context::ApiUniformMatrix2fv(GLint location, GLsizei count, GLboole
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniformMatrix234fv(location, DATA_TYPE_FLOAT_2X2, count, transpose, value);
+    CTX_ANALYZER_FUNC4(UniformMatrix2fv, Uniform, UNIFORM_BUF_SIZE, location, count, transpose, value);
 }
 
 GLvoid CGLES3Context::ApiUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value)
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniformMatrix234fv(location, DATA_TYPE_FLOAT_3X3, count, transpose, value);
+    CTX_ANALYZER_FUNC4(UniformMatrix3fv, Uniform, UNIFORM_BUF_SIZE, location, count, transpose, value);
 }
 
 GLvoid CGLES3Context::ApiUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value)
 {
     CProgramObj *p = FindProgram(curProgram);
     p->SetUniformMatrix234fv(location, DATA_TYPE_FLOAT_4X4, count, transpose, value);
+    CTX_ANALYZER_FUNC4(UniformMatrix4fv, Uniform, UNIFORM_BUF_SIZE, location, count, transpose, value);
 }
 
 GLvoid CGLES3Context::ApiUseProgram(GLuint program)
 {
     curProgram = program;
+    CTX_ANALYZER_FUNC1(UseProgram, GLOutput, GL_OUT_BUF_SIZE, program);
 }
 
 GLvoid CGLES3Context::ApiGetActiveAttrib(GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name)
 {
+    CTX_ANALYZER_FUNC7(GetActiveAttrib, GLOutput, GL_OUT_BUF_SIZE, program, index, bufSize, length, size, type, name);
 }
 
 GLvoid CGLES3Context::ApiGetActiveUniform(GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name)
 {
+    CTX_ANALYZER_FUNC7(GetActiveUniform, GLOutput, GL_OUT_BUF_SIZE, program, index, bufSize, length, size, type, name);
 }
 
 GLvoid CGLES3Context::ApiGetAttachedShaders(GLuint program, GLsizei maxCount, GLsizei *count, GLuint *shaders)
 {
+    CTX_ANALYZER_FUNC4(GetAttachedShaders, GLOutput, GL_OUT_BUF_SIZE, program, maxCount, count, shaders);
 }
 
 GLvoid CGLES3Context::ApiGetProgramiv(GLuint program, GLenum pname, GLint *params)
 {
+    CTX_ANALYZER_FUNC3(GetProgramiv, GLOutput, GL_OUT_BUF_SIZE, program, pname, params);
 }
 
 GLvoid CGLES3Context::ApiGetProgramInfoLog(GLuint program, GLsizei bufSize, GLsizei *length, GLchar *infoLog)
 {
+    CTX_ANALYZER_FUNC4(GetProgramInfoLog, GLOutput, GL_OUT_BUF_SIZE, program, bufSize, length, infoLog);
 }
 
 GLvoid CGLES3Context::ApiGetShaderiv(GLuint shader, GLenum pname, GLint *params)
 {
+    CTX_ANALYZER_FUNC3(GetShaderiv, GLOutput, GL_OUT_BUF_SIZE, shader, pname, params);
 }
 
 GLvoid CGLES3Context::ApiGetShaderInfoLog(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *infoLog)
 {
+    CTX_ANALYZER_FUNC4(GetShaderInfoLog, GLOutput, GL_OUT_BUF_SIZE, shader, bufSize, length, infoLog);
 }
 
 GLvoid CGLES3Context::ApiGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, GLint *range, GLint *precision)
 {
+    CTX_ANALYZER_FUNC4(GetShaderPrecisionFormat, GLOutput, GL_OUT_BUF_SIZE, shadertype, precisiontype, range, precision);
 }
 
 GLvoid CGLES3Context::ApiGetShaderSource(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source)
 {
+    CTX_ANALYZER_FUNC4(GetShaderSource, GLOutput, GL_OUT_BUF_SIZE, shader, bufSize, length, source);
 }
 
 GLvoid CGLES3Context::ApiGetUniformfv(GLuint program, GLint location, GLfloat *params)
 {
+    CTX_ANALYZER_FUNC3(GetUniformfv, GLOutput, GL_OUT_BUF_SIZE, program, location, params);
 }
 
 GLvoid CGLES3Context::ApiGetUniformiv(GLuint program, GLint location, GLint *params)
 {
+    CTX_ANALYZER_FUNC3(GetUniformiv, GLOutput, GL_OUT_BUF_SIZE, program, location, params);
 }
 
 GLvoid CGLES3Context::ApiShaderBinary(GLsizei count, const GLuint *shaders, GLenum binaryformat, const void *binary, GLsizei length)
 {
+    CTX_ANALYZER_FUNC5(ShaderBinary, GLOutput, GL_OUT_BUF_SIZE, count, shaders, binaryformat, binary, length);
 }
 
 GLvoid CGLES3Context::ApiValidateProgram(GLuint program)
 {
+    CTX_ANALYZER_FUNC1(ValidateProgram, GLOutput, GL_OUT_BUF_SIZE, program);
+}
+
+GLvoid CGLES3Context::ApiGetProgramBinary(GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, void *binary)
+{
+    CTX_ANALYZER_FUNC5(GetProgramBinary, GLOutput, GL_OUT_BUF_SIZE, program, bufSize, length, binaryFormat, binary);
 }

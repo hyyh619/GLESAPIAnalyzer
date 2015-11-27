@@ -238,12 +238,6 @@
     <ClCompile Include="..\..\src\Context\GLES3DrawStates.cpp">
       <Filter>src\Context</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\api\GLES3\APIDump.c">
-      <Filter>api\GLESAPI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\api\GLES3\ApiOESEngine.c">
-      <Filter>api\GLESAPI</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\api\GLES3\ES30API.cpp">
       <Filter>api\GLESAPI</Filter>
     </ClCompile>
@@ -258,6 +252,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Context\ApiEGLContext.cpp">
       <Filter>src\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\api\GLES3\ApiOESEngine.cpp">
+      <Filter>api\GLESAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OS\windows\DllMain.cpp">
+      <Filter>OS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -429,19 +429,7 @@
     <ClInclude Include="..\..\api\GLES3\EGLAPI.h">
       <Filter>api\GLESAPI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\api\GLES3\EngineOCL.h">
-      <Filter>api\GLESAPI</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\api\GLES3\ES30API.h">
-      <Filter>api\GLESAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\api\GLES3\veEGLresource.h">
-      <Filter>api\GLESAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\api\GLES3\veES30resource.h">
-      <Filter>api\GLESAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\api\GLES3\wglext.h">
       <Filter>api\GLESAPI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\api\GLES3\ApiOESEngine.h">
@@ -456,5 +444,10 @@
     <ClInclude Include="..\..\src\Context\ApiEGLContext.h">
       <Filter>src\Context</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\api\GLES3\GLESAPIAnalyzer.def">
+      <Filter>api\GLESAPI</Filter>
+    </None>
   </ItemGroup>
 </Project>

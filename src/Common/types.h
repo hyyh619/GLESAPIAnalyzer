@@ -673,6 +673,8 @@ typedef enum _GLESAPIIndex
     EGL_API_eglSignalSyncKHR,
     EGL_API_eglGetSyncAttribKHR,
     EGL_API_eglPatchID,
+    EGL_API_eglLockSurfaceKHR,
+    EGL_API_eglUnlockSurfaceKHR,
 
     /* ES1.1 functions */
     GL1_API_glAlphaFunc,

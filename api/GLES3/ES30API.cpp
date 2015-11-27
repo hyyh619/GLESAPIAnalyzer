@@ -1,69 +1,12 @@
 #include "ES30API.h"
 #include "ApiGLES3Context.h"
+#include "ApiEGLContext.h"
 
 #ifndef API_DUMP
 
-const stEngine  *g_opengl   = NULL;
-GLint           threadValue = TLS_OUT_OF_INDEXES;
-
-CGLES3Context*
-_GetThreadDataES3(
-               void
-               )
-{
-    return (CGLES3Context*)TlsGetValue(threadValue);
-}
-
-GLvoid*
-GLES3CreateContext(
-                   const stEngine * Eng
-                   )
-{
-    CGLES3Context   *p = NULL;
-
-    p = new CGLES3Context();
-
-    return p;
-}
-
-GLvoid
-GLES3DestroyContext(
-                    void *context
-                    )
-{
-    CGLES3Context   *p = (CGLES3Context*)context;
-    delete p;
-    return;
-}
-
-GLint
-GLES3SetContext(
-                void *context,
-                const stEngine *Eng
-                )
-{
-    if (g_opengl == NULL)
-    {
-        g_opengl = Eng;
-    }
-
-    if (threadValue == TLS_OUT_OF_INDEXES)
-    {
-        threadValue = TlsAlloc();
-        if (threadValue == TLS_OUT_OF_INDEXES)
-        {
-            return GL_FALSE;
-        }
-    }
-
-    TlsSetValue(threadValue, context);
-
-    return GL_TRUE;
-}
-
 void apiERROR(GLint e)
 {
-    CGLES3Context* thread = _GetThreadDataES3();
+    PEglThreadData thread = _GetThreadData();
 
     if (thread != NULL)
     {
@@ -75,7 +18,7 @@ void apiERROR(GLint e)
 }
 
 /*-------------------------------------------------------------------------
-* Entrypoint definitions
+* Entrcypoint definitions
 *-----------------------------------------------------------------------*/
 
 /* OpenGL ES 2.0 */
@@ -93,7 +36,7 @@ glActiveTexture(
     }
 
     g_opengl->glActiveTexture(texture);
-    CURRENT_GL_CONTEXT()->ApiActiveTexture(texture);
+    CURRENT_CONTEXT1()->ApiActiveTexture(texture);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -103,7 +46,7 @@ glAttachShader(
                )
 {
     g_opengl->glAttachShader(program, shader);
-    CURRENT_GL_CONTEXT()->ApiAttachShader(program, shader);
+    CURRENT_CONTEXT1()->ApiAttachShader(program, shader);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -114,7 +57,7 @@ glBindAttribLocation (
                       )
 {
     g_opengl->glBindAttribLocation(program, index, name);
-    CURRENT_GL_CONTEXT()->ApiBindAttribLocation(program, index, name);
+    CURRENT_CONTEXT1()->ApiBindAttribLocation(program, index, name);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -124,7 +67,7 @@ glBindBuffer(
              )
 {
     g_opengl->glBindBuffer(target, buffer);
-    CURRENT_GL_CONTEXT()->ApiBindBuffer(target, buffer);
+    CURRENT_CONTEXT1()->ApiBindBuffer(target, buffer);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -134,7 +77,7 @@ glBindFramebuffer(
                   )
 {
     g_opengl->glBindFramebuffer(target, framebuffer);
-    CURRENT_GL_CONTEXT()->ApiBindFramebuffer(target, framebuffer);
+    CURRENT_CONTEXT1()->ApiBindFramebuffer(target, framebuffer);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -144,7 +87,7 @@ glBindRenderbuffer(
                    )
 {
     g_opengl->glBindRenderbuffer(target, renderbuffer);
-    CURRENT_GL_CONTEXT()->ApiBindRenderbuffer(target, renderbuffer);
+    CURRENT_CONTEXT1()->ApiBindRenderbuffer(target, renderbuffer);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -154,7 +97,7 @@ glBindTexture(
               )
 {
     g_opengl->glBindTexture(target, texture);
-    CURRENT_GL_CONTEXT()->ApiBindTexture(target, texture);
+    CURRENT_CONTEXT1()->ApiBindTexture(target, texture);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -163,7 +106,7 @@ glBindVertexArrayOES (
                       )
 {
     g_opengl->glBindVertexArray(array);
-    CURRENT_GL_CONTEXT()->ApiBindVertexArray(array);
+    CURRENT_CONTEXT1()->ApiBindVertexArray(array);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -175,7 +118,7 @@ glBlendColor(
              )
 {
     g_opengl->glBlendColor(red, green, blue, alpha);
-    CURRENT_GL_CONTEXT()->ApiBlendColor(red, green, blue, alpha);
+    CURRENT_CONTEXT1()->ApiBlendColor(red, green, blue, alpha);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -184,7 +127,7 @@ glBlendEquation(
                 )
 {
     g_opengl->glBlendEquation(mode);
-    CURRENT_GL_CONTEXT()->ApiBlendEquation(mode);
+    CURRENT_CONTEXT1()->ApiBlendEquation(mode);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -194,7 +137,7 @@ glBlendEquationSeparate(
                         )
 {
     g_opengl->glBlendEquationSeparate(modeRGB, modeAlpha);
-    CURRENT_GL_CONTEXT()->ApiBlendEquationSeparate(modeRGB, modeAlpha);
+    CURRENT_CONTEXT1()->ApiBlendEquationSeparate(modeRGB, modeAlpha);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -204,7 +147,7 @@ glBlendFunc(
             )
 {
     g_opengl->glBlendFunc(sfactor, dfactor);
-    CURRENT_GL_CONTEXT()->ApiBlendFunc(sfactor, dfactor);
+    CURRENT_CONTEXT1()->ApiBlendFunc(sfactor, dfactor);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -221,7 +164,7 @@ glBlendFuncSeparate(
         srcAlpha,
         dstAlpha
         );
-    CURRENT_GL_CONTEXT()->ApiBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+    CURRENT_CONTEXT1()->ApiBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -233,7 +176,7 @@ glBufferData(
              )
 {
     g_opengl->glBufferData(target, size, data, usage);
-    CURRENT_GL_CONTEXT()->ApiBufferData(target, size, data, usage);
+    CURRENT_CONTEXT1()->ApiBufferData(target, size, data, usage);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -245,7 +188,7 @@ glBufferSubData(
                 )
 {
     g_opengl->glBufferSubData(target, offset, size, data);
-    CURRENT_GL_CONTEXT()->ApiBufferSubData(target, offset, size, data);
+    CURRENT_CONTEXT1()->ApiBufferSubData(target, offset, size, data);
 }
 
 GL_APICALL GLenum GL_APIENTRY
@@ -254,7 +197,7 @@ glCheckFramebufferStatus(
                          )
 {
     GLenum en = g_opengl->glCheckFramebufferStatus(target);
-    CURRENT_GL_CONTEXT()->ApiCheckFramebufferStatus(target, en);
+    CURRENT_CONTEXT1()->ApiCheckFramebufferStatus(target, en);
     return en;
 }
 
@@ -264,7 +207,7 @@ glClear(
         )
 {
     g_opengl->glClear(mask);
-    CURRENT_GL_CONTEXT()->ApiClear(mask);
+    CURRENT_CONTEXT1()->ApiClear(mask);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -277,7 +220,7 @@ glClearColor(
 {
 
     g_opengl->glClearColor(red, green, blue, alpha);
-    CURRENT_GL_CONTEXT()->ApiClearColor(red, green, blue, alpha);
+    CURRENT_CONTEXT1()->ApiClearColor(red, green, blue, alpha);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -286,7 +229,7 @@ glClearDepthf(
               )
 {
     g_opengl->glClearDepthf(depth);
-    CURRENT_GL_CONTEXT()->ApiClearDepthf(depth);
+    CURRENT_CONTEXT1()->ApiClearDepthf(depth);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -295,7 +238,7 @@ glClearStencil(
                )
 {
     g_opengl->glClearStencil(s);
-    CURRENT_GL_CONTEXT()->ApiClearStencil(s);
+    CURRENT_CONTEXT1()->ApiClearStencil(s);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -307,7 +250,7 @@ glColorMask(
             )
 {
     g_opengl->glColorMask(red, green, blue, alpha);
-    CURRENT_GL_CONTEXT()->ApiColorMask(red, green, blue, alpha);
+    CURRENT_CONTEXT1()->ApiColorMask(red, green, blue, alpha);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -316,7 +259,7 @@ glCompileShader(
                 )
 {
     g_opengl->glCompileShader(shader);
-    CURRENT_GL_CONTEXT()->ApiCompileShader(shader);
+    CURRENT_CONTEXT1()->ApiCompileShader(shader);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -340,7 +283,7 @@ glCompressedTexImage2D(
         imageSize,
         data
         );
-    CURRENT_GL_CONTEXT()->ApiCompressedTexImage2D(target,
+    CURRENT_CONTEXT1()->ApiCompressedTexImage2D(target,
                                                   level,
                                                   internalformat,
                                                   width,
@@ -364,7 +307,7 @@ glCompressedTexSubImage2D(
                           )
 {
     g_opengl->glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
-    CURRENT_GL_CONTEXT()->ApiCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
+    CURRENT_CONTEXT1()->ApiCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -388,7 +331,7 @@ glCopyTexImage2D(
         border
         );
 
-    CURRENT_GL_CONTEXT()->ApiCopyTexImage2D(target,
+    CURRENT_CONTEXT1()->ApiCopyTexImage2D(target,
                                             level,
                                             internalformat,
                                             x, y,
@@ -416,7 +359,7 @@ glCopyTexSubImage2D(
         width, height
         );
 
-    CURRENT_GL_CONTEXT()->ApiCopyTexSubImage2D(target,
+    CURRENT_CONTEXT1()->ApiCopyTexSubImage2D(target,
                                                level,
                                                xoffset, yoffset,
                                                x, y,
@@ -429,7 +372,7 @@ glCreateProgram(
                 )
 {
     GLuint ret = g_opengl->glCreateProgram();
-    CURRENT_GL_CONTEXT()->ApiCreateProgram(ret);
+    CURRENT_CONTEXT1()->ApiCreateProgram(ret);
     return ret;
 }
 
@@ -439,7 +382,7 @@ glCreateShader(
                )
 {
     GLuint ret = g_opengl->glCreateShader(type);
-    CURRENT_GL_CONTEXT()->ApiCreateShader(type, ret);
+    CURRENT_CONTEXT1()->ApiCreateShader(type, ret);
     return ret;
 }
 
@@ -449,7 +392,7 @@ glCullFace(
            )
 {
     g_opengl->glCullFace(mode);
-    CURRENT_GL_CONTEXT()->ApiCullFace(mode);
+    CURRENT_CONTEXT1()->ApiCullFace(mode);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -459,7 +402,7 @@ glDeleteBuffers(
                 )
 {
     g_opengl->glDeleteBuffers(n, buffers);
-    CURRENT_GL_CONTEXT()->ApiDeleteBuffers(n, buffers);
+    CURRENT_CONTEXT1()->ApiDeleteBuffers(n, buffers);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -469,7 +412,7 @@ glDeleteFramebuffers(
                      )
 {
     g_opengl->glDeleteFramebuffers(n, framebuffers);
-    CURRENT_GL_CONTEXT()->ApiDeleteFramebuffers(n, framebuffers);
+    CURRENT_CONTEXT1()->ApiDeleteFramebuffers(n, framebuffers);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -478,7 +421,7 @@ glDeleteProgram(
                 )
 {
     g_opengl->glDeleteProgram(program);
-    CURRENT_GL_CONTEXT()->ApiDeleteProgram(program);
+    CURRENT_CONTEXT1()->ApiDeleteProgram(program);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -488,7 +431,7 @@ glDeleteRenderbuffers(
                       )
 {
     g_opengl->glDeleteRenderbuffers(n, renderbuffers);
-    CURRENT_GL_CONTEXT()->ApiDeleteRenderbuffers(n, renderbuffers);
+    CURRENT_CONTEXT1()->ApiDeleteRenderbuffers(n, renderbuffers);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -497,7 +440,7 @@ glDeleteShader(
                )
 {
     g_opengl->glDeleteShader(shader);
-    CURRENT_GL_CONTEXT()->ApiDeleteShader(shader);
+    CURRENT_CONTEXT1()->ApiDeleteShader(shader);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -507,7 +450,7 @@ glDeleteTextures(
                  )
 {
     g_opengl->glDeleteTextures(n, textures);
-    CURRENT_GL_CONTEXT()->ApiDeleteTextures(n, textures);
+    CURRENT_CONTEXT1()->ApiDeleteTextures(n, textures);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -517,7 +460,7 @@ glDeleteVertexArraysOES (
                          )
 {
     g_opengl->glDeleteVertexArrays(n, arrays);
-    CURRENT_GL_CONTEXT()->ApiDeleteVertexArrays(n, arrays);
+    CURRENT_CONTEXT1()->ApiDeleteVertexArrays(n, arrays);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -526,7 +469,7 @@ glDepthFunc(
             )
 {
     g_opengl->glDepthFunc(func);
-    CURRENT_GL_CONTEXT()->ApiDepthFunc(func);
+    CURRENT_CONTEXT1()->ApiDepthFunc(func);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -535,7 +478,7 @@ glDepthMask(
             )
 {
     g_opengl->glDepthMask(flag);
-    CURRENT_GL_CONTEXT()->ApiDepthMask(flag);
+    CURRENT_CONTEXT1()->ApiDepthMask(flag);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -545,7 +488,7 @@ glDepthRangef(
               )
 {
     g_opengl->glDepthRangef(n, f);
-    CURRENT_GL_CONTEXT()->ApiDepthRangef(n, f);
+    CURRENT_CONTEXT1()->ApiDepthRangef(n, f);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -555,7 +498,7 @@ glDetachShader(
                )
 {
     g_opengl->glDetachShader(program, shader);
-    CURRENT_GL_CONTEXT()->ApiDetachShader(program, shader);
+    CURRENT_CONTEXT1()->ApiDetachShader(program, shader);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -564,7 +507,7 @@ glDisable(
           )
 {
     g_opengl->glDisable(cap);
-    CURRENT_GL_CONTEXT()->ApiDisable(cap);
+    CURRENT_CONTEXT1()->ApiDisable(cap);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -573,7 +516,7 @@ glDisableVertexAttribArray(
                            )
 {
     g_opengl->glDisableVertexAttribArray(index);
-    CURRENT_GL_CONTEXT()->ApiDisableVertexAttribArray(index);
+    CURRENT_CONTEXT1()->ApiDisableVertexAttribArray(index);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -584,7 +527,7 @@ glDrawArrays(
              )
 {
     g_opengl->glDrawArrays(mode, first, count);
-    CURRENT_GL_CONTEXT()->ApiDrawArrays(mode, first, count);;
+    CURRENT_CONTEXT1()->ApiDrawArrays(mode, first, count);;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -596,7 +539,7 @@ glDrawElements(
                )
 {
     g_opengl->glDrawElements(mode, count, type, indices);
-    CURRENT_GL_CONTEXT()->ApiDrawElements(mode, count, type, indices);
+    CURRENT_CONTEXT1()->ApiDrawElements(mode, count, type, indices);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -605,7 +548,7 @@ glEnable(
          )
 {
     g_opengl->glEnable(cap);
-    CURRENT_GL_CONTEXT()->ApiEnable(cap);
+    CURRENT_CONTEXT1()->ApiEnable(cap);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -614,7 +557,7 @@ glEnableVertexAttribArray(
                           )
 {
     g_opengl->glEnableVertexAttribArray(index);
-    CURRENT_GL_CONTEXT()->ApiEnableVertexAttribArray(index);
+    CURRENT_CONTEXT1()->ApiEnableVertexAttribArray(index);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -623,7 +566,7 @@ glFinish(
          )
 {
     g_opengl->glFinish();
-    CURRENT_GL_CONTEXT()->ApiFinish();
+    CURRENT_CONTEXT1()->ApiFinish();
 }
 
 GL_APICALL void GL_APIENTRY
@@ -633,7 +576,7 @@ glFlush(
 {
     g_opengl->glFlush();
 
-    CURRENT_GL_CONTEXT()->ApiFlush();
+    CURRENT_CONTEXT1()->ApiFlush();
 }
 
 GL_APICALL void GL_APIENTRY
@@ -651,7 +594,7 @@ glFramebufferRenderbuffer(
         renderbuffer
         );
 
-    CURRENT_GL_CONTEXT()->ApiFramebufferRenderbuffer(
+    CURRENT_CONTEXT1()->ApiFramebufferRenderbuffer(
         target,
         attachment,
         renderbuffertarget,
@@ -676,7 +619,7 @@ glFramebufferTexture2D(
         level
         );
 
-    CURRENT_GL_CONTEXT()->ApiFramebufferTexture2D(
+    CURRENT_CONTEXT1()->ApiFramebufferTexture2D(
         target,
         attachment,
         textarget,
@@ -692,7 +635,7 @@ glFrontFace(
 {
     g_opengl->glFrontFace(mode);
 
-    CURRENT_GL_CONTEXT()->ApiFrontFace(mode);
+    CURRENT_CONTEXT1()->ApiFrontFace(mode);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -703,7 +646,7 @@ glGenBuffers(
 {
     g_opengl->glGenBuffers(n, buffers);
 
-    CURRENT_GL_CONTEXT()->ApiGenBuffers(n, buffers);
+    CURRENT_CONTEXT1()->ApiGenBuffers(n, buffers);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -713,7 +656,7 @@ glGenerateMipmap(
 {
     g_opengl->glGenerateMipmap(target);
 
-    CURRENT_GL_CONTEXT()->ApiGenerateMipmap(target);
+    CURRENT_CONTEXT1()->ApiGenerateMipmap(target);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -724,7 +667,7 @@ glGenFramebuffers(
 {
     g_opengl->glGenFramebuffers(n, framebuffers);
 
-    CURRENT_GL_CONTEXT()->ApiGenFramebuffers(n, framebuffers);
+    CURRENT_CONTEXT1()->ApiGenFramebuffers(n, framebuffers);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -735,7 +678,7 @@ glGenRenderbuffers(
 {
     g_opengl->glGenRenderbuffers(n, renderbuffers);
 
-    CURRENT_GL_CONTEXT()->ApiGenRenderbuffers(n, renderbuffers);
+    CURRENT_CONTEXT1()->ApiGenRenderbuffers(n, renderbuffers);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -746,7 +689,7 @@ glGenTextures(
 {
     g_opengl->glGenTextures(n, textures);
 
-    CURRENT_GL_CONTEXT()->ApiGenTextures(n, textures);
+    CURRENT_CONTEXT1()->ApiGenTextures(n, textures);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -757,7 +700,7 @@ glGenVertexArraysOES (
 {
     g_opengl->glGenVertexArrays(n, arrays);
 
-    CURRENT_GL_CONTEXT()->ApiGenVertexArrays(n, arrays);
+    CURRENT_CONTEXT1()->ApiGenVertexArrays(n, arrays);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -781,7 +724,7 @@ glGetActiveAttrib(
         name
         );
 
-    CURRENT_GL_CONTEXT()->ApiGetActiveAttrib(
+    CURRENT_CONTEXT1()->ApiGetActiveAttrib(
         program,
         index,
         bufsize,
@@ -803,6 +746,8 @@ glGetActiveUniform(
                    GLchar* name
                    )
 {
+    memset(name, 0, bufsize);
+
     g_opengl->glGetActiveUniform(
         program,
         index,
@@ -813,7 +758,7 @@ glGetActiveUniform(
         name
         );
 
-    CURRENT_GL_CONTEXT()->ApiGetActiveUniform(
+    CURRENT_CONTEXT1()->ApiGetActiveUniform(
         program,
         index,
         bufsize,
@@ -839,7 +784,7 @@ glGetAttachedShaders(
         shaders
         );
 
-    CURRENT_GL_CONTEXT()->ApiGetAttachedShaders(
+    CURRENT_CONTEXT1()->ApiGetAttachedShaders(
         program,
         maxcount,
         count,
@@ -855,7 +800,7 @@ glGetAttribLocation(
 {
     int loc = g_opengl->glGetAttribLocation(program, name);
 
-    CURRENT_GL_CONTEXT()->ApiGetAttribLocation(program, name, loc);
+    CURRENT_CONTEXT1()->ApiGetAttribLocation(program, name, loc);
     return loc;
 }
 
@@ -866,7 +811,7 @@ glGetBooleanv(
               )
 {
     g_opengl->glGetBooleanv(pname, params);
-    CURRENT_GL_CONTEXT()->ApiGetBooleanv(pname, params);
+    CURRENT_CONTEXT1()->ApiGetBooleanv(pname, params);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -878,7 +823,7 @@ glGetBufferParameteriv(
 {
     g_opengl->glGetBufferParameteriv(target, pname, params);
 
-    CURRENT_GL_CONTEXT()->ApiGetBufferParameteriv(target, pname, params);
+    CURRENT_CONTEXT1()->ApiGetBufferParameteriv(target, pname, params);
 }
 
 GL_APICALL GLenum GL_APIENTRY
@@ -888,7 +833,7 @@ glGetError(
 {
     GLenum  err = g_opengl->glGetError();
 
-    CURRENT_GL_CONTEXT()->ApiGetError(err);
+    CURRENT_CONTEXT1()->ApiGetError(err);
 
     return err;
 }
@@ -901,7 +846,7 @@ glGetFloatv(
 {
     g_opengl->glGetFloatv(pname, params);
 
-    CURRENT_GL_CONTEXT()->ApiGetFloatv(pname, params);
+    CURRENT_CONTEXT1()->ApiGetFloatv(pname, params);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -919,7 +864,7 @@ glGetFramebufferAttachmentParameteriv(
         params
         );
 
-    CURRENT_GL_CONTEXT()->ApiGetFramebufferAttachmentParameteriv(
+    CURRENT_CONTEXT1()->ApiGetFramebufferAttachmentParameteriv(
         target,
         attachment,
         pname,
@@ -935,7 +880,7 @@ glGetIntegerv(
 {
     g_opengl->glGetIntegerv(pname, params);
 
-    CURRENT_GL_CONTEXT()->ApiGetIntegerv(pname, params);
+    CURRENT_CONTEXT1()->ApiGetIntegerv(pname, params);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -951,7 +896,7 @@ glGetProgramiv(
         params
         );
 
-    CURRENT_GL_CONTEXT()->ApiGetProgramiv(
+    CURRENT_CONTEXT1()->ApiGetProgramiv(
         program,
         pname,
         params
@@ -973,7 +918,7 @@ glGetProgramInfoLog(
         infolog
         );
 
-    CURRENT_GL_CONTEXT()->ApiGetProgramInfoLog(
+    CURRENT_CONTEXT1()->ApiGetProgramInfoLog(
         program,
         bufsize,
         length,
@@ -994,7 +939,7 @@ glGetRenderbufferParameteriv(
         params
         );
 
-    CURRENT_GL_CONTEXT()->ApiGetRenderbufferParameteriv(
+    CURRENT_CONTEXT1()->ApiGetRenderbufferParameteriv(
         target,
         pname,
         params
@@ -1010,7 +955,7 @@ glGetShaderiv(
 {
     g_opengl->glGetShaderiv(shader, pname, params);
 
-    CURRENT_GL_CONTEXT()->ApiGetShaderiv(shader, pname, params);
+    CURRENT_CONTEXT1()->ApiGetShaderiv(shader, pname, params);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1028,7 +973,7 @@ glGetShaderInfoLog(
         infolog
         );
 
-    CURRENT_GL_CONTEXT()->ApiGetShaderInfoLog(
+    CURRENT_CONTEXT1()->ApiGetShaderInfoLog(
         shader,
         bufsize,
         length,
@@ -1045,7 +990,7 @@ glGetShaderPrecisionFormat(
                            )
 {
     g_opengl->glGetShaderPrecisionFormat(shadertype, precisiontype, range, precision);
-    CURRENT_GL_CONTEXT()->ApiGetShaderPrecisionFormat(shadertype, precisiontype, range, precision);
+    CURRENT_CONTEXT1()->ApiGetShaderPrecisionFormat(shadertype, precisiontype, range, precision);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1063,7 +1008,7 @@ glGetShaderSource(
         source
         );
 
-    CURRENT_GL_CONTEXT()->ApiGetShaderSource(
+    CURRENT_CONTEXT1()->ApiGetShaderSource(
         shader,
         bufsize,
         length,
@@ -1077,7 +1022,7 @@ glGetString(
             )
 {
     const GLubyte *ret = g_opengl->glGetString(name);
-    CURRENT_GL_CONTEXT()->ApiGetString(name, ret);
+    CURRENT_CONTEXT1()->ApiGetString(name, ret);
     return ret;
 }
 
@@ -1090,7 +1035,7 @@ glGetTexParameterfv(
 {
     g_opengl->glGetTexParameterfv(target, pname, params);
 
-    CURRENT_GL_CONTEXT()->ApiGetTexParameterfv(target, pname, params);
+    CURRENT_CONTEXT1()->ApiGetTexParameterfv(target, pname, params);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1106,7 +1051,7 @@ glGetTexParameteriv(
         params
         );
 
-    CURRENT_GL_CONTEXT()->ApiGetTexParameteriv(
+    CURRENT_CONTEXT1()->ApiGetTexParameteriv(
         target,
         pname,
         params
@@ -1122,7 +1067,7 @@ glGetUniformfv(
 {
     g_opengl->glGetUniformfv(program, location, params);
 
-    CURRENT_GL_CONTEXT()->ApiGetUniformfv(program, location, params);
+    CURRENT_CONTEXT1()->ApiGetUniformfv(program, location, params);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1134,7 +1079,7 @@ glGetUniformiv(
 {
     g_opengl->glGetUniformiv(program, location, params);
 
-    CURRENT_GL_CONTEXT()->ApiGetUniformiv(program, location, params);
+    CURRENT_CONTEXT1()->ApiGetUniformiv(program, location, params);
 }
 
 GL_APICALL int GL_APIENTRY
@@ -1144,7 +1089,7 @@ glGetUniformLocation(
                      )
 {
     int locn = g_opengl->glGetUniformLocation(program, name);
-    CURRENT_GL_CONTEXT()->ApiGetUniformLocation(program, name, locn);
+    CURRENT_CONTEXT1()->ApiGetUniformLocation(program, name, locn);
     return locn;
 }
 
@@ -1157,7 +1102,7 @@ glGetVertexAttribfv(
 {
     g_opengl->glGetVertexAttribfv(index, pname, params);
 
-    CURRENT_GL_CONTEXT()->ApiGetVertexAttribfv(index, pname, params);
+    CURRENT_CONTEXT1()->ApiGetVertexAttribfv(index, pname, params);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1169,7 +1114,7 @@ glGetVertexAttribiv(
 {
     g_opengl->glGetVertexAttribiv(index, pname, params);
 
-    CURRENT_GL_CONTEXT()->ApiGetVertexAttribiv(index, pname, params);
+    CURRENT_CONTEXT1()->ApiGetVertexAttribiv(index, pname, params);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1181,7 +1126,7 @@ glGetVertexAttribPointerv(
 {
     g_opengl->glGetVertexAttribPointerv(index, pname, pointer);
 
-    CURRENT_GL_CONTEXT()->ApiGetVertexAttribPointerv(index, pname, pointer);
+    CURRENT_CONTEXT1()->ApiGetVertexAttribPointerv(index, pname, pointer);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1192,7 +1137,7 @@ glHint(
 {
     g_opengl->glHint(target, mode);
 
-    CURRENT_GL_CONTEXT()->ApiHint(target, mode);
+    CURRENT_CONTEXT1()->ApiHint(target, mode);
 }
 
 GL_APICALL GLboolean GL_APIENTRY
@@ -1201,7 +1146,7 @@ glIsBuffer(
            )
 {
     GLboolean res = g_opengl->glIsBuffer(buffer);
-    CURRENT_GL_CONTEXT()->ApiIsBuffer(buffer, res);
+    CURRENT_CONTEXT1()->ApiIsBuffer(buffer, res);
     return res;
 }
 
@@ -1212,7 +1157,7 @@ glIsEnabled(
 {
     GLboolean result = g_opengl->glIsEnabled(cap);
 
-    CURRENT_GL_CONTEXT()->ApiIsEnabled(cap, result);
+    CURRENT_CONTEXT1()->ApiIsEnabled(cap, result);
     return result;
 }
 
@@ -1222,7 +1167,7 @@ glIsFramebuffer(
                 )
 {
     GLboolean res = g_opengl->glIsFramebuffer(framebuffer);
-    CURRENT_GL_CONTEXT()->ApiIsFramebuffer(framebuffer, res);
+    CURRENT_CONTEXT1()->ApiIsFramebuffer(framebuffer, res);
     return res;
 }
 
@@ -1232,7 +1177,7 @@ glIsProgram(
             )
 {
     GLboolean res = g_opengl->glIsProgram(program);
-    CURRENT_GL_CONTEXT()->ApiIsProgram(program, res);
+    CURRENT_CONTEXT1()->ApiIsProgram(program, res);
     return res;
 }
 
@@ -1242,7 +1187,7 @@ glIsRenderbuffer(
                  )
 {
     GLboolean res = g_opengl->glIsRenderbuffer (renderbuffer);
-    CURRENT_GL_CONTEXT()->ApiIsRenderbuffer (renderbuffer, res);
+    CURRENT_CONTEXT1()->ApiIsRenderbuffer (renderbuffer, res);
     return res;
 }
 
@@ -1252,7 +1197,7 @@ glIsShader(
            )
 {
     GLboolean res = g_opengl->glIsShader(shader);
-    CURRENT_GL_CONTEXT()->ApiIsShader(shader, res);
+    CURRENT_CONTEXT1()->ApiIsShader(shader, res);
     return res;
 }
 
@@ -1262,7 +1207,7 @@ glIsTexture(
             )
 {
     GLboolean res = g_opengl->glIsTexture(texture);
-    CURRENT_GL_CONTEXT()->ApiIsTexture(texture, res);
+    CURRENT_CONTEXT1()->ApiIsTexture(texture, res);
     return res;
 }
 
@@ -1283,7 +1228,7 @@ glLineWidth(
 {
     g_opengl->glLineWidth(width);
 
-    CURRENT_GL_CONTEXT()->ApiLineWidth(width);
+    CURRENT_CONTEXT1()->ApiLineWidth(width);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1293,7 +1238,7 @@ glLinkProgram(
 {
     g_opengl->glLinkProgram(program);
 
-    CURRENT_GL_CONTEXT()->ApiLinkProgram(program);
+    CURRENT_CONTEXT1()->ApiLinkProgram(program);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1304,7 +1249,7 @@ glPixelStorei(
 {
     g_opengl->glPixelStorei(pname, param);
 
-    CURRENT_GL_CONTEXT()->ApiPixelStorei(pname, param);
+    CURRENT_CONTEXT1()->ApiPixelStorei(pname, param);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1315,7 +1260,7 @@ glPolygonOffset(
 {
     g_opengl->glPolygonOffset(factor, units);
 
-    CURRENT_GL_CONTEXT()->ApiPolygonOffset(factor, units);
+    CURRENT_CONTEXT1()->ApiPolygonOffset(factor, units);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1337,7 +1282,7 @@ glReadPixels(
         pixels
         );
 
-    CURRENT_GL_CONTEXT()->ApiReadPixels(
+    CURRENT_CONTEXT1()->ApiReadPixels(
         x, y,
         width, height,
         format,
@@ -1352,7 +1297,6 @@ glReleaseShaderCompiler(
                         )
 {
     /* No OpenGL implementation for this optional function. */
-    /* TODO: Might be needed if using vivante compiler. */
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1370,7 +1314,7 @@ glRenderbufferStorage(
         height
         );
 
-    CURRENT_GL_CONTEXT()->ApiRenderbufferStorage(
+    CURRENT_CONTEXT1()->ApiRenderbufferStorage(
         target,
         internalformat,
         width,
@@ -1386,7 +1330,7 @@ glSampleCoverage(
 {
     g_opengl->glSampleCoverage(value, invert);
 
-    CURRENT_GL_CONTEXT()->ApiSampleCoverage(value, invert);
+    CURRENT_CONTEXT1()->ApiSampleCoverage(value, invert);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1402,7 +1346,7 @@ glScissor(
         width, height
         );
 
-    CURRENT_GL_CONTEXT()->ApiScissor(
+    CURRENT_CONTEXT1()->ApiScissor(
         x, y,
         width, height
         );
@@ -1418,7 +1362,7 @@ glShaderBinary(
                )
 {
     g_opengl->glShaderBinary(n, shaders, binaryformat, binary, length);
-    CURRENT_GL_CONTEXT()->ApiShaderBinary(n, shaders, binaryformat, binary, length);
+    CURRENT_CONTEXT1()->ApiShaderBinary(n, shaders, binaryformat, binary, length);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1430,7 +1374,7 @@ glShaderSource(
                )
 {
     g_opengl->glShaderSource(shader, count, string, length);
-    CURRENT_GL_CONTEXT()->ApiShaderSource(shader, count, string, length);
+    CURRENT_CONTEXT1()->ApiShaderSource(shader, count, string, length);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1442,7 +1386,7 @@ glStencilFunc(
 {
     g_opengl->glStencilFunc(func, ref, mask);
 
-    CURRENT_GL_CONTEXT()->ApiStencilFunc(func, ref, mask);
+    CURRENT_CONTEXT1()->ApiStencilFunc(func, ref, mask);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1455,7 +1399,7 @@ glStencilFuncSeparate(
 {
     g_opengl->glStencilFuncSeparate(face, func, ref, mask);
 
-    CURRENT_GL_CONTEXT()->ApiStencilFuncSeparate(face, func, ref, mask);
+    CURRENT_CONTEXT1()->ApiStencilFuncSeparate(face, func, ref, mask);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1465,7 +1409,7 @@ glStencilMask(
 {
     g_opengl->glStencilMask(mask);
 
-    CURRENT_GL_CONTEXT()->ApiStencilMask(mask);
+    CURRENT_CONTEXT1()->ApiStencilMask(mask);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1476,7 +1420,7 @@ glStencilMaskSeparate(
 {
     g_opengl->glStencilMaskSeparate(face, mask);
 
-    CURRENT_GL_CONTEXT()->ApiStencilMaskSeparate(face, mask);
+    CURRENT_CONTEXT1()->ApiStencilMaskSeparate(face, mask);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1488,7 +1432,7 @@ glStencilOp(
 {
     g_opengl->glStencilOp(fail, zfail, zpass);
 
-    CURRENT_GL_CONTEXT()->ApiStencilOp(fail, zfail, zpass);
+    CURRENT_CONTEXT1()->ApiStencilOp(fail, zfail, zpass);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1506,7 +1450,7 @@ glStencilOpSeparate(
         zpass
         );
 
-    CURRENT_GL_CONTEXT()->ApiStencilOpSeparate(
+    CURRENT_CONTEXT1()->ApiStencilOpSeparate(
         face,
         fail,
         zfail,
@@ -1538,7 +1482,7 @@ glTexImage2D(
         pixels
         );
 
-    CURRENT_GL_CONTEXT()->ApiTexImage2D(
+    CURRENT_CONTEXT1()->ApiTexImage2D(
         target,
         level,
         internalformat,
@@ -1559,7 +1503,7 @@ glTexParameterf(
 {
     g_opengl->glTexParameterf(target, pname, param);
 
-    CURRENT_GL_CONTEXT()->ApiTexParameterf(target, pname, param);
+    CURRENT_CONTEXT1()->ApiTexParameterf(target, pname, param);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1571,7 +1515,7 @@ glTexParameterfv(
 {
     g_opengl->glTexParameterfv(target, pname, params);
 
-    CURRENT_GL_CONTEXT()->ApiTexParameterfv(target, pname, params);
+    CURRENT_CONTEXT1()->ApiTexParameterfv(target, pname, params);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1583,7 +1527,7 @@ glTexParameteri(
 {
     g_opengl->glTexParameteri(target, pname, param);
 
-    CURRENT_GL_CONTEXT()->ApiTexParameteri(target, pname, param);
+    CURRENT_CONTEXT1()->ApiTexParameteri(target, pname, param);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1595,7 +1539,7 @@ glTexParameteriv(
 {
     g_opengl->glTexParameteriv(target, pname, params);
 
-    CURRENT_GL_CONTEXT()->ApiTexParameteriv(target, pname, params);
+    CURRENT_CONTEXT1()->ApiTexParameteriv(target, pname, params);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1621,7 +1565,7 @@ glTexSubImage2D(
         pixels
         );
 
-    CURRENT_GL_CONTEXT()->ApiTexSubImage2D(
+    CURRENT_CONTEXT1()->ApiTexSubImage2D(
         target,
         level,
         xoffset, yoffset,
@@ -1640,7 +1584,7 @@ glUniform1f(
 {
     g_opengl->glUniform1f(location, x);
 
-    CURRENT_GL_CONTEXT()->ApiUniform1f(location, x);
+    CURRENT_CONTEXT1()->ApiUniform1f(location, x);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1652,7 +1596,7 @@ glUniform1fv(
 {
     g_opengl->glUniform1fv(location, count, v);
 
-    CURRENT_GL_CONTEXT()->ApiUniform1fv(location, count, v);
+    CURRENT_CONTEXT1()->ApiUniform1fv(location, count, v);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1663,7 +1607,7 @@ glUniform1i(
 {
     g_opengl->glUniform1i(location, x);
 
-    CURRENT_GL_CONTEXT()->ApiUniform1i(location, x);
+    CURRENT_CONTEXT1()->ApiUniform1i(location, x);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1675,7 +1619,7 @@ glUniform1iv(
 {
     g_opengl->glUniform1iv(location, count, v);
 
-    CURRENT_GL_CONTEXT()->ApiUniform1iv(location, count, v);
+    CURRENT_CONTEXT1()->ApiUniform1iv(location, count, v);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1687,7 +1631,7 @@ glUniform2f(
 {
     g_opengl->glUniform2f(location, x, y);
 
-    CURRENT_GL_CONTEXT()->ApiUniform2f(location, x, y);
+    CURRENT_CONTEXT1()->ApiUniform2f(location, x, y);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1699,7 +1643,7 @@ glUniform2fv(
 {
     g_opengl->glUniform2fv(location, count, v);
 
-    CURRENT_GL_CONTEXT()->ApiUniform2fv(location, count, v);
+    CURRENT_CONTEXT1()->ApiUniform2fv(location, count, v);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1711,7 +1655,7 @@ glUniform2i(
 {
     g_opengl->glUniform2i(location, x, y);
 
-    CURRENT_GL_CONTEXT()->ApiUniform2i(location, x, y);
+    CURRENT_CONTEXT1()->ApiUniform2i(location, x, y);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1723,7 +1667,7 @@ glUniform2iv(
 {
     g_opengl->glUniform2iv(location, count, v);
 
-    CURRENT_GL_CONTEXT()->ApiUniform2iv(location, count, v);
+    CURRENT_CONTEXT1()->ApiUniform2iv(location, count, v);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1736,7 +1680,7 @@ glUniform3f(
 {
     g_opengl->glUniform3f(location, x, y, z);
 
-    CURRENT_GL_CONTEXT()->ApiUniform3f(location, x, y, z);
+    CURRENT_CONTEXT1()->ApiUniform3f(location, x, y, z);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1748,7 +1692,7 @@ glUniform3fv(
 {
     g_opengl->glUniform3fv(location, count, v);
 
-    CURRENT_GL_CONTEXT()->ApiUniform3fv(location, count, v);
+    CURRENT_CONTEXT1()->ApiUniform3fv(location, count, v);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1761,7 +1705,7 @@ glUniform3i(
 {
     g_opengl->glUniform3i(location, x, y, z);
 
-    CURRENT_GL_CONTEXT()->ApiUniform3i(location, x, y, z);
+    CURRENT_CONTEXT1()->ApiUniform3i(location, x, y, z);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1773,7 +1717,7 @@ glUniform3iv(
 {
     g_opengl->glUniform3iv(location, count, v);
 
-    CURRENT_GL_CONTEXT()->ApiUniform3iv(location, count, v);
+    CURRENT_CONTEXT1()->ApiUniform3iv(location, count, v);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1787,7 +1731,7 @@ glUniform4f(
 {
     g_opengl->glUniform4f(location, x, y, z, w);
 
-    CURRENT_GL_CONTEXT()->ApiUniform4f(location, x, y, z, w);
+    CURRENT_CONTEXT1()->ApiUniform4f(location, x, y, z, w);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1798,8 +1742,7 @@ glUniform4fv(
              )
 {
     g_opengl->glUniform4fv(location, count, v);
-
-    CURRENT_GL_CONTEXT()->ApiUniform4fv(location, count, v);
+    CURRENT_CONTEXT1()->ApiUniform4fv(location, count, v);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1813,7 +1756,7 @@ glUniform4i(
 {
     g_opengl->glUniform4i(location, x, y, z, w);
 
-    CURRENT_GL_CONTEXT()->ApiUniform4i(location, x, y, z, w);
+    CURRENT_CONTEXT1()->ApiUniform4i(location, x, y, z, w);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1825,7 +1768,7 @@ glUniform4iv(
 {
     g_opengl->glUniform4iv(location, count, v);
 
-    CURRENT_GL_CONTEXT()->ApiUniform4iv(location, count, v);
+    CURRENT_CONTEXT1()->ApiUniform4iv(location, count, v);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1843,7 +1786,7 @@ glUniformMatrix2fv(
         value
         );
 
-    CURRENT_GL_CONTEXT()->ApiUniformMatrix2fv(
+    CURRENT_CONTEXT1()->ApiUniformMatrix2fv(
         location,
         count,
         transpose,
@@ -1866,7 +1809,7 @@ glUniformMatrix3fv(
         value
         );
 
-    CURRENT_GL_CONTEXT()->ApiUniformMatrix3fv(
+    CURRENT_CONTEXT1()->ApiUniformMatrix3fv(
         location,
         count,
         transpose,
@@ -1889,7 +1832,7 @@ glUniformMatrix4fv(
         value
         );
 
-    CURRENT_GL_CONTEXT()->ApiUniformMatrix4fv(
+    CURRENT_CONTEXT1()->ApiUniformMatrix4fv(
         location,
         count,
         transpose,
@@ -1904,7 +1847,7 @@ glUseProgram(
 {
     g_opengl->glUseProgram(program);
 
-    CURRENT_GL_CONTEXT()->ApiUseProgram(program);
+    CURRENT_CONTEXT1()->ApiUseProgram(program);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1914,7 +1857,7 @@ glValidateProgram(
 {
     g_opengl->glValidateProgram(program);
 
-    CURRENT_GL_CONTEXT()->ApiValidateProgram(program);
+    CURRENT_CONTEXT1()->ApiValidateProgram(program);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1925,7 +1868,7 @@ glVertexAttrib1f(
 {
     g_opengl->glVertexAttrib1f(indx, x);
 
-    CURRENT_GL_CONTEXT()->ApiVertexAttrib1f(indx, x);
+    CURRENT_CONTEXT1()->ApiVertexAttrib1f(indx, x);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1936,7 +1879,7 @@ glVertexAttrib1fv(
 {
     g_opengl->glVertexAttrib1fv(indx, values);
 
-    CURRENT_GL_CONTEXT()->ApiVertexAttrib1fv(indx, values);
+    CURRENT_CONTEXT1()->ApiVertexAttrib1fv(indx, values);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1948,7 +1891,7 @@ glVertexAttrib2f(
 {
     g_opengl->glVertexAttrib2f(indx, x, y);
 
-    CURRENT_GL_CONTEXT()->ApiVertexAttrib2f(indx, x, y);
+    CURRENT_CONTEXT1()->ApiVertexAttrib2f(indx, x, y);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1959,7 +1902,7 @@ glVertexAttrib2fv(
 {
     g_opengl->glVertexAttrib2fv(indx, values);
 
-    CURRENT_GL_CONTEXT()->ApiVertexAttrib2fv(indx, values);
+    CURRENT_CONTEXT1()->ApiVertexAttrib2fv(indx, values);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1972,7 +1915,7 @@ glVertexAttrib3f(
 {
     g_opengl->glVertexAttrib3f(indx, x, y, z);
 
-    CURRENT_GL_CONTEXT()->ApiVertexAttrib3f(indx, x, y, z);
+    CURRENT_CONTEXT1()->ApiVertexAttrib3f(indx, x, y, z);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1983,7 +1926,7 @@ glVertexAttrib3fv(
 {
     g_opengl->glVertexAttrib3fv (indx, values);
 
-    CURRENT_GL_CONTEXT()->ApiVertexAttrib3fv (indx, values);
+    CURRENT_CONTEXT1()->ApiVertexAttrib3fv (indx, values);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -1997,7 +1940,7 @@ glVertexAttrib4f(
 {
     g_opengl->glVertexAttrib4f(indx, x, y, z, w);
 
-    CURRENT_GL_CONTEXT()->ApiVertexAttrib4f(indx, x, y, z, w);
+    CURRENT_CONTEXT1()->ApiVertexAttrib4f(indx, x, y, z, w);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2008,7 +1951,7 @@ glVertexAttrib4fv(
 {
     g_opengl->glVertexAttrib4fv(indx, values);
 
-    CURRENT_GL_CONTEXT()->ApiVertexAttrib4fv(indx, values);
+    CURRENT_CONTEXT1()->ApiVertexAttrib4fv(indx, values);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2030,7 +1973,7 @@ glVertexAttribPointer(
         ptr
         );
 
-    CURRENT_GL_CONTEXT()->ApiVertexAttribPointer(
+    CURRENT_CONTEXT1()->ApiVertexAttribPointer(
         indx,
         size,
         type,
@@ -2050,7 +1993,7 @@ glViewport(
 {
     g_opengl->glViewport(x, y, width, height);
 
-    CURRENT_GL_CONTEXT()->ApiViewport(x, y, width, height);
+    CURRENT_CONTEXT1()->ApiViewport(x, y, width, height);
 }
 
 /* OpenGL ES 3.0 */
@@ -2062,7 +2005,7 @@ glReadBuffer(
 {
     g_opengl->glReadBuffer(mode);
 
-    CURRENT_GL_CONTEXT()->ApiReadBuffer(mode);
+    CURRENT_CONTEXT1()->ApiReadBuffer(mode);
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2080,7 +2023,483 @@ glBlitFramebufferANGLE(
                        )
 {
     g_opengl->glBlitFramebufferEXT(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
-    CURRENT_GL_CONTEXT()->ApiBlitFramebufferEXT(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+    CURRENT_CONTEXT1()->ApiBlitFramebufferEXT(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+}
+
+GL_APICALL void GL_APIENTRY
+glBlitFramebuffer(
+                  GLint srcX0,
+                  GLint srcY0,
+                  GLint srcX1,
+                  GLint srcY1,
+                  GLint dstX0,
+                  GLint dstY0,
+                  GLint dstX1,
+                  GLint dstY1,
+                  GLbitfield mask,
+                  GLenum filter
+                  )
+{
+    g_opengl->glBlitFramebufferEXT(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+    CURRENT_CONTEXT1()->ApiBlitFramebufferEXT(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+}
+
+GL_APICALL void GL_APIENTRY
+glBeginTransformFeedback(
+    GLenum primitiveMode
+    )
+{
+    g_opengl->glBeginTransformFeedback(primitiveMode);
+    CURRENT_CONTEXT1()->ApiBeginTransformFeedback(primitiveMode);
+}
+
+GL_APICALL void GL_APIENTRY
+glEndTransformFeedback(
+    void
+    )
+{
+    g_opengl->glEndTransformFeedback();
+    CURRENT_CONTEXT1()->ApiEndTransformFeedback();
+}
+
+GL_APICALL void GL_APIENTRY
+glBindBufferRange(
+    GLenum target,
+    GLuint index,
+    GLuint buffer,
+    GLintptr offset,
+    GLsizeiptr size
+    )
+{
+    switch(target)
+    {
+    case GL_TRANSFORM_FEEDBACK_BUFFER:
+    case GL_UNIFORM_BUFFER:
+        break;
+    default:
+        apiERROR(GL_INVALID_ENUM);
+        return;
+    }
+    g_opengl->glBindBufferRange(target, index, buffer, offset, size);
+
+    CURRENT_CONTEXT1()->ApiBindBufferRange(target, index, buffer, offset, size);
+}
+
+GL_APICALL void GL_APIENTRY
+glBindBufferBase(
+    GLenum target,
+    GLuint index,
+    GLuint buffer
+    )
+{
+    g_opengl->glBindBufferBase(target, index, buffer);
+    CURRENT_CONTEXT1()->ApiBindBufferBase(target, index, buffer);
+}
+
+GL_APICALL void GL_APIENTRY
+glTransformFeedbackVaryings(
+    GLuint program,
+    GLsizei count,
+    const GLchar* const* varyings,
+    GLenum bufferMode
+    )
+{
+    g_opengl->glTransformFeedbackVaryings(program, count, varyings, bufferMode);
+    CURRENT_CONTEXT1()->ApiTransformFeedbackVaryings(program, count, varyings, bufferMode);
+}
+
+GL_APICALL void GL_APIENTRY
+glGetTransformFeedbackVarying(
+    GLuint program,
+    GLuint index,
+    GLsizei bufSize,
+    GLsizei* length,
+    GLsizei* size,
+    GLenum* type,
+    GLchar* name
+    )
+{
+    g_opengl->glGetTransformFeedbackVarying(program, index, bufSize, length, size, type, name);
+    CURRENT_CONTEXT1()->ApiGetTransformFeedbackVarying(program, index, bufSize, length, size, type, name);
+}
+
+GL_APICALL void GL_APIENTRY
+glVertexAttribIPointer(
+    GLuint index,
+    GLint size,
+    GLenum type,
+    GLsizei stride,
+    const GLvoid* pointer
+    )
+{
+    g_opengl->glVertexAttribIPointer(index, size, type, stride, pointer);
+    CURRENT_CONTEXT1()->ApiVertexAttribIPointer(index, size, type, stride, pointer);
+}
+
+GL_APICALL void GL_APIENTRY
+    glTexStorage2D(
+    GLenum target,
+    GLsizei levels,
+    GLenum internalformat,
+    GLsizei width,
+    GLsizei height
+    )
+{
+    g_opengl->glTexStorage2D(target, levels, internalformat, width, height);
+    CURRENT_CONTEXT1()->ApiTexStorage2D(target, levels, internalformat, width, height);
+}
+
+GL_APICALL void GL_APIENTRY
+    glTexStorage3D(
+    GLenum target,
+    GLsizei levels,
+    GLenum internalformat,
+    GLsizei width,
+    GLsizei height,
+    GLsizei depth
+    )
+{
+    g_opengl->glTexStorage3D(target, levels, internalformat, width, height, depth);
+    CURRENT_CONTEXT1()->ApiTexStorage3D(target, levels, internalformat, width, height, depth);
+}
+
+GL_APICALL void GL_APIENTRY
+    glTexImage3D(
+    GLenum target,
+    GLint level,
+    GLint internalformat,
+    GLsizei width,
+    GLsizei height,
+    GLsizei depth,
+    GLint border,
+    GLenum format,
+    GLenum type,
+    const GLvoid* pixels
+    )
+{
+    g_opengl->glTexImage3D(
+        target,
+        level,
+        internalformat,
+        width, height, depth,
+        border,
+        format,
+        type,
+        pixels
+        );
+
+    CURRENT_CONTEXT1()->ApiTexImage3D(
+        target,
+        level,
+        internalformat,
+        width, height, depth,
+        border,
+        format,
+        type,
+        pixels
+        );
+}
+
+GL_APICALL void GL_APIENTRY
+    glTexSubImage3D(
+    GLenum target,
+    GLint level,
+    GLint xoffset,
+    GLint yoffset,
+    GLint zoffset,
+    GLsizei width,
+    GLsizei height,
+    GLsizei depth,
+    GLenum format,
+    GLenum type,
+    const GLvoid* pixels
+    )
+{
+    g_opengl->glTexSubImage3D(
+        target,
+        level,
+        xoffset, yoffset, zoffset,
+        width, height, depth,
+        format,
+        type,
+        pixels
+        );
+
+    CURRENT_CONTEXT1()->ApiTexSubImage3D(
+        target,
+        level,
+        xoffset, yoffset, zoffset,
+        width, height, depth,
+        format,
+        type,
+        pixels
+        );
+}
+
+GL_APICALL void GL_APIENTRY
+    glCopyTexSubImage3D(
+    GLenum target,
+    GLint level,
+    GLint xoffset,
+    GLint yoffset,
+    GLint zoffset,
+    GLint x,
+    GLint y,
+    GLsizei width,
+    GLsizei height
+    )
+{
+    g_opengl->glCopyTexSubImage3D(
+        target,
+        level,
+        xoffset, yoffset, zoffset,
+        x, y,
+        width, height
+        );
+
+    CURRENT_CONTEXT1()->ApiCopyTexSubImage3D(
+        target,
+        level,
+        xoffset, yoffset, zoffset,
+        x, y,
+        width, height
+        );
+}
+
+GL_APICALL void GL_APIENTRY
+    glCompressedTexImage3D(
+    GLenum target,
+    GLint level,
+    GLenum internalformat,
+    GLsizei width,
+    GLsizei height,
+    GLsizei depth,
+    GLint border,
+    GLsizei imageSize,
+    const GLvoid* data
+    )
+{
+    g_opengl->glCompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, data);
+    CURRENT_CONTEXT1()->ApiCompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, data);
+}
+
+GL_APICALL void GL_APIENTRY
+    glCompressedTexSubImage3D(
+    GLenum target,
+    GLint level,
+    GLint xoffset,
+    GLint yoffset,
+    GLint zoffset,
+    GLsizei width,
+    GLsizei height,
+    GLsizei depth,
+    GLenum format,
+    GLsizei imageSize,
+    const GLvoid* data
+    )
+{
+    g_opengl->glCompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data);
+    CURRENT_CONTEXT1()->ApiCompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data);
+}
+
+GL_APICALL void GL_APIENTRY
+    glDrawBuffers(
+    GLsizei n,
+    const GLenum* bufs
+    )
+{
+    g_opengl->glDrawBuffers(n, bufs);
+
+    CURRENT_CONTEXT1()->ApiDrawBuffers(n, bufs);
+}
+
+GL_APICALL GLvoid* GL_APIENTRY
+    glMapBufferRange(
+    GLenum target,
+    GLintptr offset,
+    GLsizeiptr length,
+    GLbitfield access
+    )
+{
+    GLvoid* result = NULL;
+    result = g_opengl->glMapBufferRange(target, offset, length, access);
+    CURRENT_CONTEXT1()->ApiMapBufferRange(target, offset, length, access, result);
+    return result;
+}
+
+GL_APICALL void GL_APIENTRY
+    glFlushMappedBufferRange(
+    GLenum target,
+    GLintptr offset,
+    GLsizeiptr length
+    )
+{
+
+    g_opengl->glFlushMappedBufferRange(target, offset, length);
+    CURRENT_CONTEXT1()->ApiFlushMappedBufferRange(target, offset, length);
+}
+
+
+GL_APICALL GLboolean GL_APIENTRY
+    glUnmapBuffer(
+    GLenum target
+    )
+{
+    GLboolean result = GL_FALSE;
+    result = g_opengl->glUnmapBuffer(target);
+    CURRENT_CONTEXT1()->ApiUnmapBuffer(target, result);
+    return result;
+}
+
+GL_APICALL void GL_APIENTRY
+    glBindTransformFeedback(
+    GLenum target,
+    GLuint id
+    )
+{
+    g_opengl->glBindTransformFeedback(target, id);
+    CURRENT_CONTEXT1()->ApiBindTransformFeedback(target, id);
+}
+
+GL_APICALL void GL_APIENTRY
+    glDeleteTransformFeedbacks(
+    GLsizei n,
+    const GLuint* ids
+    )
+{
+    g_opengl->glDeleteTransformFeedbacks(n, ids);
+    CURRENT_CONTEXT1()->ApiDeleteTransformFeedbacks(n, ids);
+}
+
+GL_APICALL void GL_APIENTRY
+    glGenTransformFeedbacks(
+    GLsizei n,
+    GLuint* ids
+    )
+{
+    g_opengl->glGenTransformFeedbacks(n, ids);
+    CURRENT_CONTEXT1()->ApiGenTransformFeedbacks(n, ids);
+}
+
+GL_APICALL GLboolean GL_APIENTRY
+    glIsTransformFeedback(
+    GLuint id
+    )
+{
+    GLboolean result = GL_FALSE;
+    result = g_opengl->glIsTransformFeedback(id);
+    CURRENT_CONTEXT1()->ApiIsTransformFeedback(id, result);
+    return result;
+}
+
+GL_APICALL void GL_APIENTRY
+    glPauseTransformFeedback(
+    void
+    )
+{
+    g_opengl->glPauseTransformFeedback();
+    CURRENT_CONTEXT1()->ApiPauseTransformFeedback();
+}
+
+GL_APICALL void GL_APIENTRY
+    glResumeTransformFeedback(
+    void
+    )
+{
+    g_opengl->glResumeTransformFeedback();
+    CURRENT_CONTEXT1()->ApiResumeTransformFeedback();
+}
+
+GL_APICALL void GL_APIENTRY
+    glGetProgramBinary(
+    GLuint program,
+    GLsizei bufSize,
+    GLsizei* length,
+    GLenum* binaryFormat,
+    GLvoid* binary
+    )
+{
+    g_opengl->glGetProgramBinary(program, bufSize, length, binaryFormat, binary);
+    CURRENT_CONTEXT1()->ApiGetProgramBinary(program, bufSize, length, binaryFormat, binary);
+}
+
+GL_APICALL void GL_APIENTRY
+    glProgramBinary(
+    GLuint program,
+    GLenum binaryFormat,
+    const GLvoid* binary,
+    GLsizei length
+    )
+{
+    g_opengl->glProgramBinary(program, binaryFormat, binary, length);
+    CURRENT_CONTEXT1()->ApiProgramBinary(program, binaryFormat, binary, length);
+}
+
+GL_APICALL void GL_APIENTRY
+    glInvalidateFramebuffer(
+    GLenum target,
+    GLsizei numAttachments,
+    const GLenum* attachments
+    )
+{
+
+    g_opengl->glInvalidateFramebuffer(target, numAttachments, attachments);
+    CURRENT_CONTEXT1()->ApiInvalidateFramebuffer(target, numAttachments, attachments);
+}
+
+GL_APICALL void GL_APIENTRY
+    glInvalidateSubFramebuffer(
+    GLenum target,
+    GLsizei numAttachments,
+    const GLenum* attachments,
+    GLint x,
+    GLint y,
+    GLsizei width,
+    GLsizei height
+    )
+{
+    g_opengl->glInvalidateSubFramebuffer(target, numAttachments, attachments, x, y, width, height);
+    CURRENT_CONTEXT1()->ApiInvalidateSubFramebuffer(target, numAttachments, attachments, x, y, width, height);
+}
+
+GL_APICALL void GL_APIENTRY
+    glBindVertexArray(
+    GLuint array
+    )
+{
+    g_opengl->glBindVertexArray(array);
+    CURRENT_CONTEXT1()->ApiBindVertexArray(array);
+}
+
+GL_APICALL void GL_APIENTRY
+    glDeleteVertexArrays(
+    GLsizei n,
+    const GLuint* arrays
+    )
+{
+    g_opengl->glDeleteVertexArrays(n, arrays);
+    CURRENT_CONTEXT1()->ApiDeleteVertexArrays(n, arrays);
+}
+
+GL_APICALL void GL_APIENTRY
+    glGenVertexArrays(
+    GLsizei n,
+    GLuint* arrays
+    )
+{
+    g_opengl->glGenVertexArrays(n, arrays);
+    CURRENT_CONTEXT1()->ApiGenVertexArrays(n, arrays);
+}
+
+GL_APICALL GLboolean GL_APIENTRY
+    glIsVertexArray(
+    GLuint array
+    )
+{
+    GLboolean result;
+    result = g_opengl->glIsVertexArray(array);
+    CURRENT_CONTEXT1()->ApiIsVertexArray(array, result);
+    return result;
 }
 
 #endif /* API_DUMP */
@@ -2123,7 +2542,7 @@ glDrawRangeElements(
         return;
     }
 
-    if(CURRENT_GL_CONTEXT()->ApiboundedFBO > 0)
+    if(CURRENT_CONTEXT1()->ApiboundedFBO > 0)
     {
         if(g_opengl->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
@@ -2132,7 +2551,7 @@ glDrawRangeElements(
         }
     }
 
-    if(CURRENT_GL_CONTEXT()->ApicurrentTFBState == eActive)
+    if(CURRENT_CONTEXT1()->ApicurrentTFBState == eActive)
     {
         apiERROR(GL_INVALID_OPERATION);
         return;
@@ -2145,184 +2564,7 @@ glDrawRangeElements(
         g_opengl->glFinish();
     }
 
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-
-GL_APICALL void GL_APIENTRY
-glTexImage3D(
-             GLenum target,
-             GLint level,
-             GLint internalformat,
-             GLsizei width,
-             GLsizei height,
-             GLsizei depth,
-             GLint border,
-             GLenum format,
-             GLenum type,
-             const GLvoid* pixels
-             )
-{
-    CGLES3Context* thread = _GetThreadDataES3();
-    Texture* tex;
-    tex = CURRENT_GL_CONTEXT()->ApiboundTexture[CURRENT_GL_CONTEXT()->ApiactiveTexture - GL_TEXTURE0];
-    if (tex != NULL)
-    {
-        if(level == 0)
-        {
-            tex->internalformat = internalformat;
-        }
-    }
-    else
-    {
-        tex = CreateTexture(&CURRENT_GL_CONTEXT()->ApitextureStack);
-        tex->internalformat = internalformat;
-        CURRENT_GL_CONTEXT()->ApiboundTexture[CURRENT_GL_CONTEXT()->ApiactiveTexture - GL_TEXTURE0] = tex;
-    }
-
-    g_opengl->glTexImage3D(
-        target,
-        level,
-        internalformat,
-        width, height, depth,
-        border,
-        format,
-        type,
-        pixels
-        );
-
-
-
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glTexSubImage3D(
-                GLenum target,
-                GLint level,
-                GLint xoffset,
-                GLint yoffset,
-                GLint zoffset,
-                GLsizei width,
-                GLsizei height,
-                GLsizei depth,
-                GLenum format,
-                GLenum type,
-                const GLvoid* pixels
-                )
-{
-    g_opengl->glTexSubImage3D(
-        target,
-        level,
-        xoffset, yoffset, zoffset,
-        width, height, depth,
-        format,
-        type,
-        pixels
-        );
-
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glCopyTexSubImage3D(
-                    GLenum target,
-                    GLint level,
-                    GLint xoffset,
-                    GLint yoffset,
-                    GLint zoffset,
-                    GLint x,
-                    GLint y,
-                    GLsizei width,
-                    GLsizei height
-                    )
-{
-    g_opengl->glCopyTexSubImage3D(
-        target,
-        level,
-        xoffset, yoffset, zoffset,
-        x, y,
-        width, height
-        );
-
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glCompressedTexImage3D(
-                       GLenum target,
-                       GLint level,
-                       GLenum internalformat,
-                       GLsizei width,
-                       GLsizei height,
-                       GLsizei depth,
-                       GLint border,
-                       GLsizei imageSize,
-                       const GLvoid* data
-                       )
-{
-    CGLES3Context* thread = _GetThreadDataES3();
-    Texture* tex;
-
-    tex = CURRENT_GL_CONTEXT()->ApiboundTexture[CURRENT_GL_CONTEXT()->ApiactiveTexture - GL_TEXTURE0];
-
-    if (tex != NULL)
-    {
-        if(level == 0)
-        {
-            tex->internalformat = internalformat;
-        }
-    }
-    else
-    {
-        tex = CreateTexture(&CURRENT_GL_CONTEXT()->ApitextureStack);
-        tex->internalformat = internalformat;
-        CURRENT_GL_CONTEXT()->ApiboundTexture[CURRENT_GL_CONTEXT()->ApiactiveTexture - GL_TEXTURE0] = tex;
-
-    }
-    g_opengl->glCompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, data);
-
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glCompressedTexSubImage3D(
-                          GLenum target,
-                          GLint level,
-                          GLint xoffset,
-                          GLint yoffset,
-                          GLint zoffset,
-                          GLsizei width,
-                          GLsizei height,
-                          GLsizei depth,
-                          GLenum format,
-                          GLsizei imageSize,
-                          const GLvoid* data
-                          )
-{
-    CGLES3Context* thread = _GetThreadDataES3();
-    Texture* tex;
-    tex = CURRENT_GL_CONTEXT()->ApiboundTexture[CURRENT_GL_CONTEXT()->ApiactiveTexture - GL_TEXTURE0];
-    switch (tex->internalformat)
-    {
-    case GL_COMPRESSED_R11_EAC:
-    case GL_COMPRESSED_SIGNED_R11_EAC:
-    case GL_COMPRESSED_RG11_EAC:
-    case GL_COMPRESSED_SIGNED_RG11_EAC:
-    case GL_COMPRESSED_RGB8_ETC2:
-    case GL_COMPRESSED_SRGB8_ETC2:
-    case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-    case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-    case GL_COMPRESSED_RGBA8_ETC2_EAC:
-    case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
-        break;
-    default:
-        apiERROR(GL_INVALID_ENUM);
-        return;
-    }
-    g_opengl->glCompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data);
-
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2333,7 +2575,7 @@ glGenQueries(
 {
     g_opengl->glGenQueries(n, ids);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2344,7 +2586,7 @@ glDeleteQueries(
 {
     g_opengl->glDeleteQueries(n, ids);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL GLboolean GL_APIENTRY
@@ -2355,7 +2597,7 @@ glIsQuery(
     GLboolean result;
     result = g_opengl->glIsQuery(id);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
     return result;
 }
 
@@ -2378,7 +2620,7 @@ glBeginQuery(
     }
     g_opengl->glBeginQuery(target, id);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2399,7 +2641,7 @@ glEndQuery(
     }
     g_opengl->glEndQuery(target);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2422,7 +2664,7 @@ glGetQueryiv(
     }
     g_opengl->glGetQueryiv(target, pname, params);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2434,34 +2676,7 @@ glGetQueryObjectuiv(
 {
     g_opengl->glGetQueryObjectuiv(id, pname, params);
 
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL GLboolean GL_APIENTRY
-glUnmapBuffer(
-              GLenum target
-              )
-{
-    GLboolean result = GL_FALSE;
-    switch(target)
-    {
-    case GL_ARRAY_BUFFER:
-    case GL_ELEMENT_ARRAY_BUFFER:
-    case GL_COPY_READ_BUFFER:
-    case GL_COPY_WRITE_BUFFER:
-    case GL_PIXEL_PACK_BUFFER:
-    case GL_PIXEL_UNPACK_BUFFER:
-    case GL_TRANSFORM_FEEDBACK_BUFFER:
-    case GL_UNIFORM_BUFFER:
-        break;
-    default:
-        apiERROR(GL_INVALID_ENUM);
-        return result;
-    }
-    result = g_opengl->glUnmapBuffer(target);
-
-    CURRENT_GL_CONTEXT()->Api;
-    return result;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2488,18 +2703,7 @@ glGetBufferPointerv(
     }
     g_opengl->glGetBufferPointerv(target, pname, params);
 
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glDrawBuffers(
-              GLsizei n,
-              const GLenum* bufs
-              )
-{
-    g_opengl->glDrawBuffers(n, bufs);
-
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2512,7 +2716,7 @@ glUniformMatrix2x3fv(
 {
     g_opengl->glUniformMatrix2x3fv(location, count, transpose, value);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2525,7 +2729,7 @@ glUniformMatrix3x2fv(
 {
     g_opengl->glUniformMatrix3x2fv(location, count, transpose, value);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2538,7 +2742,7 @@ glUniformMatrix2x4fv(
 {
     g_opengl->glUniformMatrix2x4fv(location, count, transpose, value);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2551,7 +2755,7 @@ glUniformMatrix4x2fv(
 {
     g_opengl->glUniformMatrix4x2fv(location, count, transpose, value);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2564,7 +2768,7 @@ glUniformMatrix3x4fv(
 {
     g_opengl->glUniformMatrix3x4fv(location, count, transpose, value);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2577,26 +2781,7 @@ glUniformMatrix4x3fv(
 {
     g_opengl->glUniformMatrix4x3fv(location, count, transpose, value);
 
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glBlitFramebuffer(
-                  GLint srcX0,
-                  GLint srcY0,
-                  GLint srcX1,
-                  GLint srcY1,
-                  GLint dstX0,
-                  GLint dstY0,
-                  GLint dstX1,
-                  GLint dstY1,
-                  GLbitfield mask,
-                  GLenum filter
-                  )
-{
-    g_opengl->glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
-
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2610,7 +2795,7 @@ glRenderbufferStorageMultisample(
 {
     g_opengl->glRenderbufferStorageMultisample(target, samples, internalformat, width, height);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2628,108 +2813,7 @@ glFramebufferTextureLayer(
 
     g_opengl->glFramebufferTextureLayer(target, attachment, texture, level, layer);
 
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL GLvoid* GL_APIENTRY
-glMapBufferRange(
-                 GLenum target,
-                 GLintptr offset,
-                 GLsizeiptr length,
-                 GLbitfield access
-                 )
-{
-    GLvoid* result = NULL;
-    switch(target)
-    {
-    case GL_ARRAY_BUFFER:
-    case GL_ELEMENT_ARRAY_BUFFER:
-    case GL_COPY_READ_BUFFER:
-    case GL_COPY_WRITE_BUFFER:
-    case GL_PIXEL_PACK_BUFFER:
-    case GL_PIXEL_UNPACK_BUFFER:
-    case GL_TRANSFORM_FEEDBACK_BUFFER:
-    case GL_UNIFORM_BUFFER:
-        break;
-    default:
-        apiERROR(GL_INVALID_ENUM);
-        return result;
-    }
-    result = g_opengl->glMapBufferRange(target, offset, length, access);
-
-    CURRENT_GL_CONTEXT()->Api;
-    return result;
-}
-
-GL_APICALL void GL_APIENTRY
-glFlushMappedBufferRange(
-                         GLenum target,
-                         GLintptr offset,
-                         GLsizeiptr length
-                         )
-{
-    switch(target)
-    {
-    case GL_ARRAY_BUFFER:
-    case GL_ELEMENT_ARRAY_BUFFER:
-    case GL_COPY_READ_BUFFER:
-    case GL_COPY_WRITE_BUFFER:
-    case GL_PIXEL_PACK_BUFFER:
-    case GL_PIXEL_UNPACK_BUFFER:
-    case GL_TRANSFORM_FEEDBACK_BUFFER:
-    case GL_UNIFORM_BUFFER:
-        break;
-    default:
-        apiERROR(GL_INVALID_ENUM);
-        return;
-    }
-    g_opengl->glFlushMappedBufferRange(target, offset, length);
-
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glBindVertexArray(
-                  GLuint array
-                  )
-{
-    g_opengl->glBindVertexArray(array);
-
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glDeleteVertexArrays(
-                     GLsizei n,
-                     const GLuint* arrays
-                     )
-{
-    g_opengl->glDeleteVertexArrays(n, arrays);
-
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glGenVertexArrays(
-                  GLsizei n,
-                  GLuint* arrays
-                  )
-{
-    g_opengl->glGenVertexArrays(n, arrays);
-
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL GLboolean GL_APIENTRY
-glIsVertexArray(
-                GLuint array
-                )
-{
-    GLboolean result;
-    result = g_opengl->glIsVertexArray(array);
-
-    CURRENT_GL_CONTEXT()->Api;
-    return result;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2747,126 +2831,7 @@ glGetIntegeri_v(
         return;
     }
     g_opengl->glGetIntegeri_v(target, index, data);
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glBeginTransformFeedback(
-                         GLenum primitiveMode
-                         )
-{
-    CGLES3Context* thread = _GetThreadDataES3();
-    if((primitiveMode != GL_POINTS) && (primitiveMode != GL_LINES) && (primitiveMode != GL_TRIANGLES))
-    {
-        apiERROR(GL_INVALID_ENUM);
-        return;
-    }
-    g_opengl->glBeginTransformFeedback(primitiveMode);
-    CURRENT_GL_CONTEXT()->Api;
-    if(CURRENT_GL_CONTEXT()->Apierror == GL_NO_ERROR)
-    {
-        CURRENT_GL_CONTEXT()->ApicurrentTFBState = eActive;
-        CURRENT_GL_CONTEXT()->ApicurrentTFBPrimMode = primitiveMode;
-    }
-
-}
-
-GL_APICALL void GL_APIENTRY
-glEndTransformFeedback(
-                       void
-                       )
-{
-    CGLES3Context* thread = _GetThreadDataES3();
-    g_opengl->glEndTransformFeedback();
-    CURRENT_GL_CONTEXT()->Api;
-    if(CURRENT_GL_CONTEXT()->Apierror == GL_NO_ERROR)
-    {
-        CURRENT_GL_CONTEXT()->ApicurrentTFBState = eDeactive;
-    }
-}
-
-GL_APICALL void GL_APIENTRY
-glBindBufferRange(
-                  GLenum target,
-                  GLuint index,
-                  GLuint buffer,
-                  GLintptr offset,
-                  GLsizeiptr size
-                  )
-{
-    switch(target)
-    {
-    case GL_TRANSFORM_FEEDBACK_BUFFER:
-    case GL_UNIFORM_BUFFER:
-        break;
-    default:
-        apiERROR(GL_INVALID_ENUM);
-        return;
-    }
-    g_opengl->glBindBufferRange(target, index, buffer, offset, size);
-
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glBindBufferBase(
-                 GLenum target,
-                 GLuint index,
-                 GLuint buffer
-                 )
-{
-    switch(target)
-    {
-    case GL_TRANSFORM_FEEDBACK_BUFFER:
-    case GL_UNIFORM_BUFFER:
-        break;
-    default:
-        apiERROR(GL_INVALID_ENUM);
-        return;
-    }
-    g_opengl->glBindBufferBase(target, index, buffer);
-
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glTransformFeedbackVaryings(
-                            GLuint program,
-                            GLsizei count,
-                            const GLchar* const* varyings,
-                            GLenum bufferMode
-                            )
-{
-    g_opengl->glTransformFeedbackVaryings(program, count, varyings, bufferMode);
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glGetTransformFeedbackVarying(
-                              GLuint program,
-                              GLuint index,
-                              GLsizei bufSize,
-                              GLsizei* length,
-                              GLsizei* size,
-                              GLenum* type,
-                              GLchar* name
-                              )
-{
-    g_opengl->glGetTransformFeedbackVarying(program, index, bufSize, length, size, type, name);
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glVertexAttribIPointer(
-                       GLuint index,
-                       GLint size,
-                       GLenum type,
-                       GLsizei stride,
-                       const GLvoid* pointer
-                       )
-{
-    g_opengl->glVertexAttribIPointer(index, size, type, stride, pointer);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2877,7 +2842,7 @@ glGetVertexAttribIiv(
                      )
 {
     g_opengl->glGetVertexAttribIiv(index, pname, params);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2888,7 +2853,7 @@ glGetVertexAttribIuiv(
                       )
 {
     g_opengl->glGetVertexAttribIuiv(index, pname, params);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2901,7 +2866,7 @@ glVertexAttribI4i(
                   )
 {
     g_opengl->glVertexAttribI4i(index, x, y, z, w);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2914,7 +2879,7 @@ glVertexAttribI4ui(
                    )
 {
     g_opengl->glVertexAttribI4ui(index, x, y, z, w);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2924,7 +2889,7 @@ glVertexAttribI4iv(
                    )
 {
     g_opengl->glVertexAttribI4iv(index, v);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2934,7 +2899,7 @@ glVertexAttribI4uiv(
                     )
 {
     g_opengl->glVertexAttribI4uiv(index, v);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2945,7 +2910,7 @@ glGetUniformuiv(
                 )
 {
     g_opengl->glGetUniformuiv(program, location, params);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL GLint GL_APIENTRY
@@ -2956,7 +2921,7 @@ glGetFragDataLocation(
 {
     GLint location = -1;
     location = g_opengl->glGetFragDataLocation(program, name);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
     return location;
 }
 
@@ -2968,7 +2933,7 @@ glUniform1ui(
 {
     g_opengl->glUniform1ui(location, v0);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2980,7 +2945,7 @@ glUniform2ui(
 {
     g_opengl->glUniform2ui(location, v0, v1);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -2993,7 +2958,7 @@ glUniform3ui(
 {
     g_opengl->glUniform3ui(location, v0, v1, v2);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3007,7 +2972,7 @@ glUniform4ui(
 {
     g_opengl->glUniform4ui(location, v0, v1, v2, v3);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3019,7 +2984,7 @@ glUniform1uiv(
 {
     g_opengl->glUniform1uiv(location, count, value);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3031,7 +2996,7 @@ glUniform2uiv(
 {
     g_opengl->glUniform2uiv(location, count, value);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3043,7 +3008,7 @@ glUniform3uiv(
 {
     g_opengl->glUniform3uiv(location, count, value);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3055,7 +3020,7 @@ glUniform4uiv(
 {
     g_opengl->glUniform4uiv(location, count, value);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3066,7 +3031,7 @@ glClearBufferiv(
                 )
 {
     g_opengl->glClearBufferiv(buffer, drawbuffer, value);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3077,7 +3042,7 @@ glClearBufferuiv(
                  )
 {
     g_opengl->glClearBufferuiv(buffer, drawbuffer, value);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3088,7 +3053,7 @@ glClearBufferfv(
                 )
 {
     g_opengl->glClearBufferfv(buffer, drawbuffer, value);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3100,7 +3065,7 @@ glClearBufferfi(
                 )
 {
     g_opengl->glClearBufferfi(buffer, drawbuffer, depth, stencil);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL const GLubyte* GL_APIENTRY
@@ -3129,7 +3094,7 @@ glCopyBufferSubData(
                     )
 {
     g_opengl->glCopyBufferSubData(readTarget, writeTarget, readOffset, writeOffset, size);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3141,7 +3106,7 @@ glGetUniformIndices(
                     )
 {
     g_opengl->glGetUniformIndices(program, uniformCount, uniformNames, uniformIndices);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3154,7 +3119,7 @@ glGetActiveUniformsiv(
                       )
 {
     g_opengl->glGetActiveUniformsiv(program, uniformCount, uniformIndices, pname, params);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL GLuint GL_APIENTRY
@@ -3165,7 +3130,7 @@ glGetUniformBlockIndex(
 {
     GLuint index = GL_INVALID_INDEX;
     index = g_opengl->glGetUniformBlockIndex(program, uniformBlockName);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
     return index;
 }
 
@@ -3178,7 +3143,7 @@ glGetActiveUniformBlockiv(
                           )
 {
     g_opengl->glGetActiveUniformBlockiv(program, uniformBlockIndex, pname, params);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3191,7 +3156,7 @@ glGetActiveUniformBlockName(
                             )
 {
     g_opengl->glGetActiveUniformBlockName(program, uniformBlockIndex, bufSize, length, uniformBlockName);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3202,7 +3167,7 @@ glUniformBlockBinding(
                       )
 {
     g_opengl->glUniformBlockBinding(program, uniformBlockIndex, uniformBlockBinding);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3220,7 +3185,7 @@ glDrawArraysInstanced(
         apiERROR(GL_INVALID_VALUE);
         return;
     }
-    if(CURRENT_GL_CONTEXT()->ApiboundedFBO > 0)
+    if(CURRENT_CONTEXT1()->ApiboundedFBO > 0)
     {
         if(g_opengl->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
@@ -3228,9 +3193,9 @@ glDrawArraysInstanced(
             return;
         }
     }
-    if(CURRENT_GL_CONTEXT()->ApicurrentTFBState == eActive)
+    if(CURRENT_CONTEXT1()->ApicurrentTFBState == eActive)
     {
-        if(CURRENT_GL_CONTEXT()->ApicurrentTFBPrimMode != mode)
+        if(CURRENT_CONTEXT1()->ApicurrentTFBPrimMode != mode)
         {
             apiERROR(GL_INVALID_OPERATION);
             return;
@@ -3244,7 +3209,7 @@ glDrawArraysInstanced(
         g_opengl->glFinish();
     }
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3271,7 +3236,7 @@ glDrawElementsInstanced(
         apiERROR(GL_INVALID_ENUM);
         return;
     }
-    if(CURRENT_GL_CONTEXT()->ApiboundedFBO > 0)
+    if(CURRENT_CONTEXT1()->ApiboundedFBO > 0)
     {
         if(g_opengl->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
@@ -3279,7 +3244,7 @@ glDrawElementsInstanced(
             return;
         }
     }
-    if(CURRENT_GL_CONTEXT()->ApicurrentTFBState == eActive)
+    if(CURRENT_CONTEXT1()->ApicurrentTFBState == eActive)
     {
         apiERROR(GL_INVALID_OPERATION);
         return;
@@ -3291,7 +3256,7 @@ glDrawElementsInstanced(
         g_opengl->glFinish();
     }
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL GLsync GL_APIENTRY
@@ -3302,7 +3267,7 @@ glFenceSync(
 {
     GLsync sync = NULL;
     sync = g_opengl->glFenceSync(condition, flags);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
     return sync;
 }
 
@@ -3313,7 +3278,7 @@ glIsSync(
 {
     GLboolean result = GL_FALSE;
     result = g_opengl->glIsSync(sync);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
     return result;
 }
 
@@ -3323,7 +3288,7 @@ glDeleteSync(
              )
 {
     g_opengl->glDeleteSync(sync);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL GLenum GL_APIENTRY
@@ -3335,7 +3300,7 @@ glClientWaitSync(
 {
     GLenum result;
     result = g_opengl->glClientWaitSync(sync, flags, timeout);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
     return result;
 }
 
@@ -3347,7 +3312,7 @@ glWaitSync(
            )
 {
     g_opengl->glWaitSync(sync, flags, timeout);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3516,10 +3481,10 @@ glGetInteger64v(
         //case GL_TRANSFORM_FEEDBACK_BINDING:
         //    break;
     case GL_TRANSFORM_FEEDBACK_ACTIVE:
-        params[0] = (CURRENT_GL_CONTEXT()->ApicurrentTFBState == eActive)? GL_TRUE : GL_FALSE;
+        params[0] = (CURRENT_CONTEXT1()->ApicurrentTFBState == eActive)? GL_TRUE : GL_FALSE;
         break;
     case GL_TRANSFORM_FEEDBACK_PAUSED:
-        params[0] = (CURRENT_GL_CONTEXT()->ApicurrentTFBState == ePause)? GL_TRUE : GL_FALSE;
+        params[0] = (CURRENT_CONTEXT1()->ApicurrentTFBState == ePause)? GL_TRUE : GL_FALSE;
         break;
         //case GL_VERTEX_ARRAY_BINDING:
         //       break;
@@ -3537,7 +3502,7 @@ glGetInteger64v(
         g_opengl->glGetInteger64v(pname, params);
         break;
     }
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3550,7 +3515,7 @@ glGetSynciv(
             )
 {
     g_opengl->glGetSynciv(sync, pname, bufSize, length, values);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3569,7 +3534,7 @@ glGetInteger64i_v(
     }
 
     g_opengl->glGetInteger64i_v(target, index, data);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3596,10 +3561,10 @@ glGetBufferParameteri64v(
     else
     {
         //g_opengl->glGetBufferParameteri64v(target, pname, params);
-        //CURRENT_GL_CONTEXT()->Api;
+        //CURRENT_CONTEXT1()->Api;
     }
     g_opengl->glGetBufferParameteri64v(target, pname, params);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3610,7 +3575,7 @@ glGenSamplers(
 {
     g_opengl->glGenSamplers(count, samplers);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3621,7 +3586,7 @@ glDeleteSamplers(
 {
     g_opengl->glDeleteSamplers(count, samplers);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL GLboolean GL_APIENTRY
@@ -3632,7 +3597,7 @@ glIsSampler(
     GLboolean result;
     result = g_opengl->glIsSampler(sampler);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
     return result;
 }
 
@@ -3644,7 +3609,7 @@ glBindSampler(
 {
     g_opengl->glBindSampler(unit, sampler);
 
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3655,7 +3620,7 @@ glSamplerParameteri(
                     )
 {
     g_opengl->glSamplerParameteri(sampler, pname, param);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3666,7 +3631,7 @@ glSamplerParameteriv(
                      )
 {
     g_opengl->glSamplerParameteriv(sampler, pname, param);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3677,7 +3642,7 @@ glSamplerParameterf(
                     )
 {
     g_opengl->glSamplerParameterf(sampler, pname, param);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3688,7 +3653,7 @@ glSamplerParameterfv(
                      )
 {
     g_opengl->glSamplerParameterfv(sampler, pname, param);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3699,7 +3664,7 @@ glGetSamplerParameteriv(
                         )
 {
     g_opengl->glGetSamplerParameteriv(sampler, pname, params);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3710,7 +3675,7 @@ glGetSamplerParameterfv(
                         )
 {
     g_opengl->glGetSamplerParameterfv(sampler, pname, params);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3721,102 +3686,7 @@ glVertexAttribDivisor(
 {
     g_opengl->glVertexAttribDivisor(index, divisor);
 
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glBindTransformFeedback(
-                        GLenum target,
-                        GLuint id
-                        )
-{
-    g_opengl->glBindTransformFeedback(target, id);
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glDeleteTransformFeedbacks(
-                           GLsizei n,
-                           const GLuint* ids
-                           )
-{
-    g_opengl->glDeleteTransformFeedbacks(n, ids);
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glGenTransformFeedbacks(
-                        GLsizei n,
-                        GLuint* ids
-                        )
-{
-    g_opengl->glGenTransformFeedbacks(n, ids);
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL GLboolean GL_APIENTRY
-glIsTransformFeedback(
-                      GLuint id
-                      )
-{
-    GLboolean result = GL_FALSE;
-    result = g_opengl->glIsTransformFeedback(id);
-    CURRENT_GL_CONTEXT()->Api;
-    return result;
-}
-
-GL_APICALL void GL_APIENTRY
-glPauseTransformFeedback(
-                         void
-                         )
-{
-    CGLES3Context* thread = _GetThreadDataES3();
-    g_opengl->glPauseTransformFeedback();
-    CURRENT_GL_CONTEXT()->Api;
-    if(CURRENT_GL_CONTEXT()->Apierror == GL_NO_ERROR)
-    {
-        CURRENT_GL_CONTEXT()->ApicurrentTFBState = ePause;
-    }
-}
-
-GL_APICALL void GL_APIENTRY
-glResumeTransformFeedback(
-                          void
-                          )
-{
-    CGLES3Context* thread = _GetThreadDataES3();
-    g_opengl->glResumeTransformFeedback();
-    CURRENT_GL_CONTEXT()->Api;
-    if(CURRENT_GL_CONTEXT()->Apierror == GL_NO_ERROR)
-    {
-        CURRENT_GL_CONTEXT()->ApicurrentTFBState = eActive;
-    }
-}
-
-GL_APICALL void GL_APIENTRY
-glGetProgramBinary(
-                   GLuint program,
-                   GLsizei bufSize,
-                   GLsizei* length,
-                   GLenum* binaryFormat,
-                   GLvoid* binary
-                   )
-{
-    g_opengl->glGetProgramBinary(program, bufSize, length, binaryFormat, binary);
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glProgramBinary(
-                GLuint program,
-                GLenum binaryFormat,
-                const GLvoid* binary,
-                GLsizei length
-                )
-{
-    g_opengl->glProgramBinary(program, binaryFormat, binary, length);
-
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3837,108 +3707,7 @@ glProgramParameteri(
         return;
     }
     g_opengl->glProgramParameteri(program, pname, value);
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glInvalidateFramebuffer(
-                        GLenum target,
-                        GLsizei numAttachments,
-                        const GLenum* attachments
-                        )
-{
-    if(target != GL_FRAMEBUFFER)
-    {
-        apiERROR(GL_INVALID_ENUM);
-        return;
-    }
-    g_opengl->glInvalidateFramebuffer(target, numAttachments, attachments);
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glInvalidateSubFramebuffer(
-                           GLenum target,
-                           GLsizei numAttachments,
-                           const GLenum* attachments,
-                           GLint x,
-                           GLint y,
-                           GLsizei width,
-                           GLsizei height
-                           )
-{
-    if(target != GL_FRAMEBUFFER)
-    {
-        apiERROR(GL_INVALID_ENUM);
-        return;
-    }
-    g_opengl->glInvalidateSubFramebuffer(target, numAttachments, attachments, x, y, width, height);
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glTexStorage2D(
-               GLenum target,
-               GLsizei levels,
-               GLenum internalformat,
-               GLsizei width,
-               GLsizei height
-               )
-{
-    CGLES3Context* thread = _GetThreadDataES3();
-    Texture* tex;
-    tex = CURRENT_GL_CONTEXT()->ApiboundTexture[CURRENT_GL_CONTEXT()->ApiactiveTexture - GL_TEXTURE0];
-    if(tex == NULL)
-    {
-        apiERROR(GL_INVALID_OPERATION);
-        return;
-    }
-    switch(target)
-    {
-    case GL_TEXTURE_2D:
-    case GL_TEXTURE_CUBE_MAP:
-        break;
-    default:
-        apiERROR(GL_INVALID_ENUM);
-        return;
-    }
-
-    tex->internalformat = internalformat;
-    g_opengl->glTexStorage2D(target, levels, internalformat, width, height);
-    CURRENT_GL_CONTEXT()->Api;
-}
-
-GL_APICALL void GL_APIENTRY
-glTexStorage3D(
-               GLenum target,
-               GLsizei levels,
-               GLenum internalformat,
-               GLsizei width,
-               GLsizei height,
-               GLsizei depth
-               )
-{
-    CGLES3Context* thread = _GetThreadDataES3();
-    Texture* tex;
-    tex = CURRENT_GL_CONTEXT()->ApiboundTexture[CURRENT_GL_CONTEXT()->ApiactiveTexture - GL_TEXTURE0];
-    if(tex == NULL)
-    {
-        apiERROR(GL_INVALID_OPERATION);
-        return;
-    }
-    switch(target)
-    {
-    case GL_TEXTURE_3D:
-    case GL_TEXTURE_2D_ARRAY:
-        break;
-    default:
-        apiERROR(GL_INVALID_ENUM);
-        return;
-    }
-
-    tex->internalformat = internalformat;
-    g_opengl->glTexStorage3D(target, levels, internalformat, width, height, depth);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 GL_APICALL void GL_APIENTRY
@@ -3956,28 +3725,31 @@ glGetInternalformativ(
         return;
     }
     g_opengl->glGetInternalformativ(target, internalformat, pname, bufSize, params);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 
 
-GL_APICALL GLvoid* GL_APIENTRY glMapBufferOES(GLenum target, GLenum access)
+GL_APICALL GLvoid* GL_APIENTRY
+glMapBufferOES(GLenum target, GLenum access)
 {
     GLvoid * ret = g_opengl->glMapBufferOES(target, access);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
     return ret;
 }
 
 
-GL_APICALL GLboolean GL_APIENTRY glUnmapBufferOES(GLenum target)
+GL_APICALL GLboolean GL_APIENTRY
+glUnmapBufferOES(GLenum target)
 {
     GLboolean ret = g_opengl->glUnmapBufferOES(target);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
     return ret;
 }
 
-GL_APICALL void GL_APIENTRY glGetBufferPointervOES (GLenum target, GLenum pname, GLvoid** params)
+GL_APICALL void GL_APIENTRY
+glGetBufferPointervOES(GLenum target, GLenum pname, GLvoid** params)
 {
     g_opengl->glGetBufferPointervOES(target, pname, params);
-    CURRENT_GL_CONTEXT()->Api;
+    CURRENT_CONTEXT1()->Api;
 }
 #endif

@@ -41,7 +41,7 @@ public:
 
 public:
     stDumpDrawOptions   m_options;
-    CAnalyzer      *m_pAnalyzer;
+    CAnalyzer           *m_pAnalyzer;
     GLuint              m_nCurrentFrameNum;
     GLuint              m_nLoop;
 

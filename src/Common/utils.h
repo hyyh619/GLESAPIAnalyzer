@@ -97,13 +97,6 @@ typedef std::map<GLuint, std::string>   STRING_MAP;
 #define MAX(a,b)    (((a) > (b)) ? (a) : (b))
 #define MIN(a,b)    (((a) < (b)) ? (a) : (b))
 
-typedef enum _enLogLevel
-{
-    LOG_VERBOSE = 0,
-    LOG_WARNING,
-    LOG_ERROR
-} enLogLevel;
-
 typedef enum _NODE_COLOR
 {
     BLACK,
@@ -319,15 +312,8 @@ GLboolean       OutputToTarget(OUTPUT_TARGET  target,
                                const GLchar   *pThread,
                                const GLchar   *pOutput,
                                GLvoid         *pTarget);
-GLvoid          OutputToShaderFile(GLchar *output);
 GLvoid          OutputStrcat(GLchar* outBuf, GLint outputSize, const GLchar* string, ...);
-GLchar*         readLineFast();
-GLchar*         readUChar(GLint count);
-GLchar*         readUCharFast(GLint count);
-GLchar*         readLine();
-GLuint*         readUInt(GLint count);
-GLuint*         readUIntCount(GLint * count);
-GLuint*         readUIntCountFast(GLint * count);
+GLvoid          OutputStrcatFast(int pos, char* outBuf, int outputSize, const char* string, ...);
 DictionaryNode* DictCreateNode(GLint nameCode, GLint outputSize, GLchar *name);
 DictionaryNode* DictCreateNode(GLint nameCode, GLint outputSize);
 DictionaryNode* DictFindSpecificNode(DictionaryNode *node, GLint code);
@@ -348,16 +334,13 @@ GLvoid          ClearAllStringMap();
 GLvoid          ClearDrawStringMap();
 GLvoid          OutputDebugInfoToFile(const GLchar *str, ...);
 GLvoid          Abort(const GLchar *msg, ...);
-GLvoid          Print(enLogLevel level, const char *msg, ...);
 GLboolean       OpenDumpFile();
-GLvoid          SetDumpFile(GLint location);
 GLvoid          CloseDumpFile();
 const GLchar*   GetAPIName(GLESAPIIndex name);
 GLvoid          APIInitNameMap();
 GLint           GetAPIIndex(GLESAPIIndex name);
 
 extern GLuint           nLineNum;
-extern GLuint           g_nFrames;
 extern GLuint           nStartFrame;
 extern GLuint           nEndFrame;
 extern GLboolean        bPrintEGL;
@@ -366,7 +349,6 @@ extern GLboolean        bPrintES11;
 extern GLboolean        bPrintDrawShader;
 extern GLboolean        bPrintVertexAttrib;
 extern GLboolean        g_bSaveTexture;
-extern GLboolean        g_bSaveShader;
 extern GLboolean        bDumpFrameFile;
 extern GLboolean        bPrintMatrix;
 extern GLboolean        bDatabase;
@@ -379,12 +361,6 @@ extern GLboolean        bExitApp;
 extern GLboolean        bUsePng;
 extern GLboolean        bFlushFile;
 extern GLchar           tmp6[TMP5_BUF_SIZE];
-extern FILE             *g_pDrawFile;
-extern FILE             *g_pOutputFile;
-extern FILE             *g_pFrameFile;
-extern FILE             *g_pApiDumpFile;
-extern FILE             *g_pShaderFile;
-extern FILE             *g_pTextureFile;
 extern GLchar           strFileName[FILE_NAME_BUF_SIZE];
 extern GLchar           strOnlyFileName[FILE_NAME_BUF_SIZE];
 extern GLchar           strOnlySourcePath[FILE_NAME_BUF_SIZE];
@@ -395,9 +371,7 @@ extern GLchar           Uniform[UNIFORM_BUF_SIZE];
 extern GLint            eglWidth;
 extern GLint            eglHeight;
 extern GLenum           eglFormat;
-extern enLogLevel       printLevel;
 extern GLchar           thread[64];
-extern const GLchar     *strHalDumpFileName;
 extern GLchar           strOnlyFrameFileName[FILE_NAME_BUF_SIZE];
 extern GLchar           EGLOutput[EGL_OUT_BUF_SIZE];
 extern GLchar           GLOutput[GL_OUT_BUF_SIZE];

@@ -61,7 +61,7 @@ typedef struct _stPrivacy
 
 typedef struct _stEngine
 {
-    /* egl functions */
+    /* EGL functions */
     EGLBoolean (APIENTRY * eglChooseConfig) (EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config);
     EGLBoolean (APIENTRY * eglCopyBuffers) (EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target);
     EGLContext (APIENTRY * eglCreateContext) (EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list);
@@ -372,26 +372,47 @@ typedef struct _stEngine
     void            (APIENTRY * glCompressedTexImage3D) (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const void *data);
     void            (APIENTRY * glCompressedTexSubImage3D) (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const void *data);
     void            (APIENTRY * glGetSynciv) (GLsync sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values);
-
-    int supportMultisample;
-    int runninginMultisamplemode;
 } stEngine;
 
 typedef __eglMustCastToProperFunctionPointerType (APIENTRY * PFNEGLGETPROCADDRESS) (const char *procname);
-typedef void        (APIENTRY * PFNEGLCREATEIMAGEKHR) (EGLDisplay, EGLContext, EGLenum, EGLClientBuffer, const EGLint*);
-typedef EGLBoolean  (APIENTRY * PFNEGLCHOOSECONFIG) (EGLDisplay, const EGLint *, EGLConfig *, EGLint , EGLint *);
-typedef EGLint      (APIENTRY * PFNEGLGETERROR) ();
-typedef EGLDisplay  (APIENTRY * PFNEGLGETDISPLAY) (EGLNativeDisplayType);
-typedef EGLBoolean  (APIENTRY * PFNEGLINITIALIZE) (EGLDisplay, EGLint*, EGLint *);
-typedef EGLContext  (APIENTRY * PFNEGLCREATECONTEXT) (EGLDisplay, EGLConfig, EGLContext, const EGLint *);
-typedef EGLBoolean  (APIENTRY * PFNEGLMAKECURRENT) (EGLDisplay, EGLSurface, EGLSurface, EGLContext);
-typedef EGLSurface  (APIENTRY * PFNEGLCREATEPBUFFERSURFACE) (EGLDisplay, EGLConfig, const EGLint*);
-typedef EGLBoolean  (APIENTRY * PFNEGLGETCONFIGATTRIB) (EGLDisplay, EGLConfig, EGLint, EGLint*);
-typedef EGLBoolean  (APIENTRY * PFNEGLGETSWAPBUFFERS) (EGLDisplay, EGLSurface);
-typedef EGLContext  (APIENTRY * PFNEGLGETCURRENTCONTEXT) (void);
-typedef EGLBoolean  (APIENTRY * PFNEGLDESTROYSURFACE) (EGLDisplay, EGLSurface);
-typedef EGLSurface  (APIENTRY * PFNEGLCREATEWINDOWSURFACE) (EGLDisplay, EGLConfig, EGLNativeWindowType, const EGLint *);
-typedef EGLBoolean  (APIENTRY * PFNEGLQUERYSURFACE) (EGLDisplay, EGLSurface, EGLint, EGLint *);
+typedef void       (APIENTRY * PFNEGLCREATEIMAGEKHR) (EGLDisplay, EGLContext, EGLenum, EGLClientBuffer, const EGLint*);
+typedef EGLBoolean (APIENTRY * PFNEGLCHOOSECONFIG) (EGLDisplay, const EGLint *, EGLConfig *, EGLint , EGLint *);
+typedef EGLint     (APIENTRY * PFNEGLGETERROR) ();
+typedef EGLBoolean (APIENTRY * PFNEGLINITIALIZE) (EGLDisplay, EGLint*, EGLint *);
+typedef EGLContext (APIENTRY * PFNEGLCREATECONTEXT) (EGLDisplay, EGLConfig, EGLContext, const EGLint *);
+typedef EGLBoolean (APIENTRY * PFNEGLMAKECURRENT) (EGLDisplay, EGLSurface, EGLSurface, EGLContext);
+typedef EGLSurface (APIENTRY * PFNEGLCREATEPBUFFERSURFACE) (EGLDisplay, EGLConfig, const EGLint*);
+typedef EGLBoolean (APIENTRY * PFNEGLGETCONFIGATTRIB) (EGLDisplay, EGLConfig, EGLint, EGLint*);
+typedef EGLBoolean (APIENTRY * PFNEGLGETSWAPBUFFERS) (EGLDisplay, EGLSurface);
+typedef EGLContext (APIENTRY * PFNEGLGETCURRENTCONTEXT) (void);
+typedef EGLBoolean (APIENTRY * PFNEGLDESTROYSURFACE) (EGLDisplay, EGLSurface);
+typedef EGLSurface (APIENTRY * PFNEGLCREATEWINDOWSURFACE) (EGLDisplay, EGLConfig, EGLNativeWindowType, const EGLint *);
+typedef EGLBoolean (APIENTRY * PFNEGLQUERYSURFACE) (EGLDisplay, EGLSurface, EGLint, EGLint *);
+typedef EGLBoolean (APIENTRY * PFNEGLCOPYBUFFERS) (EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target);
+typedef EGLSurface (APIENTRY * PFNEGLCREATEPIXMAPSURFACE) (EGLDisplay dpy, EGLConfig config, EGLNativePixmapType pixmap, const EGLint *attrib_list);
+typedef EGLBoolean (APIENTRY * PFNEGLDESTROYCONTEXT) (EGLDisplay dpy, EGLContext context);
+typedef EGLBoolean (APIENTRY * PFNEGLGETCONFIGS) (EGLDisplay dpy, EGLConfig *configs, EGLint config_size, EGLint *num_config);
+typedef EGLDisplay (APIENTRY * PFNEGLGETCURRENTDISPLAY) (void);
+typedef EGLSurface (APIENTRY * PFNEGLGETCURRENTSURFACE) (EGLint readdraw);
+typedef EGLDisplay (APIENTRY * PFNEGLGETDISPLAY) (EGLNativeDisplayType display_id);
+typedef EGLBoolean (APIENTRY * PFNEGLSETFIFO) (void*);
+typedef EGLBoolean (APIENTRY * PFNEGLQUERYCONTEXT) (EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint *value);
+typedef const char *(APIENTRY * PFNEGLQUERYSTRING) (EGLDisplay dpy, EGLint name);
+typedef EGLBoolean (APIENTRY * PFNEGLQUERYSURFACE) (EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint *value);
+typedef EGLBoolean (APIENTRY * PFNEGLSWAPBUFFERS) (EGLDisplay dpy, EGLSurface surface);
+typedef EGLBoolean (APIENTRY * PFNEGLTERMINATE) (EGLDisplay dpy);
+typedef EGLBoolean (APIENTRY * PFNEGLWAITGL) (void);
+typedef EGLBoolean (APIENTRY * PFNEGLWAITNATIVE) (EGLint engine);
+typedef EGLBoolean (APIENTRY * PFNEGLBINDTEXIMAGE) (EGLDisplay dpy, EGLSurface surface, EGLint buffer);
+typedef EGLBoolean (APIENTRY * PFNEGLRELEASETEXIMAGE) (EGLDisplay dpy, EGLSurface surface, EGLint buffer);
+typedef EGLBoolean (APIENTRY * PFNEGLSURFACEATTRIB) (EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint value);
+typedef EGLBoolean (APIENTRY * PFNEGLSWAPINTERVAL) (EGLDisplay dpy, EGLint interval);
+typedef EGLBoolean (APIENTRY * PFNEGLBINDAPI) (EGLenum api);
+typedef EGLenum (APIENTRY * PFNEGLQUERYAPI) (void);
+typedef EGLSurface (APIENTRY * PFNEGLCREATEPBUFFERFROMCLIENTBUFFER) (EGLDisplay dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig config, const EGLint *attrib_list);
+typedef EGLBoolean (APIENTRY * PFNEGLRELEASETHREAD) (void);
+typedef EGLBoolean (APIENTRY * PFNEGLWAITCLIENT) (void);
+typedef EGLContext (APIENTRY * PFNEGLGETCURRENTCONTEXT) (void);
 
 typedef void (APIENTRY * PFNGLALPHAFUNC) (GLenum func, GLclampf ref);
 typedef void (APIENTRY * PFNGLCLEARCOLOR) (GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
@@ -876,6 +897,8 @@ GetFuncAddress(
     int client,
     const GLchar *proc
     );
+
+extern stEngine     *g_opengl;
 
 #ifdef __cplusplus
 }

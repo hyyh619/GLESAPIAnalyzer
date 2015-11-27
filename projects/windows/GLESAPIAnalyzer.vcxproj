@@ -5,6 +5,10 @@
       <Configuration>API_DUMP</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="DEBUG_OES3_GLES3_API|Win32">
+      <Configuration>DEBUG_OES3_GLES3_API</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug_OES3_GLESAPI|Win32">
       <Configuration>Debug_OES3_GLESAPI</Configuration>
       <Platform>Win32</Platform>
@@ -113,6 +117,12 @@
     <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DEBUG_OES3_GLES3_API|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_OES3_GLESAPI|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -168,6 +178,9 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DEBUG_OES3|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DEBUG_OES3_GLES3_API|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug_OES3_GLESAPI|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -214,6 +227,10 @@
     <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DEBUG_OES3|Win32'">
+    <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DEBUG_OES3_GLES3_API|Win32'">
     <IntDir>$(SolutionDir)output\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
   </PropertyGroup>
@@ -346,13 +363,28 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>../../api/GLES3;../../OS;../../src/DumpDraw;../../src/engine;../../src/Context;../../src/common;../../src/ApiDump;../../sdk;../../api/GLES3.0_Tracer;../../api;../../src/ApiAnalyzer;../../modules/png;../../modules/zlib;../../../P4/tools/GLES3.0_Tracer/players/src/Render;../../../P4/tools/GLES3.0_Tracer/common;../../../P4/tools/GLES3.0_Tracer/players/src/Parser;../../../P4/tools/GLES3.0_Tracer/players/src/Main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_MBCS;WIN32;VTRACER_USE;API_ANALYZER;OPENGL_ES_2;VTRACER;WINDOWS;API_DUMP;OES3_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;WIN32;VTRACER_USE;WINDOWS;API_DUMP;OES3_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
       <CallingConvention>Cdecl</CallingConvention>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DEBUG_OES3_GLES3_API|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../api/GLES3;../../OS;../../src/DumpDraw;../../src/engine;../../src/Context;../../src/common;../../src/ApiDump;../../sdk;../../api/GLES3.0_Tracer;../../api;../../src/ApiAnalyzer;../../modules/png;../../modules/zlib;../../../P4/tools/GLES3.0_Tracer/players/src/Render;../../../P4/tools/GLES3.0_Tracer/common;../../../P4/tools/GLES3.0_Tracer/players/src/Parser;../../../P4/tools/GLES3.0_Tracer/players/src/Main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;WIN32;WINDOWS;OES3_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4005</DisableSpecificWarnings>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>../../api/GLES3/GLESAPIAnalyzer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_OES3_GLESAPI|Win32'">
@@ -414,8 +446,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\api\ApiAnalyzer.cpp" />
     <ClCompile Include="..\..\api\GLES3.0_Tracer\APIGLES3Tracer.cpp" />
-    <ClCompile Include="..\..\api\GLES3\APIDump.c" />
-    <ClCompile Include="..\..\api\GLES3\ApiOESEngine.c" />
+    <ClCompile Include="..\..\api\GLES3\ApiOESEngine.cpp" />
     <ClCompile Include="..\..\api\GLES3\EGLAPI.cpp" />
     <ClCompile Include="..\..\api\GLES3\ES30API.cpp" />
     <ClCompile Include="..\..\api\TCG\ApiTcg.cpp" />
@@ -453,6 +484,7 @@
     <ClCompile Include="..\..\modules\zlib\uncompr.c" />
     <ClCompile Include="..\..\modules\zlib\zutil.c" />
     <ClCompile Include="..\..\OS\windows\APIWindowsOS.cpp" />
+    <ClCompile Include="..\..\OS\windows\DllMain.cpp" />
     <ClCompile Include="..\..\src\ApiAnalyzer\Analyzer.cpp" />
     <ClCompile Include="..\..\src\ApiAnalyzer\ConvertApiDump.cpp" />
     <ClCompile Include="..\..\src\ApiAnalyzer\egl.cpp" />
@@ -485,11 +517,7 @@
     <ClInclude Include="..\..\api\GLES3\ApiCore.h" />
     <ClInclude Include="..\..\api\GLES3\ApiOESEngine.h" />
     <ClInclude Include="..\..\api\GLES3\EGLAPI.h" />
-    <ClInclude Include="..\..\api\GLES3\EngineOCL.h" />
     <ClInclude Include="..\..\api\GLES3\ES30API.h" />
-    <ClInclude Include="..\..\api\GLES3\veEGLresource.h" />
-    <ClInclude Include="..\..\api\GLES3\veES30resource.h" />
-    <ClInclude Include="..\..\api\GLES3\wglext.h" />
     <ClInclude Include="..\..\api\TCG\ApiTcg.h" />
     <ClInclude Include="..\..\modules\zlib\crc32.h" />
     <ClInclude Include="..\..\modules\zlib\deflate.h" />
@@ -545,6 +573,9 @@
     <ClInclude Include="..\..\src\Context\GLSLShader.h" />
     <ClInclude Include="..\..\src\DumpDraw\ApiDumpDraw.h" />
     <ClInclude Include="..\..\src\Engine\ApiEngine.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\api\GLES3\GLESAPIAnalyzer.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

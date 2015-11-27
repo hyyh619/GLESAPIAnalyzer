@@ -21,26 +21,20 @@ class CApiAnalyzer
 public:
 #ifdef API_DUMP
     CApiAnalyzer(GLboolean bAnalyzed, const GLchar *filePath, stCmdArgs& options);
-#endif
-    CApiAnalyzer();
-    ~CApiAnalyzer();
 
-private:
-#ifdef API_DUMP
     GLvoid          ParseEGLEvent(const stEvent &ev);
     GLvoid          ParseES3Event(const stEvent &ev);
     GLvoid          UpdateContext(const stEvent &ev);
     GLvoid          ShaderSource(GLuint shaderIndex, GLsizei count, GLuint stringAddr, GLuint lenAddr);
-#endif
-
-public:
-    GLvoid          Release();
-
-#ifdef API_DUMP
     GLvoid          BeginEvent(const stEvent& ev);
     GLvoid          EndEvent(const stEvent& ev);
     GLvoid          SetPlayer(CPlayer *p);
 #endif
+
+    CApiAnalyzer();
+    ~CApiAnalyzer();
+
+    GLvoid          Release();
 
 private:
 #ifdef API_DUMP

@@ -36,6 +36,8 @@ GLvoid CGLES3Context::ApiBindFramebuffer(GLenum target, GLuint fbo)
             pFBO = CreateFramebufferObj(fbo);
         }
     }
+
+    CTX_ANALYZER_FUNC2(BindFramebuffer, GLOutput, GL_OUT_BUF_SIZE, target, fbo);
 }
 
 GLvoid CGLES3Context::ApiBindRenderbuffer(GLenum target, GLuint rbo)
@@ -55,6 +57,8 @@ GLvoid CGLES3Context::ApiBindRenderbuffer(GLenum target, GLuint rbo)
             pRBO = CreateRenderbufferObj(rbo);
         }
     }
+
+    CTX_ANALYZER_FUNC2(BindRenderbuffer, GLOutput, GL_OUT_BUF_SIZE, target, rbo);
 }
 
 GLvoid CGLES3Context::ApiDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
@@ -66,17 +70,21 @@ GLvoid CGLES3Context::ApiDeleteFramebuffers(GLsizei n, const GLuint *framebuffer
     {
         DeleteFramebufferObj(framebuffers[i]);
     }
+
+    CTX_ANALYZER_FUNC2(DeleteFramebuffers, GLOutput, GL_OUT_BUF_SIZE, n, framebuffers);
 }
 
-GLvoid CGLES3Context::ApiDeleteRenderbuffers(GLsizei n, const GLuint *framebuffers)
+GLvoid CGLES3Context::ApiDeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
 {
-    if (!framebuffers)
+    if (!renderbuffers)
         return;
 
     for (GLsizei i=0; i<n; i++)
     {
-        DeleteRenderbufferObj(framebuffers[i]);
+        DeleteRenderbufferObj(renderbuffers[i]);
     }
+
+    CTX_ANALYZER_FUNC2(DeleteRenderbuffers, GLOutput, GL_OUT_BUF_SIZE, n, renderbuffers);
 }
 
 GLvoid CGLES3Context::ApiGenRenderbuffers(GLsizei n, GLuint *buffers)
@@ -88,6 +96,8 @@ GLvoid CGLES3Context::ApiGenRenderbuffers(GLsizei n, GLuint *buffers)
     {
         CRenderbufferObj *pBuf = CreateRenderbufferObj(buffers[i]);
     }
+
+    CTX_ANALYZER_FUNC2(GenRenderbuffers, GLOutput, GL_OUT_BUF_SIZE, n, buffers);
 }
 
 GLvoid CGLES3Context::ApiGenFramebuffers(GLsizei n, GLuint *buffers)
@@ -99,6 +109,8 @@ GLvoid CGLES3Context::ApiGenFramebuffers(GLsizei n, GLuint *buffers)
     {
         CFramebufferObj *pBuf = CreateFramebufferObj(buffers[i]);
     }
+
+    CTX_ANALYZER_FUNC2(GenFramebuffers, GLOutput, GL_OUT_BUF_SIZE, n, buffers);
 }
 
 CFramebufferObj* CGLES3Context::CreateFramebufferObj(GLuint fbo)
@@ -185,7 +197,7 @@ GLvoid CGLES3Context::DeleteRenderbufferObj(GLuint rbo)
     delete p;
 }
 
-GLvoid CGLES3Context::ApiRenderbufferStorage (GLenum target, GLenum internalformat, GLsizei width, GLsizei height)
+GLvoid CGLES3Context::ApiRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height)
 {
     CRenderbufferObj *pRbo = rboMap[currentRBO];
 
@@ -196,6 +208,8 @@ GLvoid CGLES3Context::ApiRenderbufferStorage (GLenum target, GLenum internalform
         pRbo->width             = width;
         pRbo->height            = height;
     }
+
+    CTX_ANALYZER_FUNC4(RenderbufferStorage, GLOutput, GL_OUT_BUF_SIZE, target, internalformat, width, height);
 }
 
 GLvoid CGLES3Context::ApiFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level)
@@ -226,6 +240,8 @@ GLvoid CGLES3Context::ApiFramebufferTexture2D(GLenum target, GLenum attachment, 
     default:
         break;
     }
+
+    CTX_ANALYZER_FUNC5(FramebufferTexture2D, GLOutput, GL_OUT_BUF_SIZE, target, attachment, textarget, texture, level);
 }
 
 GLvoid CGLES3Context::ApiFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer)
@@ -245,16 +261,36 @@ GLvoid CGLES3Context::ApiFramebufferRenderbuffer(GLenum target, GLenum attachmen
         p->stencilType  = renderbuffertarget;
         break;
     }
+
+    CTX_ANALYZER_FUNC4(FramebufferRenderbuffer, GLOutput, GL_OUT_BUF_SIZE, target, attachment, renderbuffertarget, renderbuffer);
 }
 
 GLvoid CGLES3Context::ApiCheckFramebufferStatus(GLenum target, GLenum result)
 {
+    CTX_ANALYZER_FUNC2(CheckFramebufferStatus, GLOutput, GL_OUT_BUF_SIZE, target, result);
 }
 
 GLvoid CGLES3Context::ApiGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, GLenum pname, GLint *params)
 {
+    CTX_ANALYZER_FUNC4(GetFramebufferAttachmentParameteriv, GLOutput, GL_OUT_BUF_SIZE, target, attachment, pname, params);
 }
 
 GLvoid CGLES3Context::ApiGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint *params)
 {
+    CTX_ANALYZER_FUNC3(GetRenderbufferParameteriv, GLOutput, GL_OUT_BUF_SIZE, target, pname, params);
+}
+
+GLvoid CGLES3Context::ApiDrawBuffers(GLsizei n, const GLenum *bufs)
+{
+    CTX_ANALYZER_FUNC2(DrawBuffers, GLOutput, GL_OUT_BUF_SIZE, n, bufs);
+}
+
+GLvoid CGLES3Context::ApiInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum *attachments)
+{
+    CTX_ANALYZER_FUNC3(InvalidateFramebuffer, GLOutput, GL_OUT_BUF_SIZE, target, numAttachments, attachments);
+}
+
+GLvoid CGLES3Context::ApiInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height)
+{
+    CTX_ANALYZER_FUNC7(InvalidateSubFramebuffer, GLOutput, GL_OUT_BUF_SIZE, target, numAttachments, attachments, x, y, width, height);
 }

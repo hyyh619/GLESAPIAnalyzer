@@ -46,7 +46,7 @@ GLvoid CApiDumpDraw::DumpPng(GLchar *fileName)
     GLubyte     *r,*g,*b,*a;
     GLint       viewport[4];
 
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    g_opengl->glGetIntegerv(GL_VIEWPORT, viewport);
     x       = viewport[0];
     y       = viewport[1];
     width   = viewport[2];
@@ -54,7 +54,7 @@ GLvoid CApiDumpDraw::DumpPng(GLchar *fileName)
     data    = (GLubyte *)malloc(4*width*height);
     pData   = data;
 
-    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    g_opengl->glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
     pic_d.width     = width;
     pic_d.height    = height;
@@ -103,14 +103,14 @@ GLvoid CApiDumpDraw::DumpBmp(GLchar *fileName)
     GLint   y       = 0;
     GLubyte *data   = NULL;
 
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    g_opengl->glGetIntegerv(GL_VIEWPORT, viewport);
     x       = viewport[0];
     y       = viewport[1];
     width   = viewport[2];
     height  = viewport[3];
     data = (GLubyte*)malloc(4*width*height);
 
-    glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    g_opengl->glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
     ApiWriteBitmap(fileName, data, width, height, 0, RGBA_8888, 0);
     free(data);
 
@@ -144,17 +144,19 @@ GLboolean CApiDumpDraw::GetDumpFileName(GLchar *fileName, const GLchar *dumpName
     GLint   texFace     = 0;
     GLint   fbo         = 0;
 
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+    g_opengl->glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
 
-    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,
-                                          GL_COLOR_ATTACHMENT0,
-                                          GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE,
-                                          &objectType);
+    g_opengl->glGetFramebufferAttachmentParameteriv(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE,
+        &objectType);
 
-    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,
-                                          GL_COLOR_ATTACHMENT0,
-                                          GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME,
-                                          &objectName);
+    g_opengl->glGetFramebufferAttachmentParameteriv(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME,
+        &objectName);
 
     if (objectType == 0)
     {
@@ -163,15 +165,17 @@ GLboolean CApiDumpDraw::GetDumpFileName(GLchar *fileName, const GLchar *dumpName
 
     if (objectType == GL_TEXTURE)
     {
-        glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,
-                                              GL_COLOR_ATTACHMENT0,
-                                              GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL,
-                                              &texLevel);
+        g_opengl->glGetFramebufferAttachmentParameteriv(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL,
+            &texLevel);
 
-        glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,
-                                              GL_COLOR_ATTACHMENT0,
-                                              GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE,
-                                              &texFace);
+        g_opengl->glGetFramebufferAttachmentParameteriv(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE,
+            &texFace);
     }
 
     switch (objectType)
@@ -230,7 +234,7 @@ GLvoid CApiDumpDraw::DumpDraw(GLESAPIIndex func)
     }
 
     // Dump depth buffer
-    if (m_options.dumpDepth && glIsEnabled(GL_DEPTH_TEST))
+    if (m_options.dumpDepth && g_opengl->glIsEnabled(GL_DEPTH_TEST))
     {
         m_apiEngine.SaveDrawStates();
         DumpDepth(func);
@@ -324,7 +328,7 @@ GLvoid CApiDumpDraw::DumpDepth(GLESAPIIndex func)
     GLint   locSampler  = -1;
     GLuint  drawFBO     = m_apiEngine.DrawStatesFBO();
 
-    glGetError();
+    g_opengl->glGetError();
 
     m_apiEngine.ActiveTexture(texUnit);
 
@@ -351,11 +355,11 @@ GLvoid CApiDumpDraw::DumpDepth(GLESAPIIndex func)
     m_apiEngine.FramebufferTexture2D(GL_FRAMEBUFFER, fbo1, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex1, 0);
     m_apiEngine.BindFramebuffer(GL_FRAMEBUFFER, fbo1);
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    g_opengl->glClear(GL_COLOR_BUFFER_BIT);
 
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_STENCIL_TEST);
-    glDisable(GL_BLEND);
+    g_opengl->glDisable(GL_DEPTH_TEST);
+    g_opengl->glDisable(GL_STENCIL_TEST);
+    g_opengl->glDisable(GL_BLEND);
 
     m_apiEngine.UseDumpDepthProgram();
     locPos      = m_apiEngine.GetAttribLocation(program, "a_vertex");
@@ -364,19 +368,19 @@ GLvoid CApiDumpDraw::DumpDepth(GLESAPIIndex func)
 
     m_apiEngine.ActiveTexture(texUnit);
     m_apiEngine.BindTexture(GL_TEXTURE_2D, tex);
-    glUniform1i(locSampler, texUnit-GL_TEXTURE0);
+    g_opengl->glUniform1i(locSampler, texUnit-GL_TEXTURE0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glEnableVertexAttribArray(locPos);
-    glVertexAttribPointer(locPos, 2, GL_FLOAT, 0, 16, &position[0]);
+    g_opengl->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    g_opengl->glEnableVertexAttribArray(locPos);
+    g_opengl->glVertexAttribPointer(locPos, 2, GL_FLOAT, 0, 16, &position[0]);
 
     if (locTex != -1)
     {
-        glEnableVertexAttribArray(locTex);
-        glVertexAttribPointer(locTex, 2, GL_FLOAT, 0, 16, &position[2]);
+        g_opengl->glEnableVertexAttribArray(locTex);
+        g_opengl->glVertexAttribPointer(locTex, 2, GL_FLOAT, 0, 16, &position[2]);
     }
 
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    g_opengl->glDrawArrays(GL_TRIANGLES, 0, 6);
 
     if (m_options.dumpDrawPng)
     {
@@ -387,8 +391,8 @@ GLvoid CApiDumpDraw::DumpDepth(GLESAPIIndex func)
         DumpBmp(fileName);
     }
 
-    glDeleteTextures(1, &tex);
-    glDeleteFramebuffers(1, &fbo);
-    glDeleteTextures(1, &tex1);
-    glDeleteFramebuffers(1, &fbo1);
+    g_opengl->glDeleteTextures(1, &tex);
+    g_opengl->glDeleteFramebuffers(1, &fbo);
+    g_opengl->glDeleteTextures(1, &tex1);
+    g_opengl->glDeleteFramebuffers(1, &fbo1);
 }

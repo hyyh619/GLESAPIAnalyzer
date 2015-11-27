@@ -12,12 +12,11 @@
 #include "MemoryPool.h"
 #include "ParseGLES3.h"
 #include "ApiGLES3Context.h"
+#include "ApiEGLContext.h"
+#include "Analyzer.h"
 
 #define FAKE_FRAGMENT_SHADER    0
 #define FAKE_VERTEX_SHADER      0
-
-GLenum UniformIsTextureSampler(const GLchar *name, GLenum *shaderType);
-GLvoid OutputVertexAttribToFrameFile(GLuint index);
 
 int draws[] =
 {
@@ -338,12 +337,12 @@ GLboolean GLES3Disassemble(GLchar *input, GLchar *output, GLint outputSize)
     return true;
 }
 
-GLvoid OutputMaskToFrameFile(GLchar *str)
+GLvoid CAnalyzer::OutputMaskToFrameFile(GLchar *str)
 {
-    OutputToTarget(OUTPUT_TO_FILE, GL_FALSE, 0, NULL, str, g_pFrameFile);
+    OutputToTarget(OUTPUT_TO_FILE, GL_FALSE, 0, NULL, str, m_pFrameFile);
 }
 
-GLvoid OutputClearToFrameFile(GLint mask)
+GLvoid CAnalyzer::OutputClearToFrameFile(GLint mask)
 {
     GLchar buf[1024];
 
@@ -354,28 +353,28 @@ GLvoid OutputClearToFrameFile(GLint mask)
     if (mask & GL_COLOR_BUFFER_BIT)
     {
         OutputStrcat(buf, 1024, "  RGBA(%f, %f, %f, %f) Mask(%01d%01d%01d%01d)", 
-            CURRENT_CONTEXT1().clearRed, CURRENT_CONTEXT1().clearGreen, CURRENT_CONTEXT1().clearBlue, CURRENT_CONTEXT1().clearAlpha,
-            CURRENT_CONTEXT1().colorRedMask, CURRENT_CONTEXT1().colorGreenMask, CURRENT_CONTEXT1().colorBlueMask, CURRENT_CONTEXT1().colorAlphaMask);
+            CURRENT_CONTEXT1()->clearRed, CURRENT_CONTEXT1()->clearGreen, CURRENT_CONTEXT1()->clearBlue, CURRENT_CONTEXT1()->clearAlpha,
+            CURRENT_CONTEXT1()->colorRedMask, CURRENT_CONTEXT1()->colorGreenMask, CURRENT_CONTEXT1()->colorBlueMask, CURRENT_CONTEXT1()->colorAlphaMask);
     }
 
     if (mask & GL_STENCIL_BUFFER_BIT)
     {
-        OutputStrcat(buf, 1024, "  Stencil(0x%X)", CURRENT_CONTEXT1().clearStencil);
+        OutputStrcat(buf, 1024, "  Stencil(0x%X)", CURRENT_CONTEXT1()->clearStencil);
     }
 
     if (mask & GL_DEPTH_BUFFER_BIT)
     {
-        OutputStrcat(buf, 1024, "  Depth(%1.1f)", CURRENT_CONTEXT1().clearDepth);
+        OutputStrcat(buf, 1024, "  Depth(%1.1f)", CURRENT_CONTEXT1()->clearDepth);
     }
 
     OutputStrcat(buf, 1024, "\n");
-    OutputToTarget(OUTPUT_TO_FRAME_STRING, GL_FALSE, ++g_frameDrawCount, NULL, buf, g_pFrameFile);
+    OutputToTarget(OUTPUT_TO_FRAME_STRING, GL_FALSE, ++g_frameDrawCount, NULL, buf, m_pFrameFile);
 }
 
-GLvoid OutputDrawArraysToFrameFile_es20(GLenum mode, GLuint first, GLint count, GLuint historyID)
+GLvoid CAnalyzer::OutputDrawArraysToFrameFile_es20(GLenum mode, GLuint first, GLint count)
 {
-    GLuint      progID      = CURRENT_CONTEXT1().curProgram;
-    CProgramObj *prog       = CURRENT_CONTEXT1().FindProgram(progID);
+    GLuint      progID      = CURRENT_CONTEXT1()->curProgram;
+    CProgramObj *prog       = CURRENT_CONTEXT1()->FindProgram(progID);
     GLuint      uniformSize = prog->m_uniforms.size();
     GLchar      buf[1024];
 
@@ -391,18 +390,18 @@ GLvoid OutputDrawArraysToFrameFile_es20(GLenum mode, GLuint first, GLint count, 
         sprintf(buf, "glDrawArrays(%s, %d, %d)", tmp1, first, count);
     }
 
-    OutputStrcat(buf, 1024, "  prog(%d)", CURRENT_CONTEXT1().curProgram);
+    OutputStrcat(buf, 1024, "  prog(%d)", CURRENT_CONTEXT1()->curProgram);
 
-    if (CURRENT_CONTEXT1().currentFBO)
+    if (CURRENT_CONTEXT1()->currentFBO)
     {
-        OutputStrcat(buf, 1024, "  FBO(%d)", CURRENT_CONTEXT1().currentFBO);
+        OutputStrcat(buf, 1024, "  FBO(%d)", CURRENT_CONTEXT1()->currentFBO);
     }
 
-    if (CURRENT_CONTEXT1().scissorEnable)
+    if (CURRENT_CONTEXT1()->scissorEnable)
     {
         OutputStrcat(buf, 1024, ",  s(%d, %d, %d, %d)",
-            CURRENT_CONTEXT1().scissorX, CURRENT_CONTEXT1().scissorY,
-            CURRENT_CONTEXT1().scissorWidth, CURRENT_CONTEXT1().scissorHeight);
+            CURRENT_CONTEXT1()->scissorX, CURRENT_CONTEXT1()->scissorY,
+            CURRENT_CONTEXT1()->scissorWidth, CURRENT_CONTEXT1()->scissorHeight);
     }
 
     for (unsigned int i=0; i<uniformSize; i++)
@@ -428,11 +427,11 @@ GLvoid OutputDrawArraysToFrameFile_es20(GLenum mode, GLuint first, GLint count, 
         switch (dataType)
         {
         case GL_SAMPLER_2D:
-            texId = CURRENT_CONTEXT1().textureSampler[unit][TEXTURE_TYPE_2D];
+            texId = CURRENT_CONTEXT1()->textureSampler[unit][TEXTURE_TYPE_2D];
             break;
 
         case GL_SAMPLER_CUBE:
-            texId = CURRENT_CONTEXT1().textureSampler[unit][TEXTURE_TYPE_CUBEMAP];
+            texId = CURRENT_CONTEXT1()->textureSampler[unit][TEXTURE_TYPE_CUBEMAP];
             break;
 
         default:
@@ -442,15 +441,15 @@ GLvoid OutputDrawArraysToFrameFile_es20(GLenum mode, GLuint first, GLint count, 
         OutputStrcat(buf, 1024, ",  t(%04d)", texId);
     }
 
-    //OutputStrcat(buf, 1024, " <url:./%s.hy#tn=DrawArrays: %d>\n", strOnlyFileName, CURRENT_CONTEXT1().nDrawArrays);
-    OutputStrcat(buf, 1024, " #%d\n", CURRENT_CONTEXT1().nDrawTotal);
-    OutputToTarget(OUTPUT_TO_FRAME_STRING, GL_FALSE, ++g_frameDrawCount, NULL, buf, g_pFrameFile);
+    //OutputStrcat(buf, 1024, " <url:./%s.hy#tn=DrawArrays: %d>\n", strOnlyFileName, CURRENT_CONTEXT1()->nDrawArrays);
+    OutputStrcat(buf, 1024, " #%d\n", CURRENT_CONTEXT1()->nDrawTotal);
+    OutputToTarget(OUTPUT_TO_FRAME_STRING, GL_FALSE, ++g_frameDrawCount, NULL, buf, m_pFrameFile);
 }
 
-GLvoid OutputDrawElementsToFrameFile_es20(GLenum mode, GLint count, GLenum indexType)
+GLvoid CAnalyzer::OutputDrawElementsToFrameFile_es20(GLenum mode, GLint count, GLenum indexType)
 {
-    GLuint      progID      = CURRENT_CONTEXT1().curProgram;
-    CProgramObj *prog       = CURRENT_CONTEXT1().FindProgram(progID);
+    GLuint      progID      = CURRENT_CONTEXT1()->curProgram;
+    CProgramObj *prog       = CURRENT_CONTEXT1()->FindProgram(progID);
     GLuint      uniformSize = prog->m_uniforms.size();
     GLchar      buf[1024];
 
@@ -467,18 +466,18 @@ GLvoid OutputDrawElementsToFrameFile_es20(GLenum mode, GLint count, GLenum index
         OutputStrcat(buf, 1024, "glDrawElements(%s, %d, %s)", tmp1, count, tmp3);
     }
 
-    OutputStrcat(buf, 1024, "  prog(%04d)", CURRENT_CONTEXT1().curProgram);
+    OutputStrcat(buf, 1024, "  prog(%04d)", CURRENT_CONTEXT1()->curProgram);
 
-    if (CURRENT_CONTEXT1().currentFBO)
+    if (CURRENT_CONTEXT1()->currentFBO)
     {
-        OutputStrcat(buf, 1024, "  FBO(%d)", CURRENT_CONTEXT1().currentFBO);
+        OutputStrcat(buf, 1024, "  FBO(%d)", CURRENT_CONTEXT1()->currentFBO);
     }
 
-    if (CURRENT_CONTEXT1().scissorEnable)
+    if (CURRENT_CONTEXT1()->scissorEnable)
     {
         OutputStrcat(buf, 1024, ",  s(%d, %d, %d, %d)",
-            CURRENT_CONTEXT1().scissorX, CURRENT_CONTEXT1().scissorY,
-            CURRENT_CONTEXT1().scissorWidth, CURRENT_CONTEXT1().scissorHeight);
+            CURRENT_CONTEXT1()->scissorX, CURRENT_CONTEXT1()->scissorY,
+            CURRENT_CONTEXT1()->scissorWidth, CURRENT_CONTEXT1()->scissorHeight);
     }
 
     for (unsigned int i=0; i<uniformSize; i++)
@@ -504,11 +503,11 @@ GLvoid OutputDrawElementsToFrameFile_es20(GLenum mode, GLint count, GLenum index
         switch (dataType)
         {
         case GL_SAMPLER_2D:
-            texId = CURRENT_CONTEXT1().textureSampler[unit][TEXTURE_TYPE_2D];
+            texId = CURRENT_CONTEXT1()->textureSampler[unit][TEXTURE_TYPE_2D];
             break;
 
         case GL_SAMPLER_CUBE:
-            texId = CURRENT_CONTEXT1().textureSampler[unit][TEXTURE_TYPE_CUBEMAP];
+            texId = CURRENT_CONTEXT1()->textureSampler[unit][TEXTURE_TYPE_CUBEMAP];
             break;
 
         default:
@@ -518,22 +517,22 @@ GLvoid OutputDrawElementsToFrameFile_es20(GLenum mode, GLint count, GLenum index
         OutputStrcat(buf, 1024, ",  t(%04d)", texId);
     }
 
-    // OutputStrcat(buf, 1024, " <url:./%s.hy#tn=DrawElements: %d>\n", strOnlyFileName, CURRENT_CONTEXT1().nDrawElements);
-    OutputStrcat(buf, 1024, " #%d\n", CURRENT_CONTEXT1().nDrawTotal);
-    OutputToTarget(OUTPUT_TO_FRAME_STRING, GL_FALSE, ++g_frameDrawCount, NULL, buf, g_pFrameFile);
+    // OutputStrcat(buf, 1024, " <url:./%s.hy#tn=DrawElements: %d>\n", strOnlyFileName, CURRENT_CONTEXT1()->nDrawElements);
+    OutputStrcat(buf, 1024, " #%d\n", CURRENT_CONTEXT1()->nDrawTotal);
+    OutputToTarget(OUTPUT_TO_FRAME_STRING, GL_FALSE, ++g_frameDrawCount, NULL, buf, m_pFrameFile);
 }
 
-GLvoid OutputDrawElements_es20(GLenum mode, GLint indexCount, GLenum indexType, GLuint indexAddr, GLchar *output, int outputSize)
+GLvoid CAnalyzer::OutputDrawElements_es20(GLenum mode, GLint indexCount, GLenum indexType, const GLvoid *indices, GLchar *output, int outputSize)
 {
-    GLuint      progID          = CURRENT_CONTEXT1().curProgram;
-    CProgramObj *program        = CURRENT_CONTEXT1().FindProgram(progID);
+    GLuint      progID          = CURRENT_CONTEXT1()->curProgram;
+    CProgramObj *program        = CURRENT_CONTEXT1()->FindProgram(progID);
     GLuint      PrimitiveCnt    = 0;
     GLint       pos             = 0;
     GLuint      vertexMax       = 0;
     GLuint      vertexMin       = 0xFFFFFFFF;
 
-    CURRENT_CONTEXT1().nDrawElements ++;
-    CURRENT_CONTEXT1().nDrawTotal ++;
+    CURRENT_CONTEXT1()->nDrawElements ++;
+    CURRENT_CONTEXT1()->nDrawTotal ++;
 
     if (bDumpFrameFile)
     {
@@ -542,22 +541,20 @@ GLvoid OutputDrawElements_es20(GLenum mode, GLint indexCount, GLenum indexType, 
 
     TranslateDrawMode(mode, tmp1);
     TranslateDataType(indexType, tmp2);
-    //OutputStringFast(glDrawElements1, &pos, output, outputSize, "<url:./%s#tn=drawElements=%08d>\n", strHalDumpFileName, CURRENT_CONTEXT1().nDrawElements);
-    //OutputStringFast(glDrawElements2, &pos, output, outputSize, "<url:./%s#tn=DrawElements: %08d>", strOnlyFrameFileName, CURRENT_CONTEXT1().nDrawElements);
     OutputStringFast(glDrawElements3, &pos, output, outputSize, "\n**********************************************************************************\n");
-    OutputStringFast(glDrawElements4, &pos, output, outputSize, "  %s glDrawElements: %08d,   Totals: %08d\n", thread, CURRENT_CONTEXT1().nDrawElements, CURRENT_CONTEXT1().nDrawTotal);
-    OutputStringFast(glDrawElements5, &pos, output, outputSize, "   %s, indexCount=%08d, %s, prog=%08d\n", tmp1, indexCount, tmp2, CURRENT_CONTEXT1().curProgram);
+    OutputStringFast(glDrawElements4, &pos, output, outputSize, "  %s glDrawElements: %08d,   Totals: %08d\n", thread, CURRENT_CONTEXT1()->nDrawElements, CURRENT_CONTEXT1()->nDrawTotal);
+    OutputStringFast(glDrawElements5, &pos, output, outputSize, "   %s, indexCount=%08d, %s, prog=%08d\n", tmp1, indexCount, tmp2, CURRENT_CONTEXT1()->curProgram);
     
     GetPrimitiveCount(mode, indexCount, &PrimitiveCnt);
-    OutputStates(&pos, ES20_VERSION, output, outputSize);
-    OutputStringFast(glDrawElements7, &pos, output, outputSize, "Frames: %04d\n", g_nFrames);
+    OutputStates(&pos, output, outputSize);
+    OutputStringFast(glDrawElements7, &pos, output, outputSize, "Frames: %04d\n", CURRENT_EGL_CONTEXT()->nFrame);
 
-    OutputToTarget(OUTPUT_TO_DRAW_TOTAL_STRING, GL_FALSE, 0, NULL, output, g_pOutputFile);
+    OutputToTarget(OUTPUT_TO_DRAW_TOTAL_STRING, GL_FALSE, 0, NULL, output, m_pOutputFile);
     memset(tmp1, 0, TMP_BUF_SIZE);
     sprintf(tmp1, "\n**********************************************************************************\n\n");
-    OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_FALSE, 0, NULL, tmp1, g_pOutputFile);
+    OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_FALSE, 0, NULL, tmp1, m_pOutputFile);
 
-    if (IsDrawNeedDump(CURRENT_CONTEXT1().nDrawTotal) == GL_FALSE)
+    if (IsDrawNeedDump(CURRENT_CONTEXT1()->nDrawTotal) == GL_FALSE)
     {
         return;
     }
@@ -574,10 +571,10 @@ GLvoid OutputDrawElements_es20(GLenum mode, GLint indexCount, GLenum indexType, 
 
         if (bPrintVertexAttrib)
         {
-            GLuint      indexBufferID   = CURRENT_CONTEXT1().elementArrayBuffer;
+            GLuint      indexBufferID   = CURRENT_CONTEXT1()->elementArrayBuffer;
             CBufObj     *buffer         = NULL;
             GLchar      *p              = NULL;
-            GLuint      pointer         = indexAddr;
+            GLuint      pointer         = (GLuint)indices;
             GLuint      lineNum         = indexCount/8;
             GLuint      columnNum       = 8;
             GLint       counter         = 0;
@@ -605,7 +602,7 @@ GLvoid OutputDrawElements_es20(GLenum mode, GLint indexCount, GLenum indexType, 
 
             if (indexBufferID)
             {
-                buffer = CURRENT_CONTEXT1().bufferMap[indexBufferID];
+                buffer = CURRENT_CONTEXT1()->bufferMap[indexBufferID];
 
 #ifdef LINUX
                 p = (GLchar*)((long)(buffer->m_pData) + (long)pointer);
@@ -621,8 +618,7 @@ GLvoid OutputDrawElements_es20(GLenum mode, GLint indexCount, GLenum indexType, 
             }
             else
             {
-                //v = (GLvoid*)readUCharFast(0);
-                v = (GLvoid*)ReadData(READ_GL_UCHAR, indexAddr, 0);
+                v = (GLvoid*)indices;
                 p = (GLchar*)v;
 
                 if (p == NULL)
@@ -694,45 +690,45 @@ _IndexEnd:
 
 _DrawElementsEnd:
     OutputStringFast(glDrawElements17, &pos, output, outputSize, "\n**********************************************************************************\n\n");
-    OutputToTarget(OUTPUT_TO_DRAW_STRING, GL_FALSE, 0, NULL, output, g_pDrawFile);
+    OutputToTarget(OUTPUT_TO_DRAW_STRING, GL_FALSE, 0, NULL, output, m_pDrawFile);
 }
 
-GLvoid OutputDrawArrays_es20(GLenum mode, GLuint first, GLint count, GLchar *output, int outputSize)
+GLvoid CAnalyzer::OutputDrawArrays_es20(GLenum mode, GLuint first, GLint count, GLchar *output, int outputSize)
 {
-    GLuint      progID          = CURRENT_CONTEXT1().curProgram;
-    CProgramObj *program        = CURRENT_CONTEXT1().FindProgram(progID);
+    GLuint      progID          = CURRENT_CONTEXT1()->curProgram;
+    CProgramObj *program        = CURRENT_CONTEXT1()->FindProgram(progID);
     GLuint      PrimitiveCnt    = 0;
     GLuint      historyID       = 0xFFFFFFF;
     GLint       pos             = 0;
     GLint       pos1            = 0;
 
-    CURRENT_CONTEXT1().nDrawArrays ++;
-    CURRENT_CONTEXT1().nDrawTotal ++;
+    CURRENT_CONTEXT1()->nDrawArrays ++;
+    CURRENT_CONTEXT1()->nDrawTotal ++;
 
     if (bDumpFrameFile)
     {
-        OutputDrawArraysToFrameFile_es20(mode, first, count, historyID);
+        OutputDrawArraysToFrameFile_es20(mode, first, count);
     }
 
     TranslateDrawMode(mode, tmp1);
     OutputStringFast(glDrawArrays3, &pos, output, outputSize, "\n**********************************************************************************\n");
-    OutputStringFast(glDrawArrays4, &pos, output, outputSize, "  %s glDrawArrays: %08d,   Totals: %08d\n", thread, CURRENT_CONTEXT1().nDrawArrays, CURRENT_CONTEXT1().nDrawTotal);
+    OutputStringFast(glDrawArrays4, &pos, output, outputSize, "  %s glDrawArrays: %08d,   Totals: %08d\n", thread, CURRENT_CONTEXT1()->nDrawArrays, CURRENT_CONTEXT1()->nDrawTotal);
     GetPrimitiveCount(mode, count, &PrimitiveCnt);
-    OutputStringFast(glDrawArrays5, &pos, output, outputSize, "   %s, first=%04d, count=%08d, prog=%08d\n", tmp1, first, count, CURRENT_CONTEXT1().curProgram);
-    OutputStates(&pos, ES20_VERSION, output, outputSize);
+    OutputStringFast(glDrawArrays5, &pos, output, outputSize, "   %s, first=%04d, count=%08d, prog=%08d\n", tmp1, first, count, CURRENT_CONTEXT1()->curProgram);
+    OutputStates(&pos, output, outputSize);
 
-    OutputStringFast(glDrawArrays7, &pos, output, outputSize, "Frames: %04d\n", g_nFrames);
+    OutputStringFast(glDrawArrays7, &pos, output, outputSize, "Frames: %04d\n", CURRENT_EGL_CONTEXT()->nFrame);
 
-    OutputToTarget(OUTPUT_TO_DRAW_TOTAL_STRING, GL_FALSE, 0, NULL, output, g_pOutputFile);
+    OutputToTarget(OUTPUT_TO_DRAW_TOTAL_STRING, GL_FALSE, 0, NULL, output, m_pOutputFile);
 
     // Dump uniform
     DumpUniforms(&pos, output, outputSize);
 
     memset(tmp1, 0, TMP_BUF_SIZE);
     OutputStringFast(glDrawArrays8, &pos1, tmp1, TMP_BUF_SIZE, "\n**********************************************************************************\n\n");
-    OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_FALSE, 0, NULL, tmp1, g_pOutputFile);
+    OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_FALSE, 0, NULL, tmp1, m_pOutputFile);
 
-    if (IsDrawNeedDump(CURRENT_CONTEXT1().nDrawTotal) == GL_FALSE)
+    if (IsDrawNeedDump(CURRENT_CONTEXT1()->nDrawTotal) == GL_FALSE)
     {
         return;
     }
@@ -747,13 +743,13 @@ GLvoid OutputDrawArrays_es20(GLenum mode, GLuint first, GLint count, GLchar *out
     }
 
     OutputStringFast(glDrawArrays9, &pos, output, outputSize, "\n**********************************************************************************\n\n");
-    OutputToTarget(OUTPUT_TO_DRAW_STRING, GL_FALSE, 0, NULL, output, g_pDrawFile);
+    OutputToTarget(OUTPUT_TO_DRAW_STRING, GL_FALSE, 0, NULL, output, m_pDrawFile);
 }
 
-GLvoid DumpVertexAttr(int *pos, int vertexMin, int vertexMax, int first, GLchar *output, int outputSize)
+GLvoid CAnalyzer::DumpVertexAttr(int *pos, int vertexMin, int vertexMax, int first, GLchar *output, int outputSize)
 {
-    GLuint          progID          = CURRENT_CONTEXT1().curProgram;
-    CProgramObj     *program        = CURRENT_CONTEXT1().FindProgram(progID);
+    GLuint          progID          = CURRENT_CONTEXT1()->curProgram;
+    CProgramObj     *program        = CURRENT_CONTEXT1()->FindProgram(progID);
     CBufObj         *buffer         = NULL;
     GLchar          *v              = NULL;
     GLuint          addressUsed     = 0;
@@ -779,9 +775,9 @@ GLvoid DumpVertexAttr(int *pos, int vertexMin, int vertexMax, int first, GLchar 
         GLuint          count           = (vertexMax-vertexMin+1);
 
         attribute   = program->m_attributes[i];
-        vertex      = &CURRENT_CONTEXT1().vertexAttribPointer[attribute->nLoc];
+        vertex      = &CURRENT_CONTEXT1()->vertexAttribPointer[attribute->nLoc];
 
-        if (!(CURRENT_CONTEXT1().vertexAttribBits & (1 << attribute->nLoc)))
+        if (!(CURRENT_CONTEXT1()->vertexAttribBits & (1 << attribute->nLoc)))
             continue;
 
         if (vertex->size == 0)
@@ -810,7 +806,7 @@ GLvoid DumpVertexAttr(int *pos, int vertexMin, int vertexMax, int first, GLchar 
         // Use VBO
         if (vertex->vbo)
         {
-            buffer = CURRENT_CONTEXT1().bufferMap[vertex->vbo];
+            buffer = CURRENT_CONTEXT1()->bufferMap[vertex->vbo];
 
             if (buffer->m_pData && (GLuint)pointer < buffer->m_nSize)
             {
@@ -833,7 +829,7 @@ GLvoid DumpVertexAttr(int *pos, int vertexMin, int vertexMax, int first, GLchar 
             p = address[i];
             vertexPointer = p;
 
-            // do not use vbo. we should caculate data size based on glVertexAttribPointer and draw.
+            // do not use vbo. we should calculate data size based on glVertexAttribPointer and draw.
             GLuint dataSize = GetDataTypeSize(vertexType);
 
             dataSize *= (vertexSize*(vertexMax-vertexMin));
@@ -882,7 +878,7 @@ _VertexEnd:
     OutputStringFast(dumpVertex9, pos, output, outputSize, "\n+++++++++++++++++++++++++Attribute end+++++++++++++++++++++++++\n");
 }
 
-GLboolean IsTextureSampler(const GLchar *src, const GLchar *textFunc, const GLchar *uniName)
+GLboolean CAnalyzer::IsTextureSampler(const GLchar *src, const GLchar *textFunc, const GLchar *uniName)
 {
     GLchar var[256];
     GLchar *pVar = NULL;
@@ -931,15 +927,15 @@ GLboolean IsTextureSampler(const GLchar *src, const GLchar *textFunc, const GLch
     return false;
 }
 
-GLenum UniformIsTextureSampler(const GLchar *name, GLenum *shaderType)
+GLenum CAnalyzer::UniformIsTextureSampler(const GLchar *name, GLenum *shaderType)
 {
-    GLuint      progID          = CURRENT_CONTEXT1().curProgram;
-    CProgramObj *programArray   = CURRENT_CONTEXT1().FindProgram(progID);
+    GLuint      progID          = CURRENT_CONTEXT1()->curProgram;
+    CProgramObj *programArray   = CURRENT_CONTEXT1()->FindProgram(progID);
     CShaderObj  *vertexShader   = programArray->m_pVertex;
     CShaderObj  *fragmentShader = programArray->m_pFragment;
     GLuint      i               = 0;
 
-    if (g_bSaveShader == false)
+    if (m_bSaveShader == false)
     {
         *shaderType = 0;
         return 0;
@@ -984,7 +980,7 @@ GLenum UniformIsTextureSampler(const GLchar *name, GLenum *shaderType)
     return 0;
 }
 
-GLboolean DumpUniform(int *pos, GLint location, GLuint programId, CUniformObj *uniform, GLchar *output, int outputSize)
+GLboolean CAnalyzer::DumpUniform(int *pos, GLint location, GLuint programId, CUniformObj *uniform, GLchar *output, int outputSize)
 {
     GLenum          dataType    = -1;
     GLuint          dataSize    = 2;
@@ -1108,7 +1104,7 @@ GLboolean DumpUniform(int *pos, GLint location, GLuint programId, CUniformObj *u
     if (texTarget != 0)
     {
         GLint       unit        = *(int*)uniform->data;
-        CTexObj     *pTexObj    = CURRENT_CONTEXT1().GetTexObjByUnit(unit+GL_TEXTURE0, texTarget);
+        CTexObj     *pTexObj    = CURRENT_CONTEXT1()->GetTexObjByUnit(unit+GL_TEXTURE0, texTarget);
         stTexImage  *pTexImage  = pTexObj->GetTexImageByLevel(texTarget, 0);
 
         if (unit < API_TEX_UNIT_NUM && pTexImage)
@@ -1126,10 +1122,10 @@ GLboolean DumpUniform(int *pos, GLint location, GLuint programId, CUniformObj *u
     return GL_TRUE;
 }
 
-GLvoid DumpUniforms(int *pos, GLchar *output, int outputSize)
+GLvoid CAnalyzer::DumpUniforms(int *pos, GLchar *output, int outputSize)
 {
-    GLuint      progID      = CURRENT_CONTEXT1().curProgram;
-    CProgramObj *program    = CURRENT_CONTEXT1().FindProgram(progID);
+    GLuint      progID      = CURRENT_CONTEXT1()->curProgram;
+    CProgramObj *program    = CURRENT_CONTEXT1()->FindProgram(progID);
     GLuint      uniformSize = program->m_uniforms.size();
 
     if (!bPrintUniform)
@@ -1150,11 +1146,11 @@ GLvoid DumpUniforms(int *pos, GLchar *output, int outputSize)
     OutputStringFast(dumpUniform3, pos, output, outputSize, "\n--------------------end----------------------\n");
 }
 
-GLvoid SaveShaderToFile(GLuint shaderIndex, GLenum shaderType, GLuint shaderLine, GLchar **shaderSource)
+GLvoid CAnalyzer::SaveShaderToFile(GLuint shaderIndex, GLenum shaderType, GLuint shaderLine, GLchar **shaderSource)
 {
     const GLchar    *suffix     = NULL;
     FILE            *pFile      = NULL;
-    CShaderObj      *pShader    = CURRENT_CONTEXT1().FindShader(shaderIndex);
+    CShaderObj      *pShader    = CURRENT_CONTEXT1()->FindShader(shaderIndex);
     GLchar          shaderName[128];
 
     memset(shaderName, 0, 128);
@@ -1194,151 +1190,14 @@ GLvoid SaveShaderToFile(GLuint shaderIndex, GLenum shaderType, GLuint shaderLine
     }
 }
 
-GLvoid OutputVertexAttribToFrameFile(GLuint index)
+GLvoid CAnalyzer::OutputVertexAttribToFrameFile(GLuint index)
 {
-    stVertAttrPtr *vertex = &(CURRENT_CONTEXT1().vertexAttribPointer[index]);
+    stVertAttrPtr *vertex = &(CURRENT_CONTEXT1()->vertexAttribPointer[index]);
     GLchar buf[256];
 
     memset(buf, 0, 256);
     TranslateDataType(vertex->type, tmp);
     sprintf(buf, "glVertexAttribPointer(index=%02d, stride=%06d, pointer=0x%08X, buffer=%04d, type=%s\n",
-        index, vertex->stride, vertex->pointer, CURRENT_CONTEXT1().arrayBuffer, tmp);
-    OutputToTarget(OUTPUT_TO_FILE, GL_FALSE, 0, NULL, buf, g_pFrameFile);
-}
-
-GLvoid OutputFBOAttachment(GLenum type, GLuint name, const GLchar *attachName, GLchar *output, GLint outputSize)
-{
-    const GLchar        *targetName = NULL;
-    GLboolean           bTex        = GL_TRUE;
-    CTexObj             *pTex       = NULL;
-    CRenderbufferObj    *pRbo       = NULL;
-    GLenum              format      = 0;
-    GLsizei             width       = 0;
-    GLsizei             height      = 0;
-
-    switch (type)
-    {
-    case GL_TEXTURE_2D:
-        targetName = "tex2d";
-        break;
-
-    case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
-        targetName = "texCube_px";
-        break;
-
-    case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
-        targetName = "texCube_nx";
-        break;
-
-    case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
-        targetName = "texCube_py";
-        break;
-
-    case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
-        targetName = "texCube_ny";
-        break;
-
-    case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
-        targetName = "texCube_pz";
-        break;
-
-    case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
-        targetName = "texCube_nz";
-        break;
-
-    case GL_RENDERBUFFER:
-        targetName = "rbo";
-        bTex = GL_FALSE;
-        break;
-
-    default:
-        targetName = "Invalid";
-        bTex = GL_FALSE;
-        break;
-    }
-
-    if (bTex)
-    {
-        pTex    = CURRENT_CONTEXT1().GetTexObjByName(name);
-        format  = pTex->GetTexFormat();
-        width   = pTex->GetWidth(0);
-        height  = pTex->GetHeight(0);
-
-        TranslateTexFormat(format, tmp1);
-        OutputStrcat(output, outputSize, "%s: %s(%04d, %dx%d, %s)  ", attachName, targetName, name, width, height, tmp1);
-    }
-    else
-    {
-        pRbo = CURRENT_CONTEXT1().GetRBOByName(name);
-        format = pRbo->GetFormat();
-        TranslateTexFormat(format, tmp1);
-        OutputStrcat(output, outputSize, "%s: %s(%04d, %s)  ", attachName, targetName, name, tmp1);
-    }
-}
-
-GLvoid OutputCurrentFBO(GLint *pos, GLchar *output, GLint outputSize)
-{
-    CFramebufferObj *pFBO = CURRENT_CONTEXT1().GetCurrentFBO();
-    GLchar buf[128];
-
-    if (pFBO)
-    {
-        OutputStringFast(drawStates34, pos, output, outputSize, "   FBO: %04d\n", pFBO->name);
-        if (pFBO->color0 != 0)
-        {
-            memset(buf, 0, 128);
-            OutputFBOAttachment(pFBO->color0Type, pFBO->color0, "        color  ", buf, 128);
-            OutputStringFast(drawStates35, pos, output, outputSize, "%s\n", buf);
-        }
-
-        if (pFBO->depth != 0)
-        {
-            memset(buf, 0, 128);
-            OutputFBOAttachment(pFBO->depthType, pFBO->depth, "        depth  ", buf, 128);
-            OutputStringFast(drawStates36, pos, output, outputSize, "%s\n", buf);
-        }
-
-        if (pFBO->stencil != 0)
-        {
-            memset(buf, 0, 128);
-            OutputFBOAttachment(pFBO->stencilType, pFBO->stencil, "        stencil", buf, 128);
-            OutputStringFast(drawStates37, pos, output, outputSize, "%s\n", buf);
-        }
-    }
-    else // Using RT
-    {
-        OutputStringFast(drawStates34, pos, output, outputSize, "   FBO: 0000  \n");
-    }
-}
-
-GLvoid OutputFBO(GLuint currentFBO, GLchar *output, GLint outputSize)
-{
-    CFramebufferObj *pFBO = CURRENT_CONTEXT1().GetCurrentFBO();
-
-    sprintf(output, "glBindFramebuffer(fbo=%04d)  ", currentFBO);
-
-    // Using FBO
-    if (pFBO)
-    {
-        if (pFBO->color0 != 0)
-        {
-            OutputFBOAttachment(pFBO->color0Type, pFBO->color0, "color", output, outputSize);
-        }
-
-        if (pFBO->depth != 0)
-        {
-            OutputFBOAttachment(pFBO->depthType, pFBO->depth, "depth", output, outputSize);
-        }
-
-        if (pFBO->stencil != 0)
-        {
-            OutputFBOAttachment(pFBO->stencilType, pFBO->stencil, "stencil", output, outputSize);;
-        }
-    }
-    else // Using RT
-    {
-
-    }
-
-    OutputStrcat(output, outputSize, "\n");
+        index, vertex->stride, vertex->pointer, CURRENT_CONTEXT1()->arrayBuffer, tmp);
+    OutputToTarget(OUTPUT_TO_FILE, GL_FALSE, 0, NULL, buf, m_pFrameFile);
 }

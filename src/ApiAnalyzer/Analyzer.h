@@ -1,7 +1,13 @@
 #ifndef __ANALYZER_GLES3_H
 #define __ANALYZER_GLES3_H
 
+#include <stdio.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <GLES3/gl31.h>
+#include <GLES2/gl2ext.h>
+
+#include "GLSLShader.h"
 
 #define ANALYZE_BEGIN_EVENT()   \
     if (!m_bAnalyzeEnabled) \
@@ -10,28 +16,70 @@
 
 #define ANALYZE_END_EVENT(func) EndEvent(func)
 
+#define ANALYZER_FUNC0(funcName)  \
+    g_Analyzer.Analyze##funcName(output, outputSize)
 #define ANALYZER_FUNC1(funcName, arg1)  \
-    CURRENT_CONTEXT1().m_pAnalyzer->Analyze##funcName(output, outputSize, arg1)
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1)
 #define ANALYZER_FUNC2(funcName, arg1, arg2)  \
-    CURRENT_CONTEXT1().m_pAnalyzer->Analyze##funcName(output, outputSize, arg1, arg2)
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2)
 #define ANALYZER_FUNC3(funcName, arg1, arg2, arg3)  \
-    CURRENT_CONTEXT1().m_pAnalyzer->Analyze##funcName(output, outputSize, arg1, arg2, arg3)
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3)
 #define ANALYZER_FUNC4(funcName, arg1, arg2, arg3, arg4)  \
-    CURRENT_CONTEXT1().m_pAnalyzer->Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4)
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4)
 #define ANALYZER_FUNC5(funcName, arg1, arg2, arg3, arg4, arg5)  \
-    CURRENT_CONTEXT1().m_pAnalyzer->Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5)
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5)
 #define ANALYZER_FUNC6(funcName, arg1, arg2, arg3, arg4, arg5, arg6)  \
-    CURRENT_CONTEXT1().m_pAnalyzer->Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6)
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6)
 #define ANALYZER_FUNC7(funcName, arg1, arg2, arg3, arg4, arg5, arg6, arg7)  \
-    CURRENT_CONTEXT1().m_pAnalyzer->Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
 #define ANALYZER_FUNC8(funcName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)  \
-    CURRENT_CONTEXT1().m_pAnalyzer->Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 #define ANALYZER_FUNC9(funcName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)  \
-    CURRENT_CONTEXT1().m_pAnalyzer->Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
 #define ANALYZER_FUNC10(funcName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)  \
-    CURRENT_CONTEXT1().m_pAnalyzer->Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
 #define ANALYZER_FUNC11(funcName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)  \
-    CURRENT_CONTEXT1().m_pAnalyzer->Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
+
+#ifndef API_DUMP
+#define CTX_ANALYZER_FUNC0(funcName, output, outputSize)  \
+    g_Analyzer.Analyze##funcName(output, outputSize)
+#define CTX_ANALYZER_FUNC1(funcName, output, outputSize, arg1)  \
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1)
+#define CTX_ANALYZER_FUNC2(funcName, output, outputSize, arg1, arg2)  \
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2)
+#define CTX_ANALYZER_FUNC3(funcName, output, outputSize, arg1, arg2, arg3)  \
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3)
+#define CTX_ANALYZER_FUNC4(funcName, output, outputSize, arg1, arg2, arg3, arg4)  \
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4)
+#define CTX_ANALYZER_FUNC5(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5)  \
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5)
+#define CTX_ANALYZER_FUNC6(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6)  \
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6)
+#define CTX_ANALYZER_FUNC7(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7)  \
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+#define CTX_ANALYZER_FUNC8(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)  \
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+#define CTX_ANALYZER_FUNC9(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)  \
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+#define CTX_ANALYZER_FUNC10(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)  \
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
+#define CTX_ANALYZER_FUNC11(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)  \
+    g_Analyzer.Analyze##funcName(output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
+#else
+#define CTX_ANALYZER_FUNC0(funcName, output, outputSize)
+#define CTX_ANALYZER_FUNC1(funcName, output, outputSize, arg1)
+#define CTX_ANALYZER_FUNC2(funcName, output, outputSize, arg1, arg2)
+#define CTX_ANALYZER_FUNC3(funcName, output, outputSize, arg1, arg2, arg3)
+#define CTX_ANALYZER_FUNC4(funcName, output, outputSize, arg1, arg2, arg3, arg4)
+#define CTX_ANALYZER_FUNC5(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5)
+#define CTX_ANALYZER_FUNC6(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6)
+#define CTX_ANALYZER_FUNC7(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+#define CTX_ANALYZER_FUNC8(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+#define CTX_ANALYZER_FUNC9(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+#define CTX_ANALYZER_FUNC10(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
+#define CTX_ANALYZER_FUNC11(funcName, output, outputSize, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
+#endif
 
 class CGLES3Context;
 
@@ -41,7 +89,7 @@ public:
     CAnalyzer();
     ~CAnalyzer();
 
-    GLvoid                  InitAnalyzer(const GLchar *filePath, CGLES3Context *pContext);
+    GLvoid                  InitAnalyzer(const GLchar *filePath);
     GLvoid                  ReleaseAnalyzer();
     GLvoid                  EnableAnalyze(GLboolean flag);
     GLboolean               DumpStringToApiDump(const GLchar *string);
@@ -50,9 +98,85 @@ public:
     GLboolean               IsDrawCommand(GLESAPIIndex name);
     GLvoid                  ErrorCheck(GLESAPIIndex func);
     const GLchar*           ConvertErrCode2String(GLenum err);
+    GLuint                  GetEventSequence();
+    GLboolean               OpenDumpFile();
+    GLvoid                  CloseDumpFile();
+    GLvoid                  OutputToShaderFile(GLchar *output);
+
+    GLvoid                  OutputFBO(GLuint currentFBO, GLchar *output, GLint outputSize);
+    GLvoid                  OutputFBOAttachment(GLenum type, GLuint name, const GLchar *attachName, GLchar *output, GLint outputSize);
+    GLvoid                  OutputCurrentFBO(GLint *pos, GLchar *output, GLint outputSize);
+
+    GLvoid                  OutputDrawElements_es20(GLenum mode, GLint indexCount, GLenum indexType, const GLvoid *indices, GLchar *output, GLint outputSize);
+    GLvoid                  OutputDrawArrays_es20(GLenum mode, GLuint first, GLint count, char *output, GLint outputSize);
+    GLvoid                  OutputDrawArraysToFrameFile_es20(GLenum mode, GLuint first, GLint count);
+    GLvoid                  OutputClearToFrameFile(GLint mask);
+    GLvoid                  OutputMaskToFrameFile(char *str);
+    GLvoid                  OutputDrawElementsToFrameFile_es20(GLenum mode, GLint count, GLenum indexType);
+
+    GLvoid                  OutputBlend(int *pos, char *output, int outputSize);
+    GLvoid                  OutputCullFace(int *pos, char *output, int outputSize);
+    GLvoid                  OutputDepth(int *pos, char *output, int outputSize);
+    GLvoid                  OutputDither(int *pos, char *output, int outputSize);
+    GLvoid                  OutputScissor(int *pos, char *output, int outputSize);
+    GLvoid                  OutputStencil(int *pos, char *output, int outputSize);
+    GLvoid                  OutputPolygonOffset(int *pos, char *output, int outputSize);
+    GLvoid                  OutputSampleCoverage(int *pos, char *output, int outputSize);
+    GLvoid                  OutputViewPort(int *pos, char *output, int outputSize);
+    GLvoid                  PrintMatrixf(GLfloat *matrix, char *output);
+    GLvoid                  OutputStates(int *pos, char *output, int outputSize);
+
+    GLvoid                  DumpVertexAttr(int *pos, int vertexMin, int vertexMax, int first, GLchar *output, int outputSize);
+    GLboolean               DumpUniform(int *pos, GLint location, GLuint programId, CUniformObj *uniform, GLchar *output, int outputSize);
+    GLvoid                  DumpUniforms(int *pos, GLchar *output, int outputSize);
+    GLenum                  UniformIsTextureSampler(const GLchar *name, GLenum *shaderType);
+    GLboolean               IsTextureSampler(const GLchar *src, const GLchar *textFunc, const GLchar *uniName);
+    GLvoid                  SaveShaderToFile(GLuint shaderIndex, GLenum shaderType, GLuint shaderLine, GLchar **shaderSource);
+    GLvoid                  OutputVertexAttribToFrameFile(GLuint index);
+
+    GLvoid PrintUniform1234if(
+        GLchar *output,
+        GLuint outputSize,
+        GLuint location,
+        eShaderType type,
+        GLuint count,
+        GLuint *value,
+        const GLchar *funcName
+        );
+    GLvoid PrintUniform1234ifv(
+        GLint *pos,
+        GLchar *output,
+        GLuint outputSize,
+        GLuint location,
+        eShaderType type,
+        GLuint count,
+        GLuint num,
+        GLuint handle,
+        const GLchar *funcName
+        );
+    GLvoid PrintUniformMatrix234fv(
+        GLint *pos,
+        GLchar *output,
+        GLuint outputSize,
+        GLuint location,
+        eShaderType type,
+        GLuint count,
+        GLuint num,
+        GLuint handle,
+        GLuint transpose,
+        const GLchar *funcName
+        );
 
 public:
-    CGLES3Context           *m_pContext;
+
+    FILE                    *m_pOutputFile;
+    FILE                    *m_pDrawFile;
+    FILE                    *m_pFrameFile;
+    FILE                    *m_pShaderFile;
+    FILE                    *m_pTextureFile;
+
+    GLboolean               m_bOutputToShaderFile;
+    GLboolean               m_bSaveShader;
 
     GLboolean               m_bAnalyzeEnabled;
     GLboolean               m_bErrorCheck;
@@ -73,9 +197,9 @@ public:
     void                    AnalyzeGetCurrentDisplay(GLchar *output, GLint outputSize, EGLDisplay res);
     void                    AnalyzeGetCurrentSurface(GLchar *output, GLint outputSize, EGLint readdraw, EGLSurface res);
     void                    AnalyzeGetDisplay(GLchar *output, GLint outputSize, EGLNativeDisplayType display_id, EGLDisplay res);
-    void                    eglGetError(GLchar *output, GLint outputSize, EGLint err);
+    void                    AnalyzeEGLGetError(GLchar *output, GLint outputSize, EGLint err);
     void                    AnalyzeSetFIFO(GLchar *output, GLint outputSize, void* fifo, EGLBoolean res);
-    void                    AnalyzeGetProcAddress(GLchar *output, GLint outputSize, const char *procname);
+    void                    AnalyzeGetProcAddress(GLchar *output, GLint outputSize, const char *procname, void *func);
     void                    AnalyzeInitialize(GLchar *output, GLint outputSize, EGLDisplay dpy, EGLint *major, EGLint *minor, EGLBoolean res);
     void                    AnalyzeMakeCurrent(GLchar *output, GLint outputSize, EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx, EGLBoolean res);
     void                    AnalyzeQueryContext(GLchar *output, GLint outputSize, EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint *value, EGLBoolean res);
@@ -95,6 +219,14 @@ public:
     void                    AnalyzeReleaseThread(GLchar *output, GLint outputSize, EGLBoolean res);
     void                    AnalyzeWaitClient(GLchar *output, GLint outputSize, EGLBoolean res);
     void                    AnalyzeGetCurrentContext(GLchar *output, GLint outputSize, EGLContext res);
+    void                    AnalyzeCreateImageKHR(GLchar *output, GLint outputSize, EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list, EGLImageKHR ret);
+    void                    AnalyzeDestroyImageKHR(GLchar *output, GLint outputSize, EGLDisplay dpy, EGLImageKHR image, EGLBoolean ret);
+    void                    AnalyzeCreateSyncKHR(GLchar *output, GLint outputSize, EGLDisplay dpy, EGLenum type, const EGLint *attrib_list, EGLSyncKHR ret);
+    void                    AnalyzeDestroySyncKHR(GLchar *output, GLint outputSize, EGLDisplay dpy, EGLSyncKHR sync, EGLBoolean ret);
+    void                    AnalyzeClientWaitSyncKHR(GLchar *output, GLint outputSize, EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout, EGLint ret);
+    void                    AnalyzeGetSyncAttribKHR(GLchar *output, GLint outputSize, EGLDisplay dpy, EGLSyncKHR sync, EGLint attribute, EGLint *value, EGLBoolean ret);
+    void                    AnalyzeLockSurfaceKHR(GLchar *output, GLint outputSize, EGLDisplay display, EGLSurface surface, const EGLint *attrib_list, EGLBoolean ret);
+    void                    AnalyzeUnlockSurfaceKHR(GLchar *output, GLint outputSize, EGLDisplay display, EGLSurface surface, EGLBoolean ret);
 
     GLvoid                  AnalyzeGenBuffers(GLchar *output, GLint outputSize, GLsizei n, GLuint *buffers);
     GLvoid                  AnalyzeDeleteBuffers(GLchar *output, GLint outputSize, GLsizei n, const GLuint *buffers);
@@ -256,12 +388,35 @@ public:
     GLvoid                  AnalyzeHint(GLchar *output, GLint outputSize, GLenum target, GLenum mode);
     GLvoid                  AnalyzeReadPixels(GLchar *output, GLint outputSize, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void *pixels);
     GLvoid                  AnalyzeReadBuffer(GLchar *output, GLint outputSize, GLenum mode);
+    GLvoid                  AnalyzeDrawBuffers(GLchar *output, GLint outputSize, GLsizei n, const GLenum *bufs);
 
     GLvoid                  AnalyzeClear(GLchar *output, GLint outputSize, GLbitfield mask);
     GLvoid                  AnalyzeDrawArrays(GLchar *output, GLint outputSize, GLenum mode, GLint first, GLsizei count);
     GLvoid                  AnalyzeDrawElements(GLchar *output, GLint outputSize, GLenum mode, GLsizei count, GLenum type, const GLvoid* indices);
 
     GLvoid                  AnalyzeBlitFramebufferEXT(GLchar *output, GLint outputSize, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
+    GLvoid                  AnalyzeDiscardFramebufferEXT(GLchar *output, GLint outputSize, GLenum target, GLsizei numAttachments, const GLenum *attachments);
+    GLvoid                  AnalyzeEGLImageTargetTexture2DOES(GLchar *output, GLint outputSize, GLenum target, GLeglImageOES image);
+    GLvoid                  AnalyzeEGLImageTargetRenderbufferStorageOES(GLchar *output, GLint outputSize, GLenum target, GLeglImageOES image);
+    GLvoid                  AnalyzeGetProgramBinaryOES(GLchar *output, GLint outputSize, GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, void *binary);
+    GLvoid                  AnalyzeProgramBinaryOES(GLchar *output, GLint outputSize, GLuint program, GLenum binaryFormat, const void *binary, GLint length);
+
+    GLvoid                  AnalyzeMapBufferRange(GLchar *output, GLint outputSize, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, GLvoid *mapped);
+    GLvoid                  AnalyzeFlushMappedBufferRange(GLchar *output, GLint outputSize, GLenum target, GLintptr offset, GLsizeiptr length);
+    GLvoid                  AnalyzeUnmapBuffer(GLchar *output, GLint outputSize, GLenum target, GLboolean ret);
+    GLvoid                  AnalyzeInvalidateFramebuffer(GLchar *output, GLint outputSize, GLenum target, GLsizei numAttachments, const GLenum *attachments);
+    GLvoid                  AnalyzeInvalidateSubFramebuffer(GLchar *output, GLint outputSize, GLenum target, GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height);
+    GLvoid                  AnalyzeGetProgramBinary(GLchar *output, GLint outputSize, GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, void *binary);
+    GLvoid                  AnalyzeTransformFeedbackVaryings(GLchar *output, GLint outputSize, GLuint program, GLsizei count, const GLchar *const*varyings, GLenum bufferMode);
+    GLvoid                  AnalyzePauseTransformFeedback(GLchar *output, GLint outputSize);
+    GLvoid                  AnalyzeResumeTransformFeedback(GLchar *output, GLint outputSize);
+    GLvoid                  AnalyzeGetTransformFeedbackVarying(GLchar *output, GLint outputSize, GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLsizei *size, GLenum *type, GLchar *name);
+    GLvoid                  AnalyzeCopyTexSubImage3D(GLchar *output, GLint outputSize, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+    GLvoid                  AnalyzeCompressedTexImage3D(GLchar *output, GLint outputSize, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const void *data);
+    GLvoid                  AnalyzeCompressedTexSubImage3D(GLchar *output, GLint outputSize, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const void *data);
+    GLvoid                  AnalyzeIsVertexArray(GLchar *output, GLint outputSize, GLuint array, GLboolean ret);
 };
+
+extern CAnalyzer   g_Analyzer;
 
 #endif /* __ANALYZER_GLES3_H */

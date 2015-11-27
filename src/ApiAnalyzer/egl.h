@@ -28,26 +28,7 @@ GLvoid      TranslateEGLEnum(EGLenum value, GLchar *output);
 GLvoid      TranslateEGLAttrib(EGLenum attr, GLchar *output);
 GLvoid      EGLInit();
 GLvoid      EGLRelease();
-GLvoid      RunEglGetDisplay(GLint arg[10]);
 
-
-typedef struct _EGL_CONFIG_MAP
-{
-    EGLConfig                       apiConfig;
-    EGLConfig                       emulatorConfig;
-    EGLint                          index;
-} EGL_CONFIG_MAP;
-
-extern GLchar                       tmp1[TMP_BUF_SIZE];
-extern EGLDisplay                   eglDisplay;
-extern EGLContext                   eglContext;
-extern EGLSurface                   eglSurface;
-
-EGL_CONFIG* eglGetEGLConfig(EGL_CONFIG *configs, EGLint configNum, EGLint addr);
-EGL_CONFIG* eglGetFreeEGLConfig(EGL_CONFIG *configs, EGLint *configNum);
-stEglContext* eglGetEGLContext(stEglContext *contexts, EGLint contextNum, EGLint addr);
-stEglContext* eglGetFreeEGLContext(stEglContext *contexts, EGLint *contextNum);
-stEglSurface* eglGetSurfaceObject(stEglSurface *surfaceArray, EGLint surfaceCount, EGLint addr);
-stEglSurface* eglGetFreeSurfaceObject(stEglSurface *surfaceArray, EGLint *surfaceCount);
+extern GLchar tmp1[TMP_BUF_SIZE];
 
 #endif

@@ -7,8 +7,6 @@
 #include "ApiAnalyzer.h"
 #include "ApiDebug.h"
 
-CGLES3Context g_GLES3Context[API_RENDER_THREAD_NUM];
-
 CGLES3Context::CGLES3Context()
 {
     /* blend */
@@ -135,6 +133,7 @@ GLvoid CGLES3Context::ApiClear(GLbitfield mask)
 {
     nClear ++;
     clearBitsMask = mask;
+    CTX_ANALYZER_FUNC1(Clear, GLOutput, GL_OUT_BUF_SIZE, mask);
 }
 
 GLvoid CGLES3Context::ApiDrawArrays(GLenum mode, GLint first, GLsizei count)
@@ -142,6 +141,7 @@ GLvoid CGLES3Context::ApiDrawArrays(GLenum mode, GLint first, GLsizei count)
     drawMode    = mode;
     drawFirst   = first;
     drawCount   = count;
+    CTX_ANALYZER_FUNC3(DrawArrays, Draw, DRAW_BUF_SIZE, mode, first, count);
 }
 
 GLvoid CGLES3Context::ApiDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices)
@@ -150,15 +150,13 @@ GLvoid CGLES3Context::ApiDrawElements(GLenum mode, GLsizei count, GLenum type, c
     drawCount       = count;
     drawIndicesType = type;
     drawIndices     = (GLvoid*)indices;
+    CTX_ANALYZER_FUNC4(DrawElements, Draw, DRAW_BUF_SIZE, mode, count, type, indices);
 }
 
-GLvoid CGLES3Context::Initialize(const GLchar *filePath)
+GLvoid CGLES3Context::Initialize()
 {
-    m_pAnalyzer = new CAnalyzer();
-    m_pDumpDraw = new CApiDumpDraw(m_pAnalyzer);
+    m_pDumpDraw = new CApiDumpDraw(&g_Analyzer);
     m_pDumpInfo = new CDumpInfo(API_DUMP_OUTPUT_PATH, this);
-
-    m_pAnalyzer->InitAnalyzer(filePath, this);
 }
 
 GLvoid CGLES3Context::Release()
@@ -172,11 +170,7 @@ GLvoid CGLES3Context::Release()
     RboMap::iterator        rboIter;
     VaoMap::iterator        vaoIter;
 
-    m_pAnalyzer->ReleaseAnalyzer();
     m_pDumpInfo->Release();
-
-    if (m_pAnalyzer)
-        delete m_pAnalyzer;
 
     if (m_pDumpDraw)
         delete m_pDumpDraw;
@@ -274,11 +268,6 @@ GLvoid CGLES3Context::Release()
 
         vaoMap.erase(vaoIter++);
     }
-}
-
-GLuint CGLES3Context::GetEventSequence()
-{
-    return m_pAnalyzer->m_nEventSequence;
 }
 
 GLvoid CGLES3Context::DumpDraw(GLESAPIIndex name)

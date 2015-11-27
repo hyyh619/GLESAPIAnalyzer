@@ -16,6 +16,7 @@
 #include "ApiDumpUtils.h"
 #include "ApiDumpInfo.h"
 #include "ApiGLES3Context.h"
+#include "ApiEGLContext.h"
 
 GLuint      g_startDraw = API_DUMP_DRAW_INFO_START;
 GLuint      g_endDraw   = API_DUMP_DRAW_INFO_END;
@@ -585,7 +586,7 @@ GLvoid CDumpInfo::DumpShader(GLESAPIIndex func, CFrameInfo *pFrame)
     GLchar  *pAttributeName     = NULL;
     GLchar  *pUniformName       = NULL;
 
-    glGetAttachedShaders(m_nCurrentProgram, 2, &count, shader);
+    g_opengl->glGetAttachedShaders(m_nCurrentProgram, 2, &count, shader);
 
     DumpToFile(m_pDumpDrawFile, "**********************************program**********************************\n");
     for (GLuint i=0; i<2; i++)
@@ -595,7 +596,7 @@ GLvoid CDumpInfo::DumpShader(GLESAPIIndex func, CFrameInfo *pFrame)
         GLchar  *pSrc       = NULL;
         GLsizei size        = 0;
 
-        glGetShaderiv(shader[i], GL_SHADER_TYPE, (GLint*)&type);
+        g_opengl->glGetShaderiv(shader[i], GL_SHADER_TYPE, (GLint*)&type);
         if (type == GL_VERTEX_SHADER)
         {
             DumpToFile(m_pDumpDrawFile, "VertexShader:\n");
@@ -605,7 +606,7 @@ GLvoid CDumpInfo::DumpShader(GLESAPIIndex func, CFrameInfo *pFrame)
             DumpToFile(m_pDumpDrawFile, "FragmentShader:\n");
         }
 
-        glGetShaderiv(shader[i], GL_SHADER_SOURCE_LENGTH, &shaderLen);
+        g_opengl->glGetShaderiv(shader[i], GL_SHADER_SOURCE_LENGTH, &shaderLen);
         pSrc = (GLchar*)malloc(shaderLen + 1);
         if (pSrc == NULL)
         {
@@ -613,7 +614,7 @@ GLvoid CDumpInfo::DumpShader(GLESAPIIndex func, CFrameInfo *pFrame)
             continue;
         }
         memset(pSrc, 0, shaderLen+1);
-        glGetShaderSource(shader[i], shaderLen, &size, pSrc);
+        g_opengl->glGetShaderSource(shader[i], shaderLen, &size, pSrc);
         if (size > 0)
         {
             DumpToFile(m_pDumpDrawFile, pSrc);
@@ -639,10 +640,10 @@ GLvoid CDumpInfo::DumpShader(GLESAPIIndex func, CFrameInfo *pFrame)
     }
     DumpToFile(m_pDumpDrawFile, "\nAttributes:\n");
 
-    glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_ATTRIBUTES, &activeAttributes);
-    glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeLen);
-    glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_UNIFORMS, &activeUniforms);
-    glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformLen);
+    g_opengl->glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_ATTRIBUTES, &activeAttributes);
+    g_opengl->glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeLen);
+    g_opengl->glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_UNIFORMS, &activeUniforms);
+    g_opengl->glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformLen);
     pAttributeName  = (GLchar*)malloc(maxAttributeLen);
     pUniformName    = (GLchar*)malloc(maxUniformLen);
 
@@ -659,17 +660,17 @@ GLvoid CDumpInfo::DumpShader(GLESAPIIndex func, CFrameInfo *pFrame)
         GLint   pointer     = 0;
 
         memset(pAttributeName, 0, maxAttributeLen);
-        glGetActiveAttrib(m_nCurrentProgram, i, maxAttributeLen, &len, &size, &type, pAttributeName);
-        loc = glGetAttribLocation(m_nCurrentProgram, pAttributeName);
+        g_opengl->glGetActiveAttrib(m_nCurrentProgram, i, maxAttributeLen, &len, &size, &type, pAttributeName);
+        loc = g_opengl->glGetAttribLocation(m_nCurrentProgram, pAttributeName);
         TranslateShaderDataType(type, dumpTmp1);
         DumpToFile(m_pDumpDrawFile, "%s: type=%s, ", pAttributeName, dumpTmp1);
 
-        glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_TYPE, &vertexType);
-        glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_STRIDE, &stride);
-        glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &bufBind);
-        glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, &norm);
-        glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_SIZE, &size);
-        glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_POINTER, &pointer);
+        g_opengl->glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_TYPE, &vertexType);
+        g_opengl->glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_STRIDE, &stride);
+        g_opengl->glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &bufBind);
+        g_opengl->glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, &norm);
+        g_opengl->glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_SIZE, &size);
+        g_opengl->glGetVertexAttribiv(loc, GL_VERTEX_ATTRIB_ARRAY_POINTER, &pointer);
         TranslateDataType(vertexType, dumpTmp1);
         DumpToFile(m_pDumpDrawFile, "vertex%d, %s, size=%d, stride=%d, bufBind=%d, pointer=%d, norm=%d\n",
             loc, dumpTmp1, size, stride, bufBind, pointer, norm);
@@ -684,8 +685,8 @@ GLvoid CDumpInfo::DumpShader(GLESAPIIndex func, CFrameInfo *pFrame)
         GLint   loc     = -1;
 
         memset(pUniformName, 0, maxUniformLen);
-        glGetActiveUniform(m_nCurrentProgram, i, maxUniformLen, &len, &size, &type, pUniformName);
-        loc = glGetUniformLocation(m_nCurrentProgram, pUniformName);
+        g_opengl->glGetActiveUniform(m_nCurrentProgram, i, maxUniformLen, &len, &size, &type, pUniformName);
+        loc = g_opengl->glGetUniformLocation(m_nCurrentProgram, pUniformName);
         TranslateShaderDataType(type, dumpTmp1);
         DumpToFile(m_pDumpDrawFile, "%s: type=%s, size=%d\n", pUniformName, dumpTmp1, size);
 
@@ -965,21 +966,21 @@ GLvoid CDumpInfo::DumpDrawStates()
     // Write mask
     {
         GLboolean   colorMask[4];
-        glGetBooleanv(GL_COLOR_WRITEMASK, colorMask);
+        g_opengl->glGetBooleanv(GL_COLOR_WRITEMASK, colorMask);
         DumpToFile(m_pDumpDrawFile, "****ColorMask: (%d, %d, %d, %d)\n",
             colorMask[0], colorMask[1], colorMask[2], colorMask[3]);
     }
 
-    // Viewport
+    // View port
     {
-        glGetIntegerv(GL_VIEWPORT, value);
+        g_opengl->glGetIntegerv(GL_VIEWPORT, value);
         DumpToFile(m_pDumpDrawFile, "****Viewport: (%04d, %04d, %04d, %04d)\n", value[0], value[1], value[2], value[3]);
     }
 
     // Scissor
     if (glIsEnabled(GL_SCISSOR_TEST))
     {
-        glGetIntegerv(GL_SCISSOR_BOX, value);
+        g_opengl->glGetIntegerv(GL_SCISSOR_BOX, value);
         DumpToFile(m_pDumpDrawFile, "****Scissor: (%04d, %04d, %04d, %04d)\n", value[0], value[1], value[2], value[3]);
     }
 
@@ -996,9 +997,9 @@ GLvoid CDumpInfo::DumpDrawStates()
         GLint       depthFunc;
         GLboolean   depthMask;
 
-        glGetFloatv(GL_DEPTH_RANGE, depthRange);
-        glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
-        glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+        g_opengl->glGetFloatv(GL_DEPTH_RANGE, depthRange);
+        g_opengl->glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
+        g_opengl->glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
 
         TranslateFunc(depthFunc, dumpTmp1);
         DumpToFile(m_pDumpDrawFile, "****Depth: on %s (%f, %f) WriteMask: %s\n",
@@ -1015,12 +1016,12 @@ GLvoid CDumpInfo::DumpDrawStates()
         GLint       equationRGB;
         GLint       equationAlpha;
 
-        glGetIntegerv(GL_BLEND_SRC_RGB, &srcRGB);
-        glGetIntegerv(GL_BLEND_SRC_ALPHA, &srcAlpha);
-        glGetIntegerv(GL_BLEND_DST_RGB, &dstRGB);
-        glGetIntegerv(GL_BLEND_DST_ALPHA, &dstAlpha);
-        glGetIntegerv(GL_BLEND_EQUATION_RGB, &equationRGB);
-        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &equationAlpha);
+        g_opengl->glGetIntegerv(GL_BLEND_SRC_RGB, &srcRGB);
+        g_opengl->glGetIntegerv(GL_BLEND_SRC_ALPHA, &srcAlpha);
+        g_opengl->glGetIntegerv(GL_BLEND_DST_RGB, &dstRGB);
+        g_opengl->glGetIntegerv(GL_BLEND_DST_ALPHA, &dstAlpha);
+        g_opengl->glGetIntegerv(GL_BLEND_EQUATION_RGB, &equationRGB);
+        g_opengl->glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &equationAlpha);
 
         TranslateBlendFunc(srcRGB, dumpTmp1);
         TranslateBlendFunc(srcAlpha, dumpTmp2);
@@ -1051,8 +1052,8 @@ GLvoid CDumpInfo::DumpDrawStates()
         const GLchar    *pStrMode;
         const GLchar    *pStrFace;
 
-        glGetIntegerv(GL_CULL_FACE_MODE, &cullFaceMode);
-        glGetIntegerv(GL_FRONT_FACE, &frontFace);
+        g_opengl->glGetIntegerv(GL_CULL_FACE_MODE, &cullFaceMode);
+        g_opengl->glGetIntegerv(GL_FRONT_FACE, &frontFace);
 
         switch (cullFaceMode)
         {
@@ -1097,8 +1098,8 @@ GLvoid CDumpInfo::DumpDrawStates()
         GLfloat offsetFactor;
         GLfloat offsetUnit;
 
-        glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &offsetFactor);
-        glGetFloatv(GL_POLYGON_OFFSET_UNITS, &offsetUnit);
+        g_opengl->glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &offsetFactor);
+        g_opengl->glGetFloatv(GL_POLYGON_OFFSET_UNITS, &offsetUnit);
 
         DumpToFile(m_pDumpDrawFile, "****PolygonOffset: on\tfactor: %08.3f, units: %08.3f\n", offsetFactor, offsetUnit);
     }
@@ -1115,8 +1116,8 @@ GLvoid CDumpInfo::DumpDrawStates()
         GLfloat     value;
         GLboolean   invert;
 
-        glGetFloatv(GL_SAMPLE_COVERAGE_VALUE, &value);
-        glGetBooleanv(GL_SAMPLE_COVERAGE_INVERT, &invert);
+        g_opengl->glGetFloatv(GL_SAMPLE_COVERAGE_VALUE, &value);
+        g_opengl->glGetBooleanv(GL_SAMPLE_COVERAGE_INVERT, &invert);
 
         DumpToFile(m_pDumpDrawFile, "****SampleCoverage: on, value: %08.3f, invert: %s\n",
             value, invert?"on":"off");
@@ -1140,21 +1141,21 @@ GLvoid CDumpInfo::DumpDrawStates()
         GLint   backPassDepthPass;
         GLint   backWriteMask;
 
-        glGetIntegerv(GL_STENCIL_FUNC, &frontFunc);
-        glGetIntegerv(GL_STENCIL_VALUE_MASK, &frontValueMask);
-        glGetIntegerv(GL_STENCIL_REF, &frontRef);
-        glGetIntegerv(GL_STENCIL_FAIL, &frontFail);
-        glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &frontPassDepthFail);
-        glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &frontPassDepthPass);
-        glGetIntegerv(GL_STENCIL_WRITEMASK, &frontWriteMask);
+        g_opengl->glGetIntegerv(GL_STENCIL_FUNC, &frontFunc);
+        g_opengl->glGetIntegerv(GL_STENCIL_VALUE_MASK, &frontValueMask);
+        g_opengl->glGetIntegerv(GL_STENCIL_REF, &frontRef);
+        g_opengl->glGetIntegerv(GL_STENCIL_FAIL, &frontFail);
+        g_opengl->glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &frontPassDepthFail);
+        g_opengl->glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &frontPassDepthPass);
+        g_opengl->glGetIntegerv(GL_STENCIL_WRITEMASK, &frontWriteMask);
 
-        glGetIntegerv(GL_STENCIL_BACK_FUNC, &backFunc);
-        glGetIntegerv(GL_STENCIL_BACK_VALUE_MASK, &backValueMask);
-        glGetIntegerv(GL_STENCIL_BACK_REF, &backRef);
-        glGetIntegerv(GL_STENCIL_BACK_FAIL, &backFail);
-        glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_FAIL, &backPassDepthFail);
-        glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_PASS, &backPassDepthPass);
-        glGetIntegerv(GL_STENCIL_BACK_WRITEMASK, &backWriteMask);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_FUNC, &backFunc);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_VALUE_MASK, &backValueMask);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_REF, &backRef);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_FAIL, &backFail);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_FAIL, &backPassDepthFail);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_PASS, &backPassDepthPass);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_WRITEMASK, &backWriteMask);
 
         DumpToFile(m_pDumpDrawFile, "****Stencil: on\n");
 
@@ -1184,7 +1185,7 @@ GLvoid CDumpInfo::DumpColorBuffer(GLchar *fileName)
     GLint   width   = 0;
     GLint   height  = 0;
 
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    g_opengl->glGetIntegerv(GL_VIEWPORT, viewport);
     width   = viewport[2];
     height  = viewport[3];
 
@@ -1195,7 +1196,7 @@ GLvoid CDumpInfo::DumpColorBuffer(GLchar *fileName)
         return;
     }
 
-    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pData);
+    g_opengl->glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pData);
     DumpSavePicture(fileName, width, height, pData, m_bDumpPng);
     free(pData);
 }
@@ -1219,30 +1220,30 @@ GLvoid CDumpInfo::WriteTextureParameter(GLenum target, GLuint unit)
 
     //DumpWriteInt(m_pDrawBinFile, Dump_TexParameter);
 
-    glActiveTexture(unit+GL_TEXTURE0);
+    g_opengl->glActiveTexture(unit+GL_TEXTURE0);
 
-    glGetTexParameteriv(target, GL_TEXTURE_WRAP_S, &value);
+    g_opengl->glGetTexParameteriv(target, GL_TEXTURE_WRAP_S, &value);
     //DumpWriteInt(m_pDrawBinFile, GL_TEXTURE_WRAP_S);
     DumpWriteInt(m_pDrawBinFile, value);
 
-    glGetTexParameteriv(target, GL_TEXTURE_WRAP_T, &value);
+    g_opengl->glGetTexParameteriv(target, GL_TEXTURE_WRAP_T, &value);
     //DumpWriteInt(m_pDrawBinFile, GL_TEXTURE_WRAP_T);
     DumpWriteInt(m_pDrawBinFile, value);
 
-    glGetTexParameteriv(target, GL_TEXTURE_MIN_FILTER, &value);
+    g_opengl->glGetTexParameteriv(target, GL_TEXTURE_MIN_FILTER, &value);
     //DumpWriteInt(m_pDrawBinFile, GL_TEXTURE_MIN_FILTER);
     DumpWriteInt(m_pDrawBinFile, value);
 
-    glGetTexParameteriv(target, GL_TEXTURE_MAG_FILTER, &value);
+    g_opengl->glGetTexParameteriv(target, GL_TEXTURE_MAG_FILTER, &value);
     //DumpWriteInt(m_pDrawBinFile, GL_TEXTURE_MAG_FILTER);
     DumpWriteInt(m_pDrawBinFile, value);
 
-    glGetTexParameteriv(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, &value);
+    g_opengl->glGetTexParameteriv(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, &value);
     //DumpWriteInt(m_pDrawBinFile, GL_TEXTURE_MAX_ANISOTROPY_EXT);
     DumpWriteInt(m_pDrawBinFile, value);
 
     // Restore current texture unit
-    glActiveTexture(m_pContext->activeTexUnit);
+    g_opengl->glActiveTexture(m_pContext->activeTexUnit);
 }
 
 GLvoid CDumpInfo::WriteTextureImage(GLuint unit, stTexImage *pTexImage)
@@ -1278,7 +1279,7 @@ GLvoid CDumpInfo::WriteTexture(GLint loc, GLenum type, GLuint size)
     CTexObj     *pTex   = NULL;
     stTexImage  *pImg   = NULL;
 
-    glGetUniformiv(m_nCurrentProgram, loc, pValue);
+    g_opengl->glGetUniformiv(m_nCurrentProgram, loc, pValue);
 
     DumpWriteInt(m_pDrawBinFile, Dump_Texture);
     DumpWriteInt(m_pDrawBinFile, size);
@@ -1355,8 +1356,8 @@ GLvoid CDumpInfo::WriteShader(GLESAPIIndex func)
         return;
     }
 
-    glGetError();
-    glGetAttachedShaders(m_nCurrentProgram, 2, &count, shader);
+    g_opengl->glGetError();
+    g_opengl->glGetAttachedShaders(m_nCurrentProgram, 2, &count, shader);
 
     // Write shader
     DumpWriteInt(m_pDrawBinFile, Dump_ShaderSource);
@@ -1373,16 +1374,16 @@ GLvoid CDumpInfo::WriteShader(GLESAPIIndex func)
             continue;
         }
 
-        glGetShaderiv(shader[i], GL_SHADER_TYPE, (GLint*)&type);
-        glGetShaderiv(shader[i], GL_SHADER_SOURCE_LENGTH, &shaderLen);
+        g_opengl->glGetShaderiv(shader[i], GL_SHADER_TYPE, (GLint*)&type);
+        g_opengl->glGetShaderiv(shader[i], GL_SHADER_SOURCE_LENGTH, &shaderLen);
         pSrc = (GLchar*)malloc(shaderLen + 1);
         if (pSrc == NULL)
         {
-            printf("%s(%d): cannot allocte for shader source", __FUNCTION__, __LINE__);
+            printf("%s(%d): cannot allocate for shader source", __FUNCTION__, __LINE__);
             continue;
         }
         memset(pSrc, 0, shaderLen+1);
-        glGetShaderSource(shader[i], shaderLen, &size, pSrc);
+        g_opengl->glGetShaderSource(shader[i], shaderLen, &size, pSrc);
         DumpWriteInt(m_pDrawBinFile, type);
         if (size > 0)
         {
@@ -1405,10 +1406,10 @@ GLvoid CDumpInfo::WriteShader(GLESAPIIndex func)
         free(pSrc);
     }
 
-    glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_ATTRIBUTES, &activeAttributes);
-    glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeLen);
-    glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_UNIFORMS, &activeUniforms);
-    glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformLen);
+    g_opengl->glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_ATTRIBUTES, &activeAttributes);
+    g_opengl->glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeLen);
+    g_opengl->glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_UNIFORMS, &activeUniforms);
+    g_opengl->glGetProgramiv(m_nCurrentProgram, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformLen);
     pAttributeName  = (GLchar*)malloc(maxAttributeLen);
     pUniformName    = (GLchar*)malloc(maxUniformLen);
 
@@ -1422,8 +1423,8 @@ GLvoid CDumpInfo::WriteShader(GLESAPIIndex func)
         GLint   loc         = -1;
 
         memset(pAttributeName, 0, maxAttributeLen);
-        glGetActiveAttrib(m_nCurrentProgram, i, maxAttributeLen, &len, &size, &type, pAttributeName);
-        loc = glGetAttribLocation(m_nCurrentProgram, pAttributeName);
+        g_opengl->glGetActiveAttrib(m_nCurrentProgram, i, maxAttributeLen, &len, &size, &type, pAttributeName);
+        loc = g_opengl->glGetAttribLocation(m_nCurrentProgram, pAttributeName);
 
         // Write binary
         DumpWriteInt(m_pDrawBinFile, loc);
@@ -1440,8 +1441,8 @@ GLvoid CDumpInfo::WriteShader(GLESAPIIndex func)
         GLint   loc     = -1;
 
         memset(pUniformName, 0, maxUniformLen);
-        glGetActiveUniform(m_nCurrentProgram, i, maxUniformLen, &len, &size, &type, pUniformName);
-        loc = glGetUniformLocation(m_nCurrentProgram, pUniformName);
+        g_opengl->glGetActiveUniform(m_nCurrentProgram, i, maxUniformLen, &len, &size, &type, pUniformName);
+        loc = g_opengl->glGetUniformLocation(m_nCurrentProgram, pUniformName);
 
         DumpWriteInt(m_pDrawBinFile, size);
         DumpWriteInt(m_pDrawBinFile, type);
@@ -1534,7 +1535,7 @@ GLvoid CDumpInfo::WriteDrawStates()
     // Write mask
     {
         GLboolean   colorMask[4];
-        glGetBooleanv(GL_COLOR_WRITEMASK, colorMask);
+        g_opengl->glGetBooleanv(GL_COLOR_WRITEMASK, colorMask);
         DumpWriteInt(m_pDrawBinFile, Dump_ColorMask);
         DumpWriteInt(m_pDrawBinFile, colorMask[0]);
         DumpWriteInt(m_pDrawBinFile, colorMask[1]);
@@ -1542,9 +1543,9 @@ GLvoid CDumpInfo::WriteDrawStates()
         DumpWriteInt(m_pDrawBinFile, colorMask[3]);
     }
 
-    // Viewport
+    // View port
     {
-        glGetIntegerv(GL_VIEWPORT, value);
+        g_opengl->glGetIntegerv(GL_VIEWPORT, value);
         DumpWriteInt(m_pDrawBinFile, Dump_Viewport);
         DumpWriteInt(m_pDrawBinFile, value[0]);
         DumpWriteInt(m_pDrawBinFile, value[1]);
@@ -1558,7 +1559,7 @@ GLvoid CDumpInfo::WriteDrawStates()
         DumpWriteInt(m_pDrawBinFile, Dump_Enable);
         DumpWriteInt(m_pDrawBinFile, GL_SCISSOR_TEST);
 
-        glGetIntegerv(GL_SCISSOR_BOX, value);
+        g_opengl->glGetIntegerv(GL_SCISSOR_BOX, value);
         DumpWriteInt(m_pDrawBinFile, value[0]);
         DumpWriteInt(m_pDrawBinFile, value[1]);
         DumpWriteInt(m_pDrawBinFile, value[2]);
@@ -1579,9 +1580,9 @@ GLvoid CDumpInfo::WriteDrawStates()
         GLint       depthFunc;
         GLboolean   depthMask;
 
-        glGetFloatv(GL_DEPTH_RANGE, depthRange);
-        glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
-        glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+        g_opengl->glGetFloatv(GL_DEPTH_RANGE, depthRange);
+        g_opengl->glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
+        g_opengl->glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
 
         DumpWriteInt(m_pDrawBinFile, Dump_Enable);
         DumpWriteInt(m_pDrawBinFile, GL_DEPTH_TEST);
@@ -1601,12 +1602,12 @@ GLvoid CDumpInfo::WriteDrawStates()
         GLint   equationRGB;
         GLint   equationAlpha;
 
-        glGetIntegerv(GL_BLEND_SRC_RGB, &srcRGB);
-        glGetIntegerv(GL_BLEND_SRC_ALPHA, &srcAlpha);
-        glGetIntegerv(GL_BLEND_DST_RGB, &dstRGB);
-        glGetIntegerv(GL_BLEND_DST_ALPHA, &dstAlpha);
-        glGetIntegerv(GL_BLEND_EQUATION_RGB, &equationRGB);
-        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &equationAlpha);
+        g_opengl->glGetIntegerv(GL_BLEND_SRC_RGB, &srcRGB);
+        g_opengl->glGetIntegerv(GL_BLEND_SRC_ALPHA, &srcAlpha);
+        g_opengl->glGetIntegerv(GL_BLEND_DST_RGB, &dstRGB);
+        g_opengl->glGetIntegerv(GL_BLEND_DST_ALPHA, &dstAlpha);
+        g_opengl->glGetIntegerv(GL_BLEND_EQUATION_RGB, &equationRGB);
+        g_opengl->glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &equationAlpha);
 
         DumpWriteInt(m_pDrawBinFile, Dump_Enable);
         DumpWriteInt(m_pDrawBinFile, GL_BLEND);
@@ -1628,8 +1629,8 @@ GLvoid CDumpInfo::WriteDrawStates()
         GLint   cullFaceMode;
         GLint   frontFace;
 
-        glGetIntegerv(GL_CULL_FACE_MODE, &cullFaceMode);
-        glGetIntegerv(GL_FRONT_FACE, &frontFace);
+        g_opengl->glGetIntegerv(GL_CULL_FACE_MODE, &cullFaceMode);
+        g_opengl->glGetIntegerv(GL_FRONT_FACE, &frontFace);
 
         DumpWriteInt(m_pDrawBinFile, Dump_Enable);
         DumpWriteInt(m_pDrawBinFile, GL_CULL_FACE);
@@ -1643,8 +1644,8 @@ GLvoid CDumpInfo::WriteDrawStates()
         GLfloat offsetFactor;
         GLfloat offsetUnit;
 
-        glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &offsetFactor);
-        glGetFloatv(GL_POLYGON_OFFSET_UNITS, &offsetUnit);
+        g_opengl->glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &offsetFactor);
+        g_opengl->glGetFloatv(GL_POLYGON_OFFSET_UNITS, &offsetUnit);
 
         DumpWriteInt(m_pDrawBinFile, Dump_Enable);
         DumpWriteInt(m_pDrawBinFile, GL_POLYGON_OFFSET_FILL);
@@ -1665,8 +1666,8 @@ GLvoid CDumpInfo::WriteDrawStates()
         GLfloat     value;
         GLboolean   invert;
 
-        glGetFloatv(GL_SAMPLE_COVERAGE_VALUE, &value);
-        glGetBooleanv(GL_SAMPLE_COVERAGE_INVERT, &invert);
+        g_opengl->glGetFloatv(GL_SAMPLE_COVERAGE_VALUE, &value);
+        g_opengl->glGetBooleanv(GL_SAMPLE_COVERAGE_INVERT, &invert);
 
         DumpWriteInt(m_pDrawBinFile, Dump_Enable);
         DumpWriteInt(m_pDrawBinFile, GL_SAMPLE_COVERAGE);
@@ -1692,21 +1693,21 @@ GLvoid CDumpInfo::WriteDrawStates()
         GLint   backPassDepthPass;
         GLint   backWriteMask;
 
-        glGetIntegerv(GL_STENCIL_FUNC, &frontFunc);
-        glGetIntegerv(GL_STENCIL_VALUE_MASK, &frontValueMask);
-        glGetIntegerv(GL_STENCIL_REF, &frontRef);
-        glGetIntegerv(GL_STENCIL_FAIL, &frontFail);
-        glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &frontPassDepthFail);
-        glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &frontPassDepthPass);
-        glGetIntegerv(GL_STENCIL_WRITEMASK, &frontWriteMask);
+        g_opengl->glGetIntegerv(GL_STENCIL_FUNC, &frontFunc);
+        g_opengl->glGetIntegerv(GL_STENCIL_VALUE_MASK, &frontValueMask);
+        g_opengl->glGetIntegerv(GL_STENCIL_REF, &frontRef);
+        g_opengl->glGetIntegerv(GL_STENCIL_FAIL, &frontFail);
+        g_opengl->glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &frontPassDepthFail);
+        g_opengl->glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &frontPassDepthPass);
+        g_opengl->glGetIntegerv(GL_STENCIL_WRITEMASK, &frontWriteMask);
 
-        glGetIntegerv(GL_STENCIL_BACK_FUNC, &backFunc);
-        glGetIntegerv(GL_STENCIL_BACK_VALUE_MASK, &backValueMask);
-        glGetIntegerv(GL_STENCIL_BACK_REF, &backRef);
-        glGetIntegerv(GL_STENCIL_BACK_FAIL, &backFail);
-        glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_FAIL, &backPassDepthFail);
-        glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_PASS, &backPassDepthPass);
-        glGetIntegerv(GL_STENCIL_BACK_WRITEMASK, &backWriteMask);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_FUNC, &backFunc);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_VALUE_MASK, &backValueMask);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_REF, &backRef);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_FAIL, &backFail);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_FAIL, &backPassDepthFail);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_PASS, &backPassDepthPass);
+        g_opengl->glGetIntegerv(GL_STENCIL_BACK_WRITEMASK, &backWriteMask);
 
         DumpWriteInt(m_pDrawBinFile, Dump_Enable);
         DumpWriteInt(m_pDrawBinFile, GL_STENCIL_TEST);
@@ -2230,29 +2231,29 @@ GLvoid CDumpInfo::DumpTextureParameter(GLenum target, GLuint unit)
 {
     GLint value = 0;
 
-    glActiveTexture(unit+GL_TEXTURE0);
+    g_opengl->glActiveTexture(unit+GL_TEXTURE0);
 
-    glGetTexParameteriv(target, GL_TEXTURE_WRAP_S, &value);
+    g_opengl->glGetTexParameteriv(target, GL_TEXTURE_WRAP_S, &value);
     TranslateTexValue(value, dumpTmp1);
     DumpToFile(m_pDumpDrawFile, "   wrap_s: %s\n", dumpTmp1);
 
-    glGetTexParameteriv(target, GL_TEXTURE_WRAP_T, &value);
+    g_opengl->glGetTexParameteriv(target, GL_TEXTURE_WRAP_T, &value);
     TranslateTexValue(value, dumpTmp1);
     DumpToFile(m_pDumpDrawFile, "   wrap_t: %s\n", dumpTmp1);
 
-    glGetTexParameteriv(target, GL_TEXTURE_MIN_FILTER, &value);
+    g_opengl->glGetTexParameteriv(target, GL_TEXTURE_MIN_FILTER, &value);
     TranslateTexValue(value, dumpTmp1);
     DumpToFile(m_pDumpDrawFile, "   min_filter: %s\n", dumpTmp1);
 
-    glGetTexParameteriv(target, GL_TEXTURE_MAG_FILTER, &value);
+    g_opengl->glGetTexParameteriv(target, GL_TEXTURE_MAG_FILTER, &value);
     TranslateTexValue(value, dumpTmp1);
     DumpToFile(m_pDumpDrawFile, "   mag_filter: %s\n", dumpTmp1);
 
-    glGetTexParameteriv(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, &value);
+    g_opengl->glGetTexParameteriv(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, &value);
     DumpToFile(m_pDumpDrawFile, "   anisotropy: %d\n", value);
 
     // Restore current texture unit
-    glActiveTexture(m_pContext->activeTexUnit);
+    g_opengl->glActiveTexture(m_pContext->activeTexUnit);
 }
 
 GLvoid CDumpInfo::DumpTexture(GLint loc, GLenum type, GLuint size)
@@ -2261,7 +2262,7 @@ GLvoid CDumpInfo::DumpTexture(GLint loc, GLenum type, GLuint size)
     CTexObj     *pTex   = NULL;
     stTexImage  *pImg   = NULL;
 
-    glGetUniformiv(m_nCurrentProgram, loc, pValue);
+    g_opengl->glGetUniformiv(m_nCurrentProgram, loc, pValue);
 
     if (type == GL_SAMPLER_2D)
     {
@@ -2324,7 +2325,7 @@ GLvoid CDumpInfo::SaveShaderSource(GLESAPIIndex func, CFrameInfo *pFrame)
     memset(pSrc, 0, strLen);
     memcpy(pSrc, pSrcArray, strLen-1);
 
-    glShaderSource(pShader->m_name, 1, &pShader->m_source, NULL);
+    g_opengl->glShaderSource(pShader->m_name, 1, &pShader->m_source, NULL);
 }
 
 CAttribObj* CDumpInfo::FindAttribObjByIndex(GLuint index)
@@ -2351,13 +2352,13 @@ CAttribObj* CDumpInfo::FindAttributeByName(CProgramObj *program, GLchar *name)
 
 GLvoid CDumpInfo::SaveProgram()
 {
-    glGetIntegerv(GL_CURRENT_PROGRAM, &m_nSavedProgram);
-    glUseProgram(m_nCurrentProgram);
+    g_opengl->glGetIntegerv(GL_CURRENT_PROGRAM, &m_nSavedProgram);
+    g_opengl->glUseProgram(m_nCurrentProgram);
 }
 
 GLvoid CDumpInfo::LoadProgram()
 {
-    glUseProgram(m_nSavedProgram);
+    g_opengl->glUseProgram(m_nSavedProgram);
 }
 
 GLvoid CDumpInfo::BeginFrameInfo(GLESAPIIndex func)
@@ -2467,16 +2468,16 @@ GLvoid CDumpInfo::BeginFrameInfo(GLESAPIIndex func)
                 GLfloat     depthClear;
                 GLint       stencilClear;
 
-                glGetFloatv(GL_COLOR_CLEAR_VALUE, clearColor);
+                g_opengl->glGetFloatv(GL_COLOR_CLEAR_VALUE, clearColor);
                 m_clearColorR = clearColor[0];
                 m_clearColorG = clearColor[1];
                 m_clearColorB = clearColor[2];
                 m_clearColorA = clearColor[3];
 
-                glGetFloatv(GL_DEPTH_CLEAR_VALUE, &depthClear);
+                g_opengl->glGetFloatv(GL_DEPTH_CLEAR_VALUE, &depthClear);
                 m_clearDepth = depthClear;
 
-                glGetIntegerv(GL_STENCIL_CLEAR_VALUE, &stencilClear);
+                g_opengl->glGetIntegerv(GL_STENCIL_CLEAR_VALUE, &stencilClear);
                 m_clearStencil = stencilClear;
 
                 m_clearBits = m_pContext->clearBitsMask;
@@ -2549,7 +2550,7 @@ GLvoid CDumpInfo::EndFrameInfo(GLESAPIIndex func)
             {
                 GLint nViewport[4];
 
-                glGetIntegerv(GL_VIEWPORT, nViewport);
+                g_opengl->glGetIntegerv(GL_VIEWPORT, nViewport);
                 m_nWidth    = nViewport[2];
                 m_nHeight   = nViewport[3];
             }
@@ -2585,7 +2586,7 @@ GLvoid CDumpInfo::EndFrameInfo(GLESAPIIndex func)
                     m_nPixelBuffersSize = nCurrentSize;
                 }
 
-                glReadPixels(0, 0, m_nWidth, m_nHeight, GL_RGBA, GL_UNSIGNED_BYTE, m_pPixelBuffers);
+                g_opengl->glReadPixels(0, 0, m_nWidth, m_nHeight, GL_RGBA, GL_UNSIGNED_BYTE, m_pPixelBuffers);
 
                 if (func == GL3_API_glClear)
                 {

@@ -6,7 +6,7 @@
 
 #if defined(LINUX) || defined(__APPLE__) || defined(__QNXNTO__)
     typedef void* LIB_HANDLE;
-#elif _WIN32
+#elif _WIN32 || WINDOWS
     typedef HMODULE LIB_HANDLE;
 #endif
 #ifdef ANDROID

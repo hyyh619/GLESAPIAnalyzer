@@ -12,10 +12,6 @@
 
 #include <GLES2/gl2.h>
 
-GLchar*     readUChar(GLint count);
-GLchar*     readLine();
-GLuint*     readUInt(GLint count);
-GLuint*     readUIntCount(GLint * count);
 GLvoid      FlushToOutputFile(GLchar *output, FILE *file);
 GLboolean   GLES3Disassemble(GLchar *input, GLchar *output, GLint outputSize);
 GLboolean   eglDisassemble(GLchar *input, GLchar *output, GLint outputSize);

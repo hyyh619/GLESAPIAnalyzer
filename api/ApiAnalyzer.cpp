@@ -3,12 +3,26 @@
 #include "ConvertApiDump.h"
 #include "utils.h"
 #include "ApiGLES3Context.h"
+#include "ApiEGLContext.h"
+#include "Analyzer.h"
 
 using namespace std;
 
 CApiAnalyzer::CApiAnalyzer()
 {
     m_bAnalyzeApiDump = GL_FALSE;
+}
+
+GLvoid CApiAnalyzer::Release()
+{
+    if (!m_bAnalyzeApiDump)
+        return;
+
+    CURRENT_CONTEXT1()->Release();
+}
+
+CApiAnalyzer::~CApiAnalyzer()
+{
 }
 
 #ifdef API_DUMP
@@ -22,7 +36,6 @@ CApiAnalyzer::CApiAnalyzer(GLboolean bAnalyzed, const GLchar *filePath, stCmdArg
     memset(p, 0, 256);
     sprintf(p, "%s/vtracer", filePath);
 
-    GLint   n = sizeof(parameter)/sizeof(parameter[0]);
     GLuint  len = strlen(p);
 
     while (p[--len] != '/');
@@ -34,28 +47,16 @@ CApiAnalyzer::CApiAnalyzer(GLboolean bAnalyzed, const GLchar *filePath, stCmdArg
         return;
     }
 
-    parameter[1] = p;
-    ParseArguments1(n, parameter);
+    g_Analyzer.InitAnalyzer(filePath);
 
-    CURRENT_CONTEXT1().Initialize(filePath);
     EGLInit();
     GLES3Init();
+
+    g_opengl = (stEngine*)ConstructOpenGLEngine();
 
     delete p;
 }
 #endif
-
-GLvoid CApiAnalyzer::Release()
-{
-    if (!m_bAnalyzeApiDump)
-        return;
-
-    CURRENT_CONTEXT1().Release();
-}
-
-CApiAnalyzer::~CApiAnalyzer()
-{
-}
 
 #ifdef API_DUMP
 GLvoid CApiAnalyzer::SetPlayer(CPlayer *p)
@@ -120,42 +121,34 @@ GLvoid CApiAnalyzer::ParseEGLEvent(const stEvent &ev)
     if (strstr(Line, "eglSwapBuffers"))
     {
         // Output eglSwapBuffers
-        {
-            GLchar buf[256];
-            memset(buf, 0, 256);
-            sprintf(buf, "eglSwapBuffers(display=0x%08X, draw=0x%08X) Frames: %04d ********************", ev.args[0].val.h, ev.args[1].val.h, g_nFrames);
-            OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_TRUE, CURRENT_CONTEXT1().GetEventSequence(), thread, buf, g_pOutputFile);
-        }
+        //{
+        //    GLchar buf[256];
+        //    memset(buf, 0, 256);
+        //    sprintf(buf, "eglSwapBuffers(display=0x%08X, draw=0x%08X) Frames: %04d ********************", ev.args[0].val.h, ev.args[1].val.h, CURRENT_EGL_CONTEXT()->nFrame);
+        //    OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_TRUE, g_Analyzer.GetEventSequence(), thread, buf, g_pOutputFile);
+        //}
         eglDisassemble(Line, Output, OUT_BUF_SIZE);
+
+        //if (!OutputToTarget(OUTPUT_TO_FILE, GL_FALSE, g_Analyzer.GetEventSequence(), NULL, Output, g_pFrameFile))
+        //{
+        //    printf("#%d-EGL: frame file failed\n", nLineNum);
+        //    return;
+        //}
     
-        if (!OutputToTarget(OUTPUT_TO_FILE, GL_FALSE, CURRENT_CONTEXT1().GetEventSequence(), NULL, Output, g_pFrameFile))
-        {
-            printf("#%d-EGL: frame file failed\n", nLineNum);
-            return;
-        }
-    
-        if (!OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_FALSE, CURRENT_CONTEXT1().GetEventSequence(), NULL, Output, g_pOutputFile))
-        {
-            printf("#%d-EGL: output file failed\n", nLineNum);
-            return;
-        }
-    }
-    else if (strstr(Line, "veglGetThreadData"))
-    {
-        OutputToTarget(OUTPUT_TO_FILE, GL_TRUE, CURRENT_CONTEXT1().GetEventSequence(), thread, Line, g_pOutputFile);
+        //if (!OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_FALSE, g_Analyzer.GetEventSequence(), NULL, Output, g_pOutputFile))
+        //{
+        //    printf("#%d-EGL: output file failed\n", nLineNum);
+        //    return;
+        //}
     }
     else
     {
         eglDisassemble(Line, EGLOutput, EGL_OUT_BUF_SIZE);
-        if (*EGLOutput != '\0')
-        {
-            if (!OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_TRUE, CURRENT_CONTEXT1().GetEventSequence(), thread, EGLOutput, g_pOutputFile))
-            {
-                printf("#%d-EGL: output file failed\n", nLineNum);
-                return;
-            }
-        }
     }
+    //else if (strstr(Line, "veglGetThreadData"))
+    //{
+    //    OutputToTarget(OUTPUT_TO_FILE, GL_TRUE, g_Analyzer.GetEventSequence(), thread, Line, g_pOutputFile);
+    //}
 }
 
 void CApiAnalyzer::ParseES3Event(const stEvent &ev)
@@ -167,9 +160,6 @@ void CApiAnalyzer::ParseES3Event(const stEvent &ev)
     memset(Line, 0, 256);
 
     sprintf(Line, "${ES20 %s", funcName);
-
-    //if (ev.name == GL3_API_Index_glBindBufferBase)
-    //    __asm int 3;
 
     if ((ev.name == GL3_API_Index_glCreateProgram))
     {
@@ -332,18 +322,18 @@ void CApiAnalyzer::ParseES3Event(const stEvent &ev)
             (strstr(Line, "glDrawElements")))
         {
             // Output draw
-            {
-                GLchar buf[256];
-                memset(buf, 0, 256);
-                sprintf(buf, "%s %08d", Line, CURRENT_CONTEXT1().nDrawTotal+1);
-                OutputToTarget(OUTPUT_TO_FILE, GL_TRUE, CURRENT_CONTEXT1().GetEventSequence(), thread, buf, g_pOutputFile);
-            }
+            //{
+            //    GLchar buf[256];
+            //    memset(buf, 0, 256);
+            //    sprintf(buf, "%s %08d", Line, CURRENT_CONTEXT1()->nDrawTotal+1);
+            //    OutputToTarget(OUTPUT_TO_FILE, GL_TRUE, g_Analyzer.GetEventSequence(), thread, buf, g_pOutputFile);
+            //}
 
             GLES3Disassemble(&Line[9], Draw, DRAW_BUF_SIZE);
         }
         else if (strstr(Line, "glShaderSource"))
         {
-            OutputToTarget(OUTPUT_TO_FILE, GL_TRUE, CURRENT_CONTEXT1().GetEventSequence(), thread, Line, g_pOutputFile);
+            //OutputToTarget(OUTPUT_TO_FILE, GL_TRUE, g_Analyzer.GetEventSequence(), thread, Line, g_pOutputFile);
             GLES3Disassemble(&Line[9], Uniform, UNIFORM_BUF_SIZE);
         }
         else if ((strstr(Line, "glUniformMatrix3fv"))
@@ -356,24 +346,24 @@ void CApiAnalyzer::ParseES3Event(const stEvent &ev)
         {
             GLES3Disassemble(&Line[9], Uniform, UNIFORM_BUF_SIZE);
     
-            if (!OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_TRUE, CURRENT_CONTEXT1().GetEventSequence(), thread, Uniform, g_pOutputFile))
-            {
-                printf("#%d-ES20: output file failed\n", nLineNum);
-                return;
-            }
+            //if (!OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_TRUE, g_Analyzer.GetEventSequence(), thread, Uniform, g_pOutputFile))
+            //{
+            //    printf("#%d-ES20: output file failed\n", nLineNum);
+            //    return;
+            //}
         }
         else
         {
             GLES3Disassemble(&Line[9], GLOutput, GL_OUT_BUF_SIZE);
 
-            if (*GLOutput != '\0')
-            {
-                if (!OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_TRUE, CURRENT_CONTEXT1().GetEventSequence(), thread, GLOutput, g_pOutputFile))
-                {
-                    printf("#%d-ES20: output file failed\n", nLineNum);
-                    return;
-                }
-            }
+            //if (*GLOutput != '\0')
+            //{
+            //    if (!OutputToTarget(OUTPUT_TO_TOTAL_STRING, GL_TRUE, g_Analyzer.GetEventSequence(), thread, GLOutput, g_pOutputFile))
+            //    {
+            //        printf("#%d-ES20: output file failed\n", nLineNum);
+            //        return;
+            //    }
+            //}
         }
     }
 
@@ -387,11 +377,17 @@ GLvoid CApiAnalyzer::BeginEvent(const stEvent& ev)
 {
     UpdateContext(ev);
 
-    CURRENT_CONTEXT1().m_pDumpInfo->BeginEvent((GLESAPIIndex)ev.name);
+    PEglThreadData  thread  = _GetThreadData();
+    CGLES3Context   *pCtx   = thread->context?thread->context->pGLESContext:NULL;
 
-    if (ev.name == EGL_API_eglSwapBuffers)
+    if (pCtx)
     {
-        CURRENT_CONTEXT1().DumpFrame();
+        pCtx->m_pDumpInfo->BeginEvent((GLESAPIIndex)ev.name);
+
+        if (ev.name == EGL_API_eglSwapBuffers)
+        {
+            CURRENT_CONTEXT1()->DumpFrame();
+        }
     }
 
     if (m_bAnalyzeApiDump == GL_FALSE)
@@ -414,8 +410,14 @@ GLvoid CApiAnalyzer::BeginEvent(const stEvent& ev)
 
 GLvoid CApiAnalyzer::EndEvent(const stEvent& ev)
 {
-    CURRENT_CONTEXT1().m_pDumpInfo->EndEvent((GLESAPIIndex)ev.name);
-    CURRENT_CONTEXT1().DumpDraw((GLESAPIIndex)ev.name);
+    PEglThreadData  thread  = _GetThreadData();
+    CGLES3Context   *pCtx   = thread->context?thread->context->pGLESContext:NULL;
+
+    if (pCtx)
+    {
+        pCtx->m_pDumpInfo->EndEvent((GLESAPIIndex)ev.name);
+        pCtx->DumpDraw((GLESAPIIndex)ev.name);
+    }
 
     if (m_bAnalyzeApiDump == GL_FALSE)
     {
@@ -490,7 +492,7 @@ GLvoid  CApiAnalyzer::ShaderSource(GLuint shaderIndex, GLsizei count, GLuint str
         FreeData(strArray[i]);
     }
 
-    CURRENT_CONTEXT1().ApiShaderSource(shaderIndex, 1, &shader, NULL);
+    CURRENT_CONTEXT1()->ApiShaderSource(shaderIndex, 1, &shader, NULL);
 #elif defined(TCG_USE)
     GLchar  *string = NULL;
     GLint   *length = NULL;
@@ -539,11 +541,110 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
 {
     switch (ev.name)
     {
+    case EGL_API_eglGetDisplay:
+        {
+            EGLNativeDisplayType display_id = (EGLNativeDisplayType)ev.args[0].val.i;
+            EGLDisplay           dpy        = (EGLDisplay)ev.args[1].val.i;
+            ApiGetDisplay(display_id, dpy);
+        }
+        break;
+
+    case EGL_API_eglInitialize:
+        break;
+
     case EGL_API_eglCreateContext:
+        {
+            EGLDisplay  display = (EGLDisplay)ev.args[0].val.i;
+            EGLConfig   config  = (EGLConfig)ev.args[1].val.i;
+            EGLContext  shCtx   = (EGLContext)ev.args[2].val.i;
+            EGLint      *pAttr  = (EGLint*)GetCurrentDataPtr(ev.args[3].val.h);
+            EGLContext  ret     = (EGLContext)ev.args[4].val.i;
+            ApiCreateContext(display, config, shCtx, pAttr, ret);
+        }
+        break;
+
+    case EGL_API_eglCreateWindowSurface:
+        {
+            EGLDisplay          display = (EGLDisplay)ev.args[0].val.i;
+            EGLConfig           config  = (EGLConfig)ev.args[1].val.i;
+            EGLNativeWindowType wndType = (EGLNativeWindowType)ev.args[2].val.i;
+            EGLint              *pAttr  = (EGLint*)GetCurrentDataPtr(ev.args[3].val.h);
+            EGLSurface          ret     = (EGLSurface)ev.args[4].val.i;
+            ApiCreateWindowSurface(display, config, wndType, pAttr, ret);
+        }
+        break;
+
+    case EGL_API_eglCreatePbufferSurface:
+        {
+            EGLDisplay          display = (EGLDisplay)ev.args[0].val.i;
+            EGLConfig           config  = (EGLConfig)ev.args[1].val.i;
+            EGLint              *pAttr  = (EGLint*)GetCurrentDataPtr(ev.args[2].val.h);
+            EGLSurface          ret     = (EGLSurface)ev.args[3].val.i;
+            ApiCreatePbufferSurface(display, config, pAttr, ret);
+        }
+        break;
+
+    case EGL_API_eglCreatePixmapSurface:
+        {
+            EGLDisplay          display = (EGLDisplay)ev.args[0].val.i;
+            EGLConfig           config  = (EGLConfig)ev.args[1].val.i;
+            EGLNativePixmapType wndType = (EGLNativePixmapType)ev.args[2].val.i;
+            EGLint              *pAttr  = (EGLint*)GetCurrentDataPtr(ev.args[3].val.h);
+            EGLSurface          ret     = (EGLSurface)ev.args[4].val.i;
+            ApiCreatePixmapSurface(display, config, wndType, pAttr, ret);
+        }
+        break;
+
+    case EGL_API_eglDestroySurface:
+        {
+            EGLDisplay  display = (EGLDisplay)ev.args[0].val.i;
+            EGLSurface  surf    = (EGLSurface)ev.args[1].val.i;
+            EGLBoolean  ret     = (EGLBoolean)ev.args[2].val.i;
+            ApiDestroySurface(display, surf, ret);
+        }
+        break;
+
+    case EGL_API_eglDestroyContext:
+        {
+            EGLDisplay  display = (EGLDisplay)ev.args[0].val.i;
+            EGLContext  ctx     = (EGLContext)ev.args[1].val.i;
+            EGLBoolean  ret     = (EGLBoolean)ev.args[2].val.i;
+            ApiDestroyContext(display, ctx, ret);
+        }
+        break;
+
+    case EGL_API_eglMakeCurrent:
+        {
+            EGLDisplay  display = (EGLDisplay)ev.args[0].val.i;
+            EGLSurface  draw    = (EGLSurface)ev.args[1].val.i;
+            EGLSurface  read    = (EGLSurface)ev.args[2].val.i;
+            EGLContext  ctx     = (EGLContext)ev.args[3].val.i;
+            EGLBoolean  ret     = (EGLBoolean)ev.args[4].val.i;
+            ApiMakeCurrent(display, draw, read, ctx, ret);
+        }
+        break;
+
+    case EGL_API_eglChooseConfig:
+        {
+            EGLDisplay  display     = (EGLDisplay)ev.args[0].val.i;
+            EGLint      *attribList = (EGLint*)ReadData(READ_GL_UCHAR, ev.args[1].val.i, 0);
+            EGLConfig   *configs    = (EGLConfig*)ReadData(READ_GL_UCHAR, ev.args[2].val.i, 0);
+            EGLint      confSize    = (EGLint)ev.args[3].val.i;
+            EGLint      *configNum  = (EGLint*)ReadData(READ_GL_UCHAR, ev.args[4].val.i, 0);
+            EGLBoolean  ret         = ev.args[5].val.i;
+            ApiChooseConfig(display, attribList, configs, confSize, configNum, ret);
+        }
+        break;
+
+    case EGL_API_eglGetError:
+        ApiEglGetError(ev.args[0].val.i);
+        break;
+
+    case EGL_API_eglGetProcAddress:
         break;
 
     case GL3_API_glDrawArrays:
-        CURRENT_CONTEXT1().ApiDrawArrays(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i);
+        CURRENT_CONTEXT1()->ApiDrawArrays(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i);
         break;
 
     case GL3_API_glDrawElements:
@@ -554,50 +655,50 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLuint          handle  = ev.args[3].val.h;
             const GLvoid*   indices = NULL;
 
-            if (!CURRENT_CONTEXT1().elementArrayBuffer)
+            if (!CURRENT_CONTEXT1()->elementArrayBuffer)
             {
                 GLvoid *pData = GetCurrentDataPtr(handle);
                 indices = pData;
             }
             else
             {
-                CBufObj *p = CURRENT_CONTEXT1().FindBufObj(CURRENT_CONTEXT1().elementArrayBuffer);
+                CBufObj *p = CURRENT_CONTEXT1()->FindBufObj(CURRENT_CONTEXT1()->elementArrayBuffer);
                 indices = (const GLvoid*)((GLuint)p->GetCurrentDataPointer() + handle);
             }
 
-            CURRENT_CONTEXT1().ApiDrawElements(mode, count, type, indices);
+            CURRENT_CONTEXT1()->ApiDrawElements(mode, count, type, indices);
         }
         break;
 
     case GL3_API_glActiveTexture:
-        CURRENT_CONTEXT1().ApiActiveTexture(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiActiveTexture(ev.args[0].val.i);
         break;
 
     case GL3_API_glAttachShader:
-        CURRENT_CONTEXT1().ApiAttachShader(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiAttachShader(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glBindTexture:
-        CURRENT_CONTEXT1().ApiBindTexture(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiBindTexture(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glBindBuffer:
-        CURRENT_CONTEXT1().ApiBindBuffer(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiBindBuffer(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glBindBufferBase:
-        CURRENT_CONTEXT1().ApiBindBufferBase(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i);
+        CURRENT_CONTEXT1()->ApiBindBufferBase(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i);
         break;
 
     case GL3_API_glBindBufferRange:
-        CURRENT_CONTEXT1().ApiBindBufferRange(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i, ev.args[4].val.i);
+        CURRENT_CONTEXT1()->ApiBindBufferRange(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i, ev.args[4].val.i);
         break;
 
     case GL3_API_glBufferData:
         {
             GLuint  size    = ev.args[1].val.i;
             GLchar *pData   = (GLchar*)ReadData(READ_GL_UCHAR, ev.args[2].val.i, size);
-            CURRENT_CONTEXT1().ApiBufferData(ev.args[0].val.i, size, pData, ev.args[3].val.i);
+            CURRENT_CONTEXT1()->ApiBufferData(ev.args[0].val.i, size, pData, ev.args[3].val.i);
         }
         break;
 
@@ -606,28 +707,28 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLuint  offset  = ev.args[1].val.i;
             GLuint  size    = ev.args[2].val.i;
             GLchar *pData   = (GLchar*)ReadData(READ_GL_UCHAR, ev.args[3].val.i, size);
-            CURRENT_CONTEXT1().ApiBufferSubData(ev.args[0].val.i, offset, size, pData);
+            CURRENT_CONTEXT1()->ApiBufferSubData(ev.args[0].val.i, offset, size, pData);
         }
         break;
 
     case GL3_API_glBindVertexArray:
-        CURRENT_CONTEXT1().ApiBindVertexArray(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiBindVertexArray(ev.args[0].val.i);
         break;
 
     case GL3_API_glBindTransformFeedback:
-        CURRENT_CONTEXT1().ApiBindTransformFeedback(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiBindTransformFeedback(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glBeginTransformFeedback:
-        CURRENT_CONTEXT1().ApiBeginTransformFeedback(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiBeginTransformFeedback(ev.args[0].val.i);
         break;
 
     case GL3_API_glBindFramebuffer:
-        CURRENT_CONTEXT1().ApiBindFramebuffer(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiBindFramebuffer(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glBindRenderbuffer:
-        CURRENT_CONTEXT1().ApiBindRenderbuffer(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiBindRenderbuffer(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glBindAttribLocation:
@@ -635,32 +736,32 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLint   loc     = ev.args[1].val.i;
             GLuint  program = ev.args[0].val.i;
             GLchar  *name   = (GLchar*)ReadData(READ_GL_UCHAR, ev.args[2].val.i, 0);
-            CURRENT_CONTEXT1().ApiBindAttribLocation(program, loc, name);
+            CURRENT_CONTEXT1()->ApiBindAttribLocation(program, loc, name);
         }
         break;
 
     case GL3_API_glBlendColor:
-        CURRENT_CONTEXT1().ApiBlendColor(ev.args[0].val.f, ev.args[1].val.f, ev.args[2].val.f, ev.args[3].val.f);
+        CURRENT_CONTEXT1()->ApiBlendColor(ev.args[0].val.f, ev.args[1].val.f, ev.args[2].val.f, ev.args[3].val.f);
         break;
 
     case GL3_API_glBlendEquation:
-        CURRENT_CONTEXT1().ApiBlendEquation(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiBlendEquation(ev.args[0].val.i);
         break;
 
     case GL3_API_glBlendEquationSeparate:
-        CURRENT_CONTEXT1().ApiBlendEquationSeparate(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiBlendEquationSeparate(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glBlendFunc:
-        CURRENT_CONTEXT1().ApiBlendFunc(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiBlendFunc(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glBlendFuncSeparate:
-        CURRENT_CONTEXT1().ApiBlendFuncSeparate(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
+        CURRENT_CONTEXT1()->ApiBlendFuncSeparate(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
         break;
 
     case GL3_API_glClear:
-        CURRENT_CONTEXT1().ApiClear(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiClear(ev.args[0].val.i);
         break;
 
     case GL3_API_glClearColor:
@@ -669,16 +770,16 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLfloat p2 = ev.args[1].val.f;
             GLfloat p3 = ev.args[2].val.f;
             GLfloat p4 = ev.args[3].val.f;
-            CURRENT_CONTEXT1().ApiClearColor(p1, p2, p3, p4);
+            CURRENT_CONTEXT1()->ApiClearColor(p1, p2, p3, p4);
         }
         break;
 
     case GL3_API_glClearDepthf:
-        CURRENT_CONTEXT1().ApiClearDepthf(ev.args[0].val.f);
+        CURRENT_CONTEXT1()->ApiClearDepthf(ev.args[0].val.f);
         break;
 
     case GL3_API_glClearStencil:
-        CURRENT_CONTEXT1().ApiClearStencil(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiClearStencil(ev.args[0].val.i);
         break;
 
     case GL3_API_glCompressedTexImage2D:
@@ -693,7 +794,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLuint  handle      = ev.args[7].val.i;
             GLvoid  *data       = (GLvoid*)ReadCompressedTex(READ_GL_UCHAR, handle, imageSize);
 
-            CURRENT_CONTEXT1().ApiCompressedTexImage2D(target, level, format, width, height, border, imageSize, data);
+            CURRENT_CONTEXT1()->ApiCompressedTexImage2D(target, level, format, width, height, border, imageSize, data);
         }
         break;
 
@@ -710,35 +811,35 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLuint  handle      = ev.args[8].val.i;
             GLvoid  *data       = (GLvoid*)ReadCompressedTex(READ_GL_UCHAR, handle, imageSize);
 
-            CURRENT_CONTEXT1().ApiCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
+            CURRENT_CONTEXT1()->ApiCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
         }
         break;
 
     case GL3_API_glColorMask:
-        CURRENT_CONTEXT1().ApiColorMask(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
+        CURRENT_CONTEXT1()->ApiColorMask(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
         break;
 
     case GL3_API_glCompileShader:
-        CURRENT_CONTEXT1().ApiCompileShader(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiCompileShader(ev.args[0].val.i);
         break;
 
     case GL3_API_glCreateProgram:
-        CURRENT_CONTEXT1().ApiCreateProgram(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiCreateProgram(ev.args[0].val.i);
         break;
 
     case GL3_API_glCreateShader:
-        CURRENT_CONTEXT1().ApiCreateShader(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiCreateShader(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glCullFace:
-        CURRENT_CONTEXT1().ApiCullFace(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiCullFace(ev.args[0].val.i);
         break;
 
     case GL3_API_glDeleteBuffers:
         {
             GLuint  count   = ev.args[0].val.i;
             GLuint *pData   = (GLuint*)ReadData(READ_GL_UINT, ev.args[1].val.i, count);
-            CURRENT_CONTEXT1().ApiDeleteBuffers(count, pData);
+            CURRENT_CONTEXT1()->ApiDeleteBuffers(count, pData);
         }
         break;
 
@@ -746,31 +847,31 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
         {
             GLuint  count   = ev.args[0].val.i;
             GLuint *pData   = (GLuint*)ReadData(READ_GL_UINT, ev.args[1].val.i, count);
-            CURRENT_CONTEXT1().ApiDeleteFramebuffers(count, pData);
+            CURRENT_CONTEXT1()->ApiDeleteFramebuffers(count, pData);
         }
         break;
 
     case GL3_API_glDeleteProgram:
-        CURRENT_CONTEXT1().ApiDeleteProgram(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiDeleteProgram(ev.args[0].val.i);
         break;
 
     case GL3_API_glDeleteRenderbuffers:
         {
             GLuint  count   = ev.args[0].val.i;
             GLuint *pData   = (GLuint*)ReadData(READ_GL_UINT, ev.args[1].val.i, count);
-            CURRENT_CONTEXT1().ApiDeleteRenderbuffers(count, pData);
+            CURRENT_CONTEXT1()->ApiDeleteRenderbuffers(count, pData);
         }
         break;
 
     case GL3_API_glDeleteShader:
-        CURRENT_CONTEXT1().ApiDeleteShader(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiDeleteShader(ev.args[0].val.i);
         break;
 
     case GL3_API_glDeleteTextures:
         {
             GLuint  count = ev.args[0].val.i;
             GLuint  *v = (GLuint*)ReadData(READ_GL_UINT, ev.args[1].val.i, count);
-            CURRENT_CONTEXT1().ApiDeleteTextures(count, v);
+            CURRENT_CONTEXT1()->ApiDeleteTextures(count, v);
             break;
         }
 
@@ -778,7 +879,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
         {
             GLuint  count   = ev.args[0].val.i;
             GLuint *pData   = (GLuint*)ReadData(READ_GL_UINT, ev.args[1].val.i, count);
-            CURRENT_CONTEXT1().ApiDeleteTransformFeedbacks(count, pData);
+            CURRENT_CONTEXT1()->ApiDeleteTransformFeedbacks(count, pData);
         }
         break;
 
@@ -786,75 +887,75 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
         {
             GLuint  count   = ev.args[0].val.i;
             GLuint *pData   = (GLuint*)ReadData(READ_GL_UINT, ev.args[1].val.i, count);
-            CURRENT_CONTEXT1().ApiDeleteVertexArrays(count, pData);
+            CURRENT_CONTEXT1()->ApiDeleteVertexArrays(count, pData);
         }
         break;
 
     case GL3_API_glDepthFunc:
-        CURRENT_CONTEXT1().ApiDepthFunc(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiDepthFunc(ev.args[0].val.i);
         break;
 
     case GL3_API_glDepthMask:
-        CURRENT_CONTEXT1().ApiDepthMask(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiDepthMask(ev.args[0].val.i);
         break;
 
     case GL3_API_glDepthRangef:
-        CURRENT_CONTEXT1().ApiDepthRangef(ev.args[0].val.f, ev.args[0].val.f);
+        CURRENT_CONTEXT1()->ApiDepthRangef(ev.args[0].val.f, ev.args[0].val.f);
         break;
 
     case GL3_API_glDetachShader:
-        CURRENT_CONTEXT1().ApiDetachShader(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiDetachShader(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glDisable:
-        CURRENT_CONTEXT1().ApiDisable(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiDisable(ev.args[0].val.i);
         break;
 
     case GL3_API_glDisableVertexAttribArray:
-        CURRENT_CONTEXT1().ApiDisableVertexAttribArray(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiDisableVertexAttribArray(ev.args[0].val.i);
         break;
 
     case GL3_API_glEnable:
-        CURRENT_CONTEXT1().ApiEnable(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiEnable(ev.args[0].val.i);
         break;
 
     case GL3_API_glEnableVertexAttribArray:
-        CURRENT_CONTEXT1().ApiEnableVertexAttribArray(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiEnableVertexAttribArray(ev.args[0].val.i);
         break;
 
     case GL3_API_glEndTransformFeedback:
-        CURRENT_CONTEXT1().ApiEndTransformFeedback();
+        CURRENT_CONTEXT1()->ApiEndTransformFeedback();
         break;
 
     case GL3_API_glFramebufferRenderbuffer:
-        CURRENT_CONTEXT1().ApiFramebufferRenderbuffer(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
+        CURRENT_CONTEXT1()->ApiFramebufferRenderbuffer(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
         break;
 
     case GL3_API_glFramebufferTexture2D:
-        CURRENT_CONTEXT1().ApiFramebufferTexture2D(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i, ev.args[4].val.i);
+        CURRENT_CONTEXT1()->ApiFramebufferTexture2D(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i, ev.args[4].val.i);
         break;
 
     case GL3_API_glFrontFace:
-        CURRENT_CONTEXT1().ApiFrontFace(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiFrontFace(ev.args[0].val.i);
         break;
 
     case GL3_API_glGenBuffers:
         {
             GLuint  count   = ev.args[0].val.i;
             GLuint *pData   = (GLuint*)ReadData(READ_GL_UINT, ev.args[1].val.i, count);
-            CURRENT_CONTEXT1().ApiGenBuffers(count, pData);
+            CURRENT_CONTEXT1()->ApiGenBuffers(count, pData);
         }
         break;
 
     case GL3_API_glGenerateMipmap:
-        CURRENT_CONTEXT1().ApiGenerateMipmap(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiGenerateMipmap(ev.args[0].val.i);
         break;
 
     case GL3_API_glGenFramebuffers:
         {
             GLuint  count   = ev.args[0].val.i;
             GLuint *pData   = (GLuint*)ReadData(READ_GL_UINT, ev.args[1].val.i, count);
-            CURRENT_CONTEXT1().ApiGenFramebuffers(count, pData);
+            CURRENT_CONTEXT1()->ApiGenFramebuffers(count, pData);
         }
         break;
 
@@ -862,7 +963,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
         {
             GLuint  count   = ev.args[0].val.i;
             GLuint *pData   = (GLuint*)ReadData(READ_GL_UINT, ev.args[1].val.i, count);
-            CURRENT_CONTEXT1().ApiGenRenderbuffers(count, pData);
+            CURRENT_CONTEXT1()->ApiGenRenderbuffers(count, pData);
         }
         break;
 
@@ -870,7 +971,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
         {
             GLuint  count   = ev.args[0].val.i;
             GLuint *pData   = (GLuint*)ReadData(READ_GL_UINT, ev.args[1].val.i, count);
-            CURRENT_CONTEXT1().ApiGenTextures(count, pData);
+            CURRENT_CONTEXT1()->ApiGenTextures(count, pData);
         }
         break;
 
@@ -878,7 +979,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
         {
             GLuint  count   = ev.args[0].val.i;
             GLuint *pData   = (GLuint*)ReadData(READ_GL_UINT, ev.args[1].val.i, count);
-            CURRENT_CONTEXT1().ApiGenTransformFeedbacks(count, pData);
+            CURRENT_CONTEXT1()->ApiGenTransformFeedbacks(count, pData);
         }
         break;
 
@@ -887,7 +988,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLchar  *name    = (GLchar*)ReadData(READ_GL_UCHAR, ev.args[1].val.i, 0);
             GLuint  location = ev.args[2].val.i;
             GLuint  program  = ev.args[0].val.i;
-            CURRENT_CONTEXT1().ApiGetUniformLocation(program, name, location);
+            CURRENT_CONTEXT1()->ApiGetUniformLocation(program, name, location);
         }
         break;
 
@@ -895,7 +996,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
         {
             GLuint  count   = ev.args[0].val.i;
             GLuint *pData   = (GLuint*)ReadData(READ_GL_UINT, ev.args[1].val.i, count);
-            CURRENT_CONTEXT1().ApiGenVertexArrays(count, pData);
+            CURRENT_CONTEXT1()->ApiGenVertexArrays(count, pData);
         }
         break;
 
@@ -904,24 +1005,24 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLuint  program = ev.args[0].val.i;
             GLchar  *name   = (GLchar*)ReadData(READ_GL_UCHAR, ev.args[1].val.i, 0);
             GLint   oldLoc  = ev.args[2].val.i;
-            CURRENT_CONTEXT1().ApiGetAttribLocation(program, name, oldLoc);
+            CURRENT_CONTEXT1()->ApiGetAttribLocation(program, name, oldLoc);
         }
         break;
 
     case GL3_API_glLineWidth:
-        CURRENT_CONTEXT1().ApiLineWidth(ev.args[0].val.f);
+        CURRENT_CONTEXT1()->ApiLineWidth(ev.args[0].val.f);
         break;
 
     case GL3_API_glLinkProgram:
-        CURRENT_CONTEXT1().ApiLinkProgram(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiLinkProgram(ev.args[0].val.i);
         break;
 
     case GL3_API_glPixelStorei:
-        CURRENT_CONTEXT1().ApiPixelStorei(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiPixelStorei(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glPolygonOffset:
-        CURRENT_CONTEXT1().ApiPolygonOffset(ev.args[0].val.f, ev.args[1].val.f);
+        CURRENT_CONTEXT1()->ApiPolygonOffset(ev.args[0].val.f, ev.args[1].val.f);
         break;
 
     case GL3_API_glProgramBinary:
@@ -932,20 +1033,20 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLuint  len     = ev.args[3].val.i;
             GLubyte *binary = (GLubyte*)ReadData(READ_GL_UCHAR, ev.args[2].val.h, len);
 
-            CURRENT_CONTEXT1().ApiProgramBinary(program, format, binary, len);
+            CURRENT_CONTEXT1()->ApiProgramBinary(program, format, binary, len);
         }
         break;
 
     case GL3_API_glRenderbufferStorage:
-        CURRENT_CONTEXT1().ApiRenderbufferStorage(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
+        CURRENT_CONTEXT1()->ApiRenderbufferStorage(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
         break;
 
     case GL3_API_glSampleCoverage:
-        CURRENT_CONTEXT1().ApiSampleCoverage(ev.args[0].val.f, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiSampleCoverage(ev.args[0].val.f, ev.args[1].val.i);
         break;
 
     case GL3_API_glScissor:
-        CURRENT_CONTEXT1().ApiScissor(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
+        CURRENT_CONTEXT1()->ApiScissor(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
         break;
 
     case GL3_API_glShaderSource:
@@ -953,31 +1054,31 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
         break;
 
     case GL3_API_glStencilFunc:
-        CURRENT_CONTEXT1().ApiStencilFunc(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i);
+        CURRENT_CONTEXT1()->ApiStencilFunc(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i);
         break;
 
     case GL3_API_glStencilFuncSeparate:
-        CURRENT_CONTEXT1().ApiStencilFuncSeparate(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
+        CURRENT_CONTEXT1()->ApiStencilFuncSeparate(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
         break;
 
     case GL3_API_glStencilMask:
-        CURRENT_CONTEXT1().ApiStencilMask(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiStencilMask(ev.args[0].val.i);
         break;
 
     case GL3_API_glStencilMaskSeparate:
-        CURRENT_CONTEXT1().ApiStencilMaskSeparate(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiStencilMaskSeparate(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glStencilOp:
-        CURRENT_CONTEXT1().ApiStencilOp(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i);
+        CURRENT_CONTEXT1()->ApiStencilOp(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i);
         break;
 
     case GL3_API_glStencilOpSeparate:
-        CURRENT_CONTEXT1().ApiStencilOpSeparate(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
+        CURRENT_CONTEXT1()->ApiStencilOpSeparate(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
         break;
 
     case GL3_API_glTexParameteri:
-        CURRENT_CONTEXT1().ApiTexParameteri(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i);
+        CURRENT_CONTEXT1()->ApiTexParameteri(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i);
         break;
 
     case GL3_API_glTexParameteriv:
@@ -986,12 +1087,12 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLenum  pname   = ev.args[1].val.i;
             GLuint  handle  = ev.args[2].val.i;
             GLvoid  *pData  = ReadData(READ_GL_UCHAR, handle, 4);
-            CURRENT_CONTEXT1().ApiTexParameteriv(target, pname, (GLint*)pData);
+            CURRENT_CONTEXT1()->ApiTexParameteriv(target, pname, (GLint*)pData);
         }
         break;
 
     case GL3_API_glTexParameterf:
-        CURRENT_CONTEXT1().ApiTexParameterf(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.f);
+        CURRENT_CONTEXT1()->ApiTexParameterf(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.f);
         break;
 
     case GL3_API_glTexParameterfv:
@@ -1000,7 +1101,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLenum  pname   = ev.args[1].val.i;
             GLuint  handle  = ev.args[2].val.i;
             GLvoid  *pData  = ReadData(READ_GL_UCHAR, handle, 4);
-            CURRENT_CONTEXT1().ApiTexParameterfv(target, pname, (GLfloat*)pData);
+            CURRENT_CONTEXT1()->ApiTexParameterfv(target, pname, (GLfloat*)pData);
         }
         break;
 
@@ -1018,7 +1119,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLuint      imgSize = GetTexImageSize(infmt, type, width, height, 1);
             GLchar      *pixels = handle?(GLchar*)ReadTexData(READ_GL_UCHAR, handle, imgSize):NULL;
 
-            CURRENT_CONTEXT1().ApiTexImage2D(target, level, infmt, width, height, border, format, type, pixels);
+            CURRENT_CONTEXT1()->ApiTexImage2D(target, level, infmt, width, height, border, format, type, pixels);
         }
         break;
 
@@ -1036,7 +1137,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLuint      imgSize     = GetTexImageSize(format, type, width, height, 1);
             GLubyte      *pixels    = (GLubyte*)ReadData(READ_GL_UCHAR, handle, imgSize);
 
-            CURRENT_CONTEXT1().ApiTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+            CURRENT_CONTEXT1()->ApiTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
         }
         break;
 
@@ -1055,7 +1156,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLuint      imgSize = GetTexImageSize(infmt, type, width, height, 1);
             GLchar      *pixels = handle?(GLchar*)ReadTexData(READ_GL_UCHAR, handle, imgSize):NULL;
 
-            CURRENT_CONTEXT1().ApiTexImage3D(target, level, infmt, width, height, depth, border, format, type, pixels);
+            CURRENT_CONTEXT1()->ApiTexImage3D(target, level, infmt, width, height, depth, border, format, type, pixels);
         }
         break;
 
@@ -1075,7 +1176,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLuint      imgSize     = GetTexImageSize(format, type, width, height, 1);
             GLubyte     *pixels     = handle?(GLubyte*)ReadTexData(READ_GL_UCHAR, handle, imgSize):NULL;
 
-            CURRENT_CONTEXT1().ApiTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
+            CURRENT_CONTEXT1()->ApiTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
         }
         break;
 
@@ -1087,7 +1188,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLsizei width   = ev.args[3].val.i;
             GLsizei height  = ev.args[4].val.i;
 
-            CURRENT_CONTEXT1().ApiTexStorage2D(target, levels, format, width, height);
+            CURRENT_CONTEXT1()->ApiTexStorage2D(target, levels, format, width, height);
         }
         break;
 
@@ -1100,24 +1201,24 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLsizei height  = ev.args[4].val.i;
             GLsizei depth   = ev.args[5].val.i;
 
-            CURRENT_CONTEXT1().ApiTexStorage3D(target, levels, format, width, height, depth);
+            CURRENT_CONTEXT1()->ApiTexStorage3D(target, levels, format, width, height, depth);
         }
         break;
 
     case GL3_API_glUniform1f:
-        CURRENT_CONTEXT1().ApiUniform1f(ev.args[0].val.i, ev.args[1].val.f);
+        CURRENT_CONTEXT1()->ApiUniform1f(ev.args[0].val.i, ev.args[1].val.f);
         break;
 
     case GL3_API_glUniform2f:
-        CURRENT_CONTEXT1().ApiUniform2f(ev.args[0].val.i, ev.args[1].val.f, ev.args[2].val.f);
+        CURRENT_CONTEXT1()->ApiUniform2f(ev.args[0].val.i, ev.args[1].val.f, ev.args[2].val.f);
         break;
 
     case GL3_API_glUniform3f:
-        CURRENT_CONTEXT1().ApiUniform3f(ev.args[0].val.i, ev.args[1].val.f, ev.args[2].val.f, ev.args[3].val.f);
+        CURRENT_CONTEXT1()->ApiUniform3f(ev.args[0].val.i, ev.args[1].val.f, ev.args[2].val.f, ev.args[3].val.f);
         break;
 
     case GL3_API_glUniform4f:
-        CURRENT_CONTEXT1().ApiUniform4f(ev.args[0].val.i, ev.args[1].val.f, ev.args[2].val.f, ev.args[3].val.f, ev.args[4].val.f);
+        CURRENT_CONTEXT1()->ApiUniform4f(ev.args[0].val.i, ev.args[1].val.f, ev.args[2].val.f, ev.args[3].val.f, ev.args[4].val.f);
         break;
 
     case GL3_API_glUniform1fv:
@@ -1126,7 +1227,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLsizei count   = ev.args[1].val.i;
             GLvoid  *pData  = ReadData(READ_GL_UCHAR, ev.args[2].val.h, 0);
 
-            CURRENT_CONTEXT1().ApiUniform1fv(loc, count, (const GLfloat*)pData);
+            CURRENT_CONTEXT1()->ApiUniform1fv(loc, count, (const GLfloat*)pData);
         }
         break;
 
@@ -1136,7 +1237,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLsizei count   = ev.args[1].val.i;
             GLvoid  *pData  = ReadData(READ_GL_UCHAR, ev.args[2].val.h, 0);
 
-            CURRENT_CONTEXT1().ApiUniform2fv(loc, count, (const GLfloat*)pData);
+            CURRENT_CONTEXT1()->ApiUniform2fv(loc, count, (const GLfloat*)pData);
         }
         break;
 
@@ -1146,7 +1247,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLsizei count   = ev.args[1].val.i;
             GLvoid  *pData  = ReadData(READ_GL_UCHAR, ev.args[2].val.h, 0);
 
-            CURRENT_CONTEXT1().ApiUniform3fv(loc, count, (const GLfloat*)pData);
+            CURRENT_CONTEXT1()->ApiUniform3fv(loc, count, (const GLfloat*)pData);
         }
         break;
 
@@ -1156,24 +1257,24 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLsizei count   = ev.args[1].val.i;
             GLvoid  *pData  = ReadData(READ_GL_UCHAR, ev.args[2].val.h, 0);
 
-            CURRENT_CONTEXT1().ApiUniform4fv(loc, count, (const GLfloat*)pData);
+            CURRENT_CONTEXT1()->ApiUniform4fv(loc, count, (const GLfloat*)pData);
         }
         break;
 
     case GL3_API_glUniform1i:
-        CURRENT_CONTEXT1().ApiUniform1i(ev.args[0].val.i, ev.args[1].val.i);
+        CURRENT_CONTEXT1()->ApiUniform1i(ev.args[0].val.i, ev.args[1].val.i);
         break;
 
     case GL3_API_glUniform2i:
-        CURRENT_CONTEXT1().ApiUniform2i(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i);
+        CURRENT_CONTEXT1()->ApiUniform2i(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i);
         break;
 
     case GL3_API_glUniform3i:
-        CURRENT_CONTEXT1().ApiUniform3i(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
+        CURRENT_CONTEXT1()->ApiUniform3i(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
         break;
 
     case GL3_API_glUniform4i:
-        CURRENT_CONTEXT1().ApiUniform4i(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i, ev.args[4].val.i);
+        CURRENT_CONTEXT1()->ApiUniform4i(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i, ev.args[4].val.i);
         break;
 
     case GL3_API_glUniform1iv:
@@ -1182,7 +1283,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLsizei count   = ev.args[1].val.i;
             GLvoid  *pData  = ReadData(READ_GL_UCHAR, ev.args[2].val.h, 0);
 
-            CURRENT_CONTEXT1().ApiUniform1iv(loc, count, (const GLint*)pData);
+            CURRENT_CONTEXT1()->ApiUniform1iv(loc, count, (const GLint*)pData);
         }
         break;
 
@@ -1192,7 +1293,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLsizei count   = ev.args[1].val.i;
             GLvoid  *pData  = ReadData(READ_GL_UCHAR, ev.args[2].val.h, 0);
 
-            CURRENT_CONTEXT1().ApiUniform2iv(loc, count, (const GLint*)pData);
+            CURRENT_CONTEXT1()->ApiUniform2iv(loc, count, (const GLint*)pData);
         }
         break;
 
@@ -1202,7 +1303,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLsizei count   = ev.args[1].val.i;
             GLvoid  *pData  = ReadData(READ_GL_UCHAR, ev.args[2].val.h, 0);
 
-            CURRENT_CONTEXT1().ApiUniform3iv(loc, count, (const GLint*)pData);
+            CURRENT_CONTEXT1()->ApiUniform3iv(loc, count, (const GLint*)pData);
         }
         break;
 
@@ -1212,7 +1313,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLsizei count   = ev.args[1].val.i;
             GLvoid  *pData  = ReadData(READ_GL_UCHAR, ev.args[2].val.h, 0);
 
-            CURRENT_CONTEXT1().ApiUniform4iv(loc, count, (const GLint*)pData);
+            CURRENT_CONTEXT1()->ApiUniform4iv(loc, count, (const GLint*)pData);
         }
         break;
 
@@ -1223,7 +1324,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLboolean   trans   = ev.args[2].val.i;
             GLvoid      *pData  = ReadData(READ_GL_UCHAR, ev.args[3].val.h, 0);
 
-            CURRENT_CONTEXT1().ApiUniformMatrix2fv(loc, count, trans, (const GLfloat*)pData);
+            CURRENT_CONTEXT1()->ApiUniformMatrix2fv(loc, count, trans, (const GLfloat*)pData);
         }
         break;
 
@@ -1234,7 +1335,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLboolean   trans   = ev.args[2].val.i;
             GLvoid      *pData  = ReadData(READ_GL_UCHAR, ev.args[3].val.h, 0);
 
-            CURRENT_CONTEXT1().ApiUniformMatrix3fv(loc, count, trans, (const GLfloat*)pData);
+            CURRENT_CONTEXT1()->ApiUniformMatrix3fv(loc, count, trans, (const GLfloat*)pData);
         }
         break;
 
@@ -1245,35 +1346,35 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLboolean   trans   = ev.args[2].val.i;
             GLvoid      *pData  = ReadData(READ_GL_UCHAR, ev.args[3].val.h, 0);
 
-            CURRENT_CONTEXT1().ApiUniformMatrix4fv(loc, count, trans, (const GLfloat*)pData);
+            CURRENT_CONTEXT1()->ApiUniformMatrix4fv(loc, count, trans, (const GLfloat*)pData);
         }
         break;
 
     case GL3_API_glUseProgram:
-        CURRENT_CONTEXT1().ApiUseProgram(ev.args[0].val.i);
+        CURRENT_CONTEXT1()->ApiUseProgram(ev.args[0].val.i);
         break;
 
     case GL3_API_glVertexAttrib1f:
-        CURRENT_CONTEXT1().ApiVertexAttrib1f(ev.args[0].val.i, ev.args[1].val.f);
+        CURRENT_CONTEXT1()->ApiVertexAttrib1f(ev.args[0].val.i, ev.args[1].val.f);
         break;
 
     case GL3_API_glVertexAttrib2f:
-        CURRENT_CONTEXT1().ApiVertexAttrib2f(ev.args[0].val.i, ev.args[1].val.f, ev.args[2].val.f);
+        CURRENT_CONTEXT1()->ApiVertexAttrib2f(ev.args[0].val.i, ev.args[1].val.f, ev.args[2].val.f);
         break;
 
     case GL3_API_glVertexAttrib3f:
-        CURRENT_CONTEXT1().ApiVertexAttrib3f(ev.args[0].val.i, ev.args[1].val.f, ev.args[2].val.f, ev.args[3].val.f);
+        CURRENT_CONTEXT1()->ApiVertexAttrib3f(ev.args[0].val.i, ev.args[1].val.f, ev.args[2].val.f, ev.args[3].val.f);
         break;
 
     case GL3_API_glVertexAttrib4f:
-        CURRENT_CONTEXT1().ApiVertexAttrib4f(ev.args[0].val.i, ev.args[1].val.f, ev.args[2].val.f, ev.args[3].val.f, ev.args[4].val.f);
+        CURRENT_CONTEXT1()->ApiVertexAttrib4f(ev.args[0].val.i, ev.args[1].val.f, ev.args[2].val.f, ev.args[3].val.f, ev.args[4].val.f);
         break;
 
     case GL3_API_glVertexAttrib1fv:
         {
             GLuint  index   = ev.args[0].val.i;
             GLfloat *pData  = (GLfloat*)ReadData(READ_GL_UINT, ev.args[1].val.h, 1);
-            CURRENT_CONTEXT1().ApiVertexAttrib1fv(index, pData);
+            CURRENT_CONTEXT1()->ApiVertexAttrib1fv(index, pData);
         }
         break;
 
@@ -1281,7 +1382,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
         {
             GLuint  index   = ev.args[0].val.i;
             GLfloat *pData  = (GLfloat*)ReadData(READ_GL_UINT, ev.args[1].val.h, 2);
-            CURRENT_CONTEXT1().ApiVertexAttrib2fv(index, pData);
+            CURRENT_CONTEXT1()->ApiVertexAttrib2fv(index, pData);
         }
         break;
 
@@ -1289,7 +1390,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
         {
             GLuint  index   = ev.args[0].val.i;
             GLfloat *pData  = (GLfloat*)ReadData(READ_GL_UINT, ev.args[1].val.h, 3);
-            CURRENT_CONTEXT1().ApiVertexAttrib3fv(index, pData);
+            CURRENT_CONTEXT1()->ApiVertexAttrib3fv(index, pData);
         }
         break;
 
@@ -1297,7 +1398,7 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
         {
             GLuint  index   = ev.args[0].val.i;
             GLfloat *pData  = (GLfloat*)ReadData(READ_GL_UINT, ev.args[1].val.h, 4);
-            CURRENT_CONTEXT1().ApiVertexAttrib4fv(index, pData);
+            CURRENT_CONTEXT1()->ApiVertexAttrib4fv(index, pData);
         }
         break;
 
@@ -1310,14 +1411,14 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLsizei     stride      = ev.args[4].val.i;
             GLuint      pointer     = ev.args[5].val.i;
 
-            if (CURRENT_CONTEXT1().arrayBuffer)
+            if (CURRENT_CONTEXT1()->arrayBuffer)
             {
-                CURRENT_CONTEXT1().ApiVertexAttribPointer(index, size, type, normalized, stride, (GLvoid*)pointer);
+                CURRENT_CONTEXT1()->ApiVertexAttribPointer(index, size, type, normalized, stride, (GLvoid*)pointer);
             }
             else
             {
                 GLvoid *pData = ReadData(READ_GL_UCHAR, pointer, 0);
-                CURRENT_CONTEXT1().ApiVertexAttribPointer(index, size, type, normalized, stride, pData);
+                CURRENT_CONTEXT1()->ApiVertexAttribPointer(index, size, type, normalized, stride, pData);
             }
         }
         break;
@@ -1330,20 +1431,20 @@ GLvoid CApiAnalyzer::UpdateContext(const stEvent &ev)
             GLsizei     stride      = ev.args[3].val.i;
             GLuint      pointer     = ev.args[4].val.i;
 
-            if (CURRENT_CONTEXT1().arrayBuffer)
+            if (CURRENT_CONTEXT1()->arrayBuffer)
             {
-                CURRENT_CONTEXT1().ApiVertexAttribIPointer(index, size, type, stride, (GLvoid*)pointer);
+                CURRENT_CONTEXT1()->ApiVertexAttribIPointer(index, size, type, stride, (GLvoid*)pointer);
             }
             else
             {
                 GLvoid *pData = ReadData(READ_GL_UCHAR, pointer, 0);
-                CURRENT_CONTEXT1().ApiVertexAttribIPointer(index, size, type, stride, pData);
+                CURRENT_CONTEXT1()->ApiVertexAttribIPointer(index, size, type, stride, pData);
             }
         }
         break;
 
     case GL3_API_glViewport:
-        CURRENT_CONTEXT1().ApiViewport(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
+        CURRENT_CONTEXT1()->ApiViewport(ev.args[0].val.i, ev.args[1].val.i, ev.args[2].val.i, ev.args[3].val.i);
         break;
 
     default:
@@ -1400,7 +1501,7 @@ GLuint GetCurrentVAPDataLen(GLuint handle)
     GLuint      len  = it?it->size():0;
     return len;
 #else
-    // Todo
+    // TODO
     __asm int 3;
     return 0;
 #endif

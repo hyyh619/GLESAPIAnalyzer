@@ -12,25 +12,17 @@
 #include "ApiDumpDraw.h"
 #include "ApiDumpInfo.h"
 
+struct _stEglThreadData;
+_stEglThreadData* _GetThreadData(void);
 
-#define API_RENDER_THREAD_NUM   2
-#if API_DUMP
-#define CURRENT_CONTEXT1()      g_GLES3Context[0]
-#define VERTEX_ATTRIB_BITS      g_GLES3Context[0].GetVertexAttribBits()
-#define ARRAY_BUFFER            g_GLES3Context[0].GetArrayBuffer()
-#define ELEMENT_ARRAY_BUFFER    g_GLES3Context[0].GetElementArrayBuffer()
-#define TRANS_FEEDBACK_BUFFER   g_GLES3Context[0].GetTransFeedbackBuffer()
-#define VERTEX_ATTRIB_PTR(i)    g_GLES3Context[0].GetVertexAttribPointer(i)
-#define GET_VBO(name)           g_GLES3Context[0].FindBufObj(name)
-#else
-#define CURRENT_CONTEXT1()      (*(_GetThreadDataES3()))
-#define VERTEX_ATTRIB_BITS      (*(_GetThreadDataES3())).GetVertexAttribBits()
-#define ARRAY_BUFFER            (*(_GetThreadDataES3())).GetArrayBuffer()
-#define ELEMENT_ARRAY_BUFFER    (*(_GetThreadDataES3())).GetElementArrayBuffer()
-#define TRANS_FEEDBACK_BUFFER   (*(_GetThreadDataES3())).GetTransFeedbackBuffer()
-#define VERTEX_ATTRIB_PTR(i)    (*(_GetThreadDataES3())).GetVertexAttribPointer(i)
-#define GET_VBO(name)           (*(_GetThreadDataES3())).FindBufObj(name)
-#endif
+#define CURRENT_EGL_CONTEXT()   _GetThreadData()->context
+#define CURRENT_CONTEXT1()      _GetThreadData()->context->pGLESContext
+#define VERTEX_ATTRIB_BITS      _GetThreadData()->context->pGLESContext->GetVertexAttribBits()
+#define ARRAY_BUFFER            _GetThreadData()->context->pGLESContext->GetArrayBuffer()
+#define ELEMENT_ARRAY_BUFFER    _GetThreadData()->context->pGLESContext->GetElementArrayBuffer()
+#define TRANS_FEEDBACK_BUFFER   _GetThreadData()->context->pGLESContext->GetTransFeedbackBuffer()
+#define VERTEX_ATTRIB_PTR(i)    _GetThreadData()->context->pGLESContext->GetVertexAttribPointer(i)
+#define GET_VBO(name)           _GetThreadData()->context->pGLESContext->FindBufObj(name)
 
 struct stEvent;
 
@@ -40,14 +32,12 @@ public:
     CGLES3Context();
     ~CGLES3Context();
 
-    GLvoid                  Initialize(const GLchar *filePath);
+    GLvoid                  Initialize();
     GLvoid                  Release();
-    GLuint                  GetEventSequence();
     GLvoid                  DumpDraw(GLESAPIIndex name);
     GLboolean               IsDrawCommand(GLESAPIIndex name);
     GLvoid                  DumpFrame();
 
-    CAnalyzer               *m_pAnalyzer;
     CApiDumpDraw            *m_pDumpDraw;
     CDumpInfo               *m_pDumpInfo;
 
@@ -70,12 +60,15 @@ public: /* vertex buffer */
     GLvoid                  ApiDeleteVertexArrays(GLsizei n, const GLuint *arrays);
     GLvoid                  ApiGenVertexArrays(GLsizei n, GLuint *arrays);
     GLvoid                  ApiBindVertexArray(GLuint array);
+    GLvoid                  ApiIsVertexArray(GLuint array, GLboolean ret);
     GLvoid                  ApiBindTransformFeedback(GLenum target, GLuint id);
     GLvoid                  ApiDeleteTransformFeedbacks(GLsizei n, const GLuint *ids);
     GLvoid                  ApiGenTransformFeedbacks(GLsizei n, GLuint *ids);
-    GLboolean               ApiIsTransformFeedback(GLuint id);
+    GLvoid                  ApiIsTransformFeedback(GLuint id, GLboolean ret);
     GLvoid                  ApiBeginTransformFeedback(GLenum primitiveMode);
     GLvoid                  ApiEndTransformFeedback(void);
+    GLvoid                  ApiTransformFeedbackVaryings(GLuint program, GLsizei count, const GLchar *const*varyings, GLenum bufferMode);
+    GLvoid                  ApiGetTransformFeedbackVarying(GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLsizei *size, GLenum *type, GLchar *name);
     GLvoid                  ApiDisableVertexAttribArray(GLuint index);
     GLvoid                  ApiEnableVertexAttribArray(GLuint index);
     GLvoid                  ApiVertexAttrib1f(GLuint index, GLfloat x);
@@ -92,6 +85,11 @@ public: /* vertex buffer */
     GLvoid                  ApiGetVertexAttribfv(GLuint index, GLenum pname, GLfloat *params);
     GLvoid                  ApiGetVertexAttribiv(GLuint index, GLenum pname, GLint *params);
     GLvoid                  ApiGetVertexAttribPointerv(GLuint index, GLenum pname, void **pointer);
+    GLvoid                  ApiMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, GLvoid *map);
+    GLvoid                  ApiFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length);
+    GLvoid                  ApiUnmapBuffer(GLenum target, GLboolean ret);
+    GLvoid                  ApiPauseTransformFeedback(void);
+    GLvoid                  ApiResumeTransformFeedback(void);
 
     /* Internal function */
     CBufObj*                FindBufObj(GLuint bufId);
@@ -174,6 +172,7 @@ public: /* shader */
     GLvoid                  ApiGetUniformiv(GLuint program, GLint location, GLint *params);
     GLvoid                  ApiShaderBinary(GLsizei count, const GLuint *shaders, GLenum binaryformat, const void *binary, GLsizei length);
     GLvoid                  ApiValidateProgram(GLuint program);
+    GLvoid                  ApiGetProgramBinary(GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, void *binary);
 
     /* Internal Functions */
     CShaderObj*             FindShader(GLuint shader);
@@ -215,6 +214,9 @@ public: /* texture */
     GLvoid                  ApiCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
     GLvoid                  ApiGetTexParameterfv(GLenum target, GLenum pname, GLfloat *params);
     GLvoid                  ApiGetTexParameteriv(GLenum target, GLenum pname, GLint *params);
+    GLvoid                  ApiCopyTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+    GLvoid                  ApiCompressedTexImage3D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const void *data);
+    GLvoid                  ApiCompressedTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const void *data);
 
     /* Internal Functions */
     CTexObj*                FindTexObj(GLuint texture);
@@ -248,6 +250,9 @@ public: /* FBO and RBO */
     GLvoid                  ApiCheckFramebufferStatus(GLenum target, GLenum result);
     GLvoid                  ApiGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, GLenum pname, GLint *params);
     GLvoid                  ApiGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint *params);
+    GLvoid                  ApiDrawBuffers(GLsizei n, const GLenum *bufs);
+    GLvoid                  ApiInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum *attachments);
+    GLvoid                  ApiInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height);
 
     // Internal functions
     CFramebufferObj*        CreateFramebufferObj(GLuint fbo);
@@ -425,7 +430,5 @@ public:
 public: // OES2 extension
     GLvoid                  ApiBlitFramebufferEXT(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 };
-
-extern CGLES3Context g_GLES3Context[API_RENDER_THREAD_NUM];
 
 #endif /* __API_GLES3_CONTEXT_H */
